@@ -298,4 +298,4 @@ https://github.com/lloydchang/chiral-infrastructure-as-code
 
 ## License
 
-AGPL-3.0
+[GNU Affero General Public License v3.0](https://github.com/lloydchang/chiral-infrastructure-as-code/blob/main/LICENSE)
