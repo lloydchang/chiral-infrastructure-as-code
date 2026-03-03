@@ -279,8 +279,7 @@ Option 2: The "Facade Pattern" in TypeScript (Build your own generator)
 If you strictly want to use TypeScript and output native CloudFormation and native Bicep, you can use object-oriented programming to build a "Facade."
 You write a single configuration interface in TypeScript. Then, you pass that configuration into two separate implementations: one that leverages the AWS CDK (to generate CloudFormation), and another that generates Bicep syntax via string interpolation.
 infra-config.ts (Your Single Source of Truth)
-code
-TypeScript
+```typescript
 export interface MultiCloudConfig {
   projectName: string;
   dbEngineVersion: string;
@@ -294,6 +293,7 @@ export const sharedConfig: MultiCloudConfig = {
   nodeCount: 2,
   environment: 'prod'
 };
+```
 aws-cdk-stack.ts (Consumes the config)
 code
 TypeScript

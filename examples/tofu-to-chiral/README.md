@@ -4,9 +4,9 @@ This directory contains an example of converting OpenTofu projects to Chiral pat
 
 ## Example: opentofu-projects/
 
-- `main.opentofu`: OpenTofu configuration with hardcoded resources
-- `params.opentofu`: Input parameters for OpenTofu configuration
-- `outputs.opentofu`: Output values from OpenTofu configuration
+- `main`: OpenTofu configuration with hardcoded resources
+- `params`: Input parameters for OpenTofu configuration
+- `outputs`: Output values from OpenTofu configuration
 
 This example demonstrates how to extract business intent from OpenTofu configuration and refactor it into Chiral pattern.
 
@@ -15,7 +15,7 @@ This example demonstrates how to extract business intent from OpenTofu configura
 The Chiral pattern converts traditional OpenTofu projects into a multi-cloud, intent-driven architecture. Follow these steps:
 
 ### Step 1: Analyze Your OpenTofu Configuration
-- Review your `.opentofu` files to identify core resources
+- Review your `` files to identify core resources
 - Note hardcoded values (machine types, regions, versions) in resource definitions
 - Identify parameter patterns that represent business requirements
 

@@ -171,7 +171,7 @@ chiral-infrastructure-as-code
 │   │   └── README.md
 │   ├── gcp-to-chiral/
 │   │   └── README.md
-│   ├── opentofu-to-chiral/
+│   ├── tofu-to-chiral/
 │   │   └── README.md
 │   ├── pulumi-to-chiral/
 │   │   └── README.md
@@ -210,7 +210,7 @@ The `examples/` directory provides practical guides for implementing the Chiral 
 - **`bicep-to-chiral/`**: Guide for converting Azure Bicep templates to the Chiral pattern.
 - **`cdk-to-chiral/`**: Guide for converting AWS CDK stacks to the Chiral pattern.
 - **`gcp-to-chiral/`**: Guide for converting GCP Infrastructure Manager templates to the Chiral pattern.
-- **`opentofu-to-chiral/`**: Demonstrates how to convert OpenTofu projects to the Chiral pattern, extracting business intent and enabling multi-cloud generation.
+- **`tofu-to-chiral/`**: Demonstrates how to convert OpenTofu projects to the Chiral pattern, extracting business intent and enabling multi-cloud generation.
 - **`pulumi-to-chiral/`**: Guide for converting Pulumi programs to the Chiral pattern.
 - **`terraform-to-chiral/`**: Guide for converting Terraform configurations to the Chiral pattern.
 
