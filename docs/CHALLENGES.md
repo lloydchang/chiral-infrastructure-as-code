@@ -1,4 +1,4 @@
-# The Core Challenges with Multi-Cloud Infrastructure as Code
+# The Enterprise Challenges with Multi-Cloud Infrastructure as Code
 
 This document explains why multi-cloud infrastructure management is fundamentally challenging and why traditional approaches struggle, regardless of the tool used.
 
