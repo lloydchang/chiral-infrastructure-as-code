@@ -5,7 +5,7 @@
 ---
 
 ### Elevator Pitch
-We use the **Chiral Pattern** to avoid Infrastructure as Code (IaC) lock-in. Instead of relying on 3rd-party state managers, we maintain a central **Nucleus (Intent)** and use the **Chiral Engine** to synthesize first-party **Enantiomers (Native Templates)** for multiple clouds. This ensures native support without 3rd-party vendor lock-in.
+We use the **Chiral Pattern** to avoid Infrastructure as Code (IaC) lock-in. Instead of relying on 3rd-party state managers, we maintain a central **Nucleus (Intent)** and use the **Chiral Engine** to synthesize 1st-party **Enantiomers (Native Templates)** for multiple clouds. This ensures native support without 3rd-party vendor lock-in.
 
 
 ---
@@ -20,7 +20,7 @@ We use the **Chiral Pattern** to avoid Infrastructure as Code (IaC) lock-in. Ins
 3. **Zero State:** The Chiral Engine never stores state; it only emits artifacts.
 
 ### Description
-The Chiral Pattern is a software design approach for multi-cloud infrastructure management where a single source of truth (the Intent Schema) is used to generate native, first-party artifacts for each target cloud. 
+The Chiral Pattern is a software design approach for multi-cloud infrastructure management where a single source of truth (the Intent Schema) is used to generate native, 1st-party artifacts for each target cloud. 
 
 The pattern produces mirror-image outputs—for example, AWS CloudFormation via CDK and Azure Bicep—ensuring that both deployments share the same functional intent while remaining fully compatible with their respective cloud-native constructs. The Chiral Pattern guarantees vendor independence, auditability, and deterministic synchronization, allowing teams to evolve infrastructure declaratively without relying on third-party engines, managed state files, or cloud-agnostic compilers. 
 
