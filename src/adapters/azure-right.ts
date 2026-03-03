@@ -24,6 +24,7 @@ export class AzureRightHandAdapter {
     // Convert abstract sizes (small/large) into Azure SKUs (Standard_B2s, etc.)
     const dbSku = HardwareMap.azure.db[intent.postgres.size];
     const vmSku = HardwareMap.azure.vm[intent.adfs.size];
+    const k8sSku = HardwareMap.azure.k8s[intent.k8s.size];
     
     // Logic: Determine Postgres Tier based on SKU prefix (B=Burstable, D=GeneralPurpose)
     const dbTier = dbSku.startsWith('Standard_B') ? 'Burstable' : 'GeneralPurpose';
@@ -91,7 +92,7 @@ resource aks 'Microsoft.ContainerService/managedClusters@2024-01-01' = {
       {
         name: 'applicationpool'
         count: 2
-        vmSize: 'Standard_D4s_v3'
+        vmSize: '${k8sSku}'
         mode: 'User'
         osType: 'Linux'
         orchestratorVersion: '${intent.k8s.version}'
