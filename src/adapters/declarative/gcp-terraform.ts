@@ -5,7 +5,7 @@
 // The GCP Right Enantiomer: Terraform HCL Generator.
 
 import { ChiralSystem } from '../../intent';
-import { HardwareMap } from '../../rosetta/hardware-map';
+import { getRegionalHardwareMap, validateRegionalCapabilities } from '../../rosetta/hardware-map';
 
 // =================================================================
 // GCP RIGHT ENANTIOMER (GCP Adapter)
@@ -19,12 +19,23 @@ import { HardwareMap } from '../../rosetta/hardware-map';
 
 export class GcpTerraformAdapter {
   static synthesize(intent: ChiralSystem): string {
+    // Validate regional capabilities
+    const gcpRegion = intent.region?.gcp || 'us-central1';
+    const regionalValidation = validateRegionalCapabilities('gcp', gcpRegion, ['kubernetes', 'postgresql', 'activeDirectory']);
+
+    if (!regionalValidation.valid) {
+      throw new Error(`GCP region ${gcpRegion} missing required services: ${regionalValidation.missingServices.join(', ')}`);
+    }
+
+    // Get region-aware hardware mappings
+    const regionalHardware = getRegionalHardwareMap('gcp', gcpRegion);
+
     // 1. ROSETTA TRANSLATION (Hardware Mapping)
     // ------------------------------------------------
     // Convert abstract sizes (small/large) into GCP machine types
-    const dbMachine = HardwareMap.gcp.db[intent.postgres.size];
-    const vmMachine = HardwareMap.gcp.vm[intent.adfs.size];
-    const k8sMachine = HardwareMap.gcp.k8s[intent.k8s.size];
+    const dbMachine = regionalHardware.db[intent.postgres.size];
+    const vmMachine = regionalHardware.vm[intent.adfs.size];
+    const k8sMachine = regionalHardware.k8s[intent.k8s.size];
 
     // 2. CONFIGURABLE SETTINGS
     // ------------------------------------------------

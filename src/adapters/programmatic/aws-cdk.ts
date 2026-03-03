@@ -14,7 +14,7 @@ import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { KubectlV26Layer } from '@aws-cdk/lambda-layer-kubectl-v26';
 import { Construct } from 'constructs';
 import { ChiralSystem } from '../../intent';
-import { HardwareMap } from '../../rosetta/hardware-map';
+import { getRegionalHardwareMap, validateRegionalCapabilities } from '../../rosetta/hardware-map';
 
 export class AwsCdkAdapter extends cdk.Stack {
   public readonly vpc: ec2.IVpc;
@@ -22,9 +22,21 @@ export class AwsCdkAdapter extends cdk.Stack {
   public readonly postgresDatabase: rds.DatabaseInstance;
   public readonly adfsInstance: ec2.Instance;
   public readonly dbSecret: secretsmanager.ISecret;
+  private readonly regionalHardware: any; // Region-aware hardware mappings
 
   constructor(scope: Construct, id: string, intent: ChiralSystem, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    // Validate regional capabilities
+    const awsRegion = intent.region?.aws || process.env.CDK_DEFAULT_REGION || 'us-east-1';
+    const regionalValidation = validateRegionalCapabilities('aws', awsRegion, ['kubernetes', 'postgresql', 'activeDirectory']);
+
+    if (!regionalValidation.valid) {
+      throw new Error(`AWS region ${awsRegion} missing required services: ${regionalValidation.missingServices.join(', ')}`);
+    }
+
+    // Get region-aware hardware mappings
+    const regionalHardware = getRegionalHardwareMap('aws', awsRegion);
 
     // =================================================================
     // 1. NETWORKING LAYER (Level 2 Construct)
@@ -171,7 +183,7 @@ export class AwsCdkAdapter extends cdk.Stack {
   }
 
   private createAdfsInstance(intent: ChiralSystem): ec2.Instance {
-    const adfsVmType = new ec2.InstanceType(HardwareMap.aws.vm[intent.adfs.size]);
+    const adfsVmType = new ec2.InstanceType(this.regionalHardware.vm[intent.adfs.size]);
 
     return new ec2.Instance(this, 'AdfsServer', {
       vpc: this.vpc,

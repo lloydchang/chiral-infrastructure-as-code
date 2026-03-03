@@ -5,7 +5,7 @@
 // The Right Enantiomer: Azure Bicep Generator.
 
 import { ChiralSystem } from '../../intent';
-import { HardwareMap } from '../../rosetta/hardware-map';
+import { getRegionalHardwareMap, validateRegionalCapabilities } from '../../rosetta/hardware-map';
 
 // =================================================================
 // RIGHT ENANTIOMER (Azure Adapter)
@@ -19,12 +19,23 @@ import { HardwareMap } from '../../rosetta/hardware-map';
 
 export class AzureBicepAdapter {
   static synthesize(intent: ChiralSystem): string {
+    // Validate regional capabilities
+    const azureRegion = intent.region?.azure || 'eastus';
+    const regionalValidation = validateRegionalCapabilities('azure', azureRegion, ['kubernetes', 'postgresql', 'activeDirectory']);
+
+    if (!regionalValidation.valid) {
+      throw new Error(`Azure region ${azureRegion} missing required services: ${regionalValidation.missingServices.join(', ')}`);
+    }
+
+    // Get region-aware hardware mappings
+    const regionalHardware = getRegionalHardwareMap('azure', azureRegion);
+
     // 1. ROSETTA TRANSLATION (Hardware Mapping)
     // ------------------------------------------------
     // Convert abstract sizes (small/large) into Azure SKUs (Standard_B2s, etc.)
-    const dbSku = HardwareMap.azure.db[intent.postgres.size];
-    const vmSku = HardwareMap.azure.vm[intent.adfs.size];
-    const k8sSku = HardwareMap.azure.k8s[intent.k8s.size];
+    const dbSku = regionalHardware.db[intent.postgres.size];
+    const vmSku = regionalHardware.vm[intent.adfs.size];
+    const k8sSku = regionalHardware.k8s[intent.k8s.size];
     
     // Logic: Determine Postgres Tier based on SKU prefix (B=Burstable, D=GeneralPurpose)
     const dbTier = dbSku.startsWith('Standard_B') ? 'Burstable' : 'GeneralPurpose';
