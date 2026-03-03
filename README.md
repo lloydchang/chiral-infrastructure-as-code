@@ -1,6 +1,6 @@
 # Chiral Infrastructure as Code
 
-> **Generate mirrored, native cloud templates from a single source of truth. Multi-cloud infrastructure in sync across AWS, Azure, GCP.**
+> **From a single source of truth, generate native cloud artifacts targeting AWS, Azure, GCP.**
 
 ---
 
