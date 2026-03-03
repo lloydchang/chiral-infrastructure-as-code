@@ -19,13 +19,15 @@ import { execSync } from 'child_process'; // <--- Import for running CLI command
 import { config } from '../chiral.config';
 import { AwsLeftHandAdapter } from './adapters/aws-left';
 import { AzureRightHandAdapter } from './adapters/azure-right';
+import { GcpRightHandAdapter } from './adapters/gcp-right';
 
 // =================================================================
 // THE CHIRAL ENGINE (Orchestrator)
 // 1. Reads chiral.config.ts
 // 2. Instantiates Left Adapter (AWS) -> Synthesizes to dist/
 // 3. Instantiates Right Adapter (Azure) -> Generates Bicep to dist/
-// 4. VALIDATES the generated Bicep using Azure CLI
+// 4. Instantiates Right Adapter (GCP) -> Generates Terraform HCL to dist/
+// 5. VALIDATES the generated Bicep using Azure CLI
 // =================================================================
 
 const DIST_DIR = path.join(__dirname, '..', 'dist');
@@ -92,6 +94,27 @@ try {
   console.error(`   AI Coding Agent's LLM (Large Language Model) to receive a corrected "azure-right.ts" file.`);
   
   console.error(`\n4. RETRY: Run "npm run compile" again.`);
+  console.error('='.repeat(60) + '\n');
+  
+  process.exit(1);
+}
+
+// -----------------------------------------------------
+// 3. Synthesize GCP Right Enantiomer (Terraform HCL)
+// -----------------------------------------------------
+try {
+  // A. Generate the Terraform HCL String
+  const gcpTf = GcpRightHandAdapter.synthesize(config);
+  const gcpTfPath = path.join(DIST_DIR, 'gcp-deployment.tf');
+
+  // B. Write to Disk
+  fs.writeFileSync(gcpTfPath, gcpTf);
+  console.log(`✅ [GCP]   Terraform HCL generated at: dist/gcp-deployment.tf`);
+
+} catch (error) {
+  console.error('\n' + '='.repeat(60));
+  console.error('❌ [GCP] FATAL: Generated Terraform HCL file contains errors.');
+  console.error('   The text in src/adapters/gcp-right.ts produced invalid Terraform.');
   console.error('='.repeat(60) + '\n');
   
   process.exit(1);
