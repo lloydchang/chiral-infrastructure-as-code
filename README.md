@@ -1,6 +1,6 @@
 # Chiral Infrastructure as Code
 
-> **Generate mirrored, native cloud templates from a single source of truth. Multi-cloud infrastructure in sync across AWS, Azure, GCP, without 3rd-party vendor lock-in.**
+> **Generate mirrored, native cloud templates from a single source of truth. Multi-cloud infrastructure in sync across AWS, Azure, GCP, without 3rd-party vendor lock-in. Abandon Chiral at any time - you own the native outputs.**
 
 ---
 
@@ -69,6 +69,8 @@ The pattern supports various IaC approaches through comprehensive examples cover
 - Reduces complexity of managing different IaC tools
 - Enables true infrastructure portability
 - Maintains each cloud's optimization and features
+- **Abandon at any time**: Native outputs free you from Chiral dependency
+- **Intent-driven discipline**: Forces separation of business requirements from technical implementation
 
 The philosophy embraces cloud diversity while enforcing consistency through unified intent.
 
