@@ -76,7 +76,7 @@ The philosophy embraces cloud diversity while enforcing consistency through unif
 
 ### The "Abandon at Any Time" Promise
 
-Chiral produces native cloud artifacts (CloudFormation, Bicep, Terraform) that can be deployed independently without the Chiral framework. Generated artifacts are standard cloud templates that work with native cloud tooling.
+Chiral produces native cloud artifacts (AWS CDK and CloudFormation, Azure Bicep, GCP Infrastructure Manager Blueprint) that can be deployed independently without the Chiral framework. Generated artifacts are standard cloud templates that work with native cloud tooling.
 
 ## How Chiral Compares to Traditional Multi-Cloud Tools
 
