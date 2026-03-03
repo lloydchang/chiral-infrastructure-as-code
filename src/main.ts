@@ -35,7 +35,7 @@ program
   .description('Chiral Pattern: Syncing K8s, Postgres, and AD FS across AWS, Azure, and GCP.')
   .version('1.0.0')
   .requiredOption('-c, --config <path>', 'Path to the chiral config file (JS or TS)')
-  .option('-o, --out <dir>', 'Output directory for generated files', 'dist')
+  .option('-o, --out <dir>', 'Output directory for generated files', 'infra')
   .parse();
 
 const options = program.opts();

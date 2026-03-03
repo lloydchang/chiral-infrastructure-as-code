@@ -28,9 +28,6 @@ yarn-error.log*
 pnpm-debug.log*
 
 dist/
-!dist/aws-assembly/
-!dist/azure-deployment.bicep
-!dist/gcp-deployment.tf
 build/
 out/
 lib/
