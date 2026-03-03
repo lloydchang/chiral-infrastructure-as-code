@@ -67,7 +67,7 @@ Its metaphorical name emphasizes that the outputs are structurally identical in 
 - Reduces complexity of managing different IaC tools
 - Enables true infrastructure portability
 - Maintains each cloud's optimization and features
-- **Intent-driven discipline**: Forces separation of business requirements from technical implementation
+- Intent-driven discipline: Forces separation of business requirements from technical implementation
 
 The philosophy embraces cloud diversity while enforcing consistency through unified intent.
 
