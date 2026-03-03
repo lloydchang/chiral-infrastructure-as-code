@@ -17,9 +17,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { execSync } from 'child_process'; // <--- Import for running CLI commands
 import { Command } from 'commander';
-import { AwsLeftHandAdapter } from './adapters/aws-left';
-import { AzureRightHandAdapter } from './adapters/azure-right';
-import { GcpRightHandAdapter } from './adapters/gcp-right';
+import { AwsCdkAdapter } from './adapters/aws-cdk';
+import { AzureBicepAdapter } from './adapters/azure-bicep';
+import { GcpTerraformAdapter } from './adapters/gcp-terraform';
 import { ChiralSystem } from './intent';
 
 // Export types for users to import in their configs
@@ -79,8 +79,11 @@ const app = new cdk.App({
   outdir: path.join(DIST_DIR, 'aws-assembly')
 });
 
-new AwsLeftHandAdapter(app, 'AwsStack', config, {
-  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION }
+new AwsCdkAdapter(app, 'AwsStack', config, {
+  env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: config.region?.aws || process.env.CDK_DEFAULT_REGION
+  }
 });
 
 app.synth(); // This writes the CloudFormation template natively.
@@ -92,7 +95,7 @@ console.log(`✅ [AWS]   CloudFormation synthesized to: ${path.relative(process.
 let bicepPath: string;
 try {
   // A. Generate the Bicep String
-  const bicepContent = AzureRightHandAdapter.synthesize(config);
+  const bicepContent = AzureBicepAdapter.synthesize(config);
   bicepPath = path.join(DIST_DIR, 'azure-deployment.bicep');
 
   // B. Write to Disk
@@ -104,10 +107,24 @@ try {
   // This catches typos inside the template string in azure-right.ts.
   console.log(`🔍 [Azure] Validating Bicep syntax...`);
 
-  // Running 'az bicep build' verifies the DSL structure, resource types, and types.
-  execSync(`az bicep build --file ${bicepPath} --stdout`, { stdio: 'ignore' });
+  // Check if Azure CLI is available
+  let azAvailable = false;
+  try {
+    execSync('az --version', { stdio: 'ignore' });
+    azAvailable = true;
+  } catch {
+    console.log(`⚠️  [Azure] Azure CLI not found. Skipping Bicep validation.`);
+    console.log(`   Install Azure CLI (https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)`);
+    console.log(`   or validate manually: az bicep build --file ${path.relative(process.cwd(), bicepPath)}`);
+  }
 
-  console.log(`✅ [Azure] Validation Passed: Syntax is correct.`);
+  if (azAvailable) {
+    // Running 'az bicep build' verifies the DSL structure, resource types, and types.
+    execSync(`az bicep build --file ${bicepPath} --stdout`, { stdio: 'ignore' });
+    console.log(`✅ [Azure] Validation Passed: Syntax is correct.`);
+  } else {
+    console.log(`⚠️  [Azure] Validation Skipped: Azure CLI not available.`);
+  }
 
 } catch (error) {
   console.error('\n' + '='.repeat(60));
@@ -137,7 +154,7 @@ try {
 // -----------------------------------------------------
 try {
   // A. Generate the Terraform HCL String
-  const gcpTf = GcpRightHandAdapter.synthesize(config);
+  const gcpTf = GcpTerraformAdapter.synthesize(config);
   const gcpTfPath = path.join(DIST_DIR, 'gcp-deployment.tf');
 
   // B. Write to Disk

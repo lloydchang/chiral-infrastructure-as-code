@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { AzureRightHandAdapter } from '../adapters/azure-right';
-import { GcpRightHandAdapter } from '../adapters/gcp-right';
+import { AzureBicepAdapter } from '../adapters/azure-bicep';
+import { GcpTerraformAdapter } from '../adapters/gcp-terraform';
 import { ChiralSystem } from '../intent';
 
 describe('Chiral Synthesis Integration', () => {
@@ -28,7 +28,7 @@ describe('Chiral Synthesis Integration', () => {
 
   describe('Azure Bicep Synthesis', () => {
     it('should generate deployable Bicep template', () => {
-      const bicepContent = AzureRightHandAdapter.synthesize(testIntent);
+      const bicepContent = AzureBicepAdapter.synthesize(testIntent);
 
       // Validate Bicep structure
       expect(bicepContent).toContain('@description');
@@ -47,7 +47,7 @@ describe('Chiral Synthesis Integration', () => {
     });
 
     it('should include all required parameters', () => {
-      const bicepContent = AzureRightHandAdapter.synthesize(testIntent);
+      const bicepContent = AzureBicepAdapter.synthesize(testIntent);
 
       expect(bicepContent).toContain('@secure()');
       expect(bicepContent).toContain('param adminPassword string');
@@ -55,7 +55,7 @@ describe('Chiral Synthesis Integration', () => {
     });
 
     it('should include output definitions', () => {
-      const bicepContent = AzureRightHandAdapter.synthesize(testIntent);
+      const bicepContent = AzureBicepAdapter.synthesize(testIntent);
 
       expect(bicepContent).toContain('output vnetId string');
       expect(bicepContent).toContain('output aksClusterName string');
@@ -66,7 +66,7 @@ describe('Chiral Synthesis Integration', () => {
 
   describe('GCP Terraform Synthesis', () => {
     it('should generate deployable Terraform HCL', () => {
-      const tfContent = GcpRightHandAdapter.synthesize(testIntent);
+      const tfContent = GcpTerraformAdapter.synthesize(testIntent);
 
       // Validate Terraform structure
       expect(tfContent).toContain('terraform {');
@@ -85,7 +85,7 @@ describe('Chiral Synthesis Integration', () => {
     });
 
     it('should include proper Terraform structure', () => {
-      const tfContent = GcpRightHandAdapter.synthesize(testIntent);
+      const tfContent = GcpTerraformAdapter.synthesize(testIntent);
 
       expect(tfContent).toContain('required_providers {');
       expect(tfContent).toContain('source  = "hashicorp/google"');
@@ -93,7 +93,7 @@ describe('Chiral Synthesis Integration', () => {
     });
 
     it('should include database configuration', () => {
-      const tfContent = GcpRightHandAdapter.synthesize(testIntent);
+      const tfContent = GcpTerraformAdapter.synthesize(testIntent);
 
       expect(tfContent).toContain('database_version = "POSTGRES_15"');
       expect(tfContent).toContain('tier = "db-custom-2-4096"');
@@ -103,16 +103,16 @@ describe('Chiral Synthesis Integration', () => {
 
   describe('Cross-Cloud Consistency', () => {
     it('should use same project name across clouds', () => {
-      const azureBicep = AzureRightHandAdapter.synthesize(testIntent);
-      const gcpTf = GcpRightHandAdapter.synthesize(testIntent);
+      const azureBicep = AzureBicepAdapter.synthesize(testIntent);
+      const gcpTf = GcpTerraformAdapter.synthesize(testIntent);
 
       expect(azureBicep).toContain('integration-test');
       expect(gcpTf).toContain('integration-test');
     });
 
     it('should use same environment settings', () => {
-      const azureBicep = AzureRightHandAdapter.synthesize(testIntent);
-      const gcpTf = GcpRightHandAdapter.synthesize(testIntent);
+      const azureBicep = AzureBicepAdapter.synthesize(testIntent);
+      const gcpTf = GcpTerraformAdapter.synthesize(testIntent);
 
       // Both should reflect prod environment
       expect(azureBicep).toContain('ZoneRedundant'); // Prod HA
@@ -120,8 +120,8 @@ describe('Chiral Synthesis Integration', () => {
     });
 
     it('should use consistent sizing from HardwareMap', () => {
-      const azureBicep = AzureRightHandAdapter.synthesize(testIntent);
-      const gcpTf = GcpRightHandAdapter.synthesize(testIntent);
+      const azureBicep = AzureBicepAdapter.synthesize(testIntent);
+      const gcpTf = GcpTerraformAdapter.synthesize(testIntent);
 
       // Large sizes should be used consistently
       expect(azureBicep).toContain('Standard_D4s_v3'); // Azure large
@@ -143,7 +143,7 @@ describe('Chiral Synthesis Integration', () => {
     });
 
     it('should write valid Azure Bicep file', () => {
-      const bicepContent = AzureRightHandAdapter.synthesize(testIntent);
+      const bicepContent = AzureBicepAdapter.synthesize(testIntent);
       fs.writeFileSync(azurePath, bicepContent);
 
       const writtenContent = fs.readFileSync(azurePath, 'utf8');
@@ -152,7 +152,7 @@ describe('Chiral Synthesis Integration', () => {
     });
 
     it('should write valid GCP Terraform file', () => {
-      const tfContent = GcpRightHandAdapter.synthesize(testIntent);
+      const tfContent = GcpTerraformAdapter.synthesize(testIntent);
       fs.writeFileSync(gcpPath, tfContent);
 
       const writtenContent = fs.readFileSync(gcpPath, 'utf8');

@@ -17,7 +17,7 @@ import { HardwareMap } from '../rosetta/hardware-map';
 // It ONLY ensures the configuration values are mapped correctly.
 // =================================================================
 
-export class GcpRightHandAdapter {
+export class GcpTerraformAdapter {
   static synthesize(intent: ChiralSystem): string {
     // 1. ROSETTA TRANSLATION (Hardware Mapping)
     // ------------------------------------------------
@@ -26,7 +26,12 @@ export class GcpRightHandAdapter {
     const vmMachine = HardwareMap.gcp.vm[intent.adfs.size];
     const k8sMachine = HardwareMap.gcp.k8s[intent.k8s.size];
 
-    // 2. TERRAFORM HCL TEMPLATE GENERATION ("Mad Libs")
+    // 2. CONFIGURABLE SETTINGS
+    // ------------------------------------------------
+    const gcpRegion = intent.region?.gcp || 'us-central1';
+    const gcpZone = `${gcpRegion}-a`; // Default to first zone in region
+
+    // 3. TERRAFORM HCL TEMPLATE GENERATION ("Mad Libs")
     // ------------------------------------------------
     // The content inside the backticks (`) IS Terraform HCL.
     // We use ${variable} to inject the strict configuration.
@@ -53,7 +58,7 @@ resource "google_compute_subnetwork" "subnet" {
   name          = "${intent.projectName}-subnet"
   network       = google_compute_network.vpc.self_link
   ip_cidr_range = "${intent.networkCidr}"
-  region        = "us-central1"
+  region        = "${gcpRegion}"
 }
 
 # =================================================================
@@ -61,7 +66,7 @@ resource "google_compute_subnetwork" "subnet" {
 # =================================================================
 resource "google_container_cluster" "gke" {
   name     = "${intent.projectName}-gke"
-  location = "us-central1"
+  location = "${gcpRegion}"
 
   network    = google_compute_network.vpc.self_link
   subnetwork = google_compute_subnetwork.subnet.self_link
@@ -101,7 +106,7 @@ resource "google_container_node_pool" "primary_nodes" {
 resource "google_sql_database_instance" "postgres" {
   name             = "${intent.projectName}-pg"
   database_version = "POSTGRES_${intent.postgres.engineVersion}"
-  region           = "us-central1"
+  region           = "${gcpRegion}"
 
   settings {
     tier = "${dbMachine}"
@@ -128,7 +133,7 @@ resource "google_sql_database" "app_db" {
 resource "google_compute_instance" "adfs" {
   name         = "${intent.projectName}-adfs"
   machine_type = "${vmMachine}"
-  zone         = "us-central1-a"
+  zone         = "${gcpZone}"
 
   boot_disk {
     initialize_params {

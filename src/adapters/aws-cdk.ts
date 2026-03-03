@@ -16,7 +16,7 @@ import { Construct } from 'constructs';
 import { ChiralSystem } from '../intent';
 import { HardwareMap } from '../rosetta/hardware-map';
 
-export class AwsLeftHandAdapter extends cdk.Stack {
+export class AwsCdkAdapter extends cdk.Stack {
   public readonly vpc: ec2.IVpc;
   public readonly eksCluster: eks.Cluster;
   public readonly postgresDatabase: rds.DatabaseInstance;

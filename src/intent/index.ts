@@ -31,6 +31,16 @@ export interface ChiralSystem {
   environment: EnvironmentTier;
   networkCidr: string;
   
+  // Optional configurable settings (with sensible defaults)
+  region?: {
+    aws?: string;
+    azure?: string;
+    gcp?: string;
+  };
+  network?: {
+    subnetCidr?: string; // Default subnet within networkCidr
+  };
+  
   // The Three Pillars
   k8s: KubernetesIntent;
   postgres: DatabaseIntent;

@@ -1,7 +1,7 @@
-import { GcpRightHandAdapter } from '../adapters/gcp-right';
+import { GcpTerraformAdapter } from '../adapters/gcp-terraform';
 import { ChiralSystem } from '../intent';
 
-describe('GcpRightHandAdapter', () => {
+describe('GcpTerraformAdapter', () => {
   const testIntent: ChiralSystem = {
     projectName: 'test-project',
     environment: 'prod',
@@ -25,7 +25,7 @@ describe('GcpRightHandAdapter', () => {
 
   describe('synthesize method', () => {
     it('should generate valid Terraform HCL', () => {
-      const result = GcpRightHandAdapter.synthesize(testIntent);
+      const result = GcpTerraformAdapter.synthesize(testIntent);
 
       expect(result).toContain('terraform {');
       expect(result).toContain('required_providers');
@@ -37,7 +37,7 @@ describe('GcpRightHandAdapter', () => {
     });
 
     it('should include project name in resource names', () => {
-      const result = GcpRightHandAdapter.synthesize(testIntent);
+      const result = GcpTerraformAdapter.synthesize(testIntent);
 
       expect(result).toContain('test-project-vpc');
       expect(result).toContain('test-project-gke');
@@ -46,52 +46,52 @@ describe('GcpRightHandAdapter', () => {
     });
 
     it('should use correct network CIDR', () => {
-      const result = GcpRightHandAdapter.synthesize(testIntent);
+      const result = GcpTerraformAdapter.synthesize(testIntent);
 
       expect(result).toContain('ip_cidr_range = "10.0.0.0/16"');
     });
 
     it('should use HardwareMap values for GCP sizing', () => {
-      const result = GcpRightHandAdapter.synthesize(testIntent);
+      const result = GcpTerraformAdapter.synthesize(testIntent);
 
       expect(result).toContain('machine_type = "n1-standard-2"'); // Large VM
       expect(result).toContain('tier = "db-custom-2-4096"'); // Large DB
     });
 
     it('should configure production settings correctly', () => {
-      const result = GcpRightHandAdapter.synthesize(testIntent);
+      const result = GcpTerraformAdapter.synthesize(testIntent);
 
       expect(result).toContain('deletion_protection = true'); // Prod setting
     });
 
     it('should configure development settings correctly', () => {
       const devIntent = { ...testIntent, environment: 'dev' as const };
-      const result = GcpRightHandAdapter.synthesize(devIntent);
+      const result = GcpTerraformAdapter.synthesize(devIntent);
 
       expect(result).toContain('deletion_protection = false'); // Dev setting
     });
 
     it('should use correct PostgreSQL version', () => {
-      const result = GcpRightHandAdapter.synthesize(testIntent);
+      const result = GcpTerraformAdapter.synthesize(testIntent);
 
       expect(result).toContain('POSTGRES_15');
     });
 
     it('should use correct Windows version for AD FS', () => {
-      const result = GcpRightHandAdapter.synthesize(testIntent);
+      const result = GcpTerraformAdapter.synthesize(testIntent);
 
       expect(result).toContain('windows-2022');
     });
 
     it('should return a string', () => {
-      const result = GcpRightHandAdapter.synthesize(testIntent);
+      const result = GcpTerraformAdapter.synthesize(testIntent);
 
       expect(typeof result).toBe('string');
       expect(result.length).toBeGreaterThan(0);
     });
 
     it('should trim whitespace', () => {
-      const result = GcpRightHandAdapter.synthesize(testIntent);
+      const result = GcpTerraformAdapter.synthesize(testIntent);
 
       expect(result).toBe(result.trim());
     });
@@ -99,13 +99,13 @@ describe('GcpRightHandAdapter', () => {
 
   describe('storage configuration', () => {
     it('should set correct PostgreSQL storage', () => {
-      const result = GcpRightHandAdapter.synthesize(testIntent);
+      const result = GcpTerraformAdapter.synthesize(testIntent);
 
       expect(result).toContain('disk_size = 100');
     });
 
     it('should configure backup settings for prod', () => {
-      const result = GcpRightHandAdapter.synthesize(testIntent);
+      const result = GcpTerraformAdapter.synthesize(testIntent);
 
       expect(result).toContain('backup_configuration {');
       expect(result).toContain('enabled = true');
