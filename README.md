@@ -22,14 +22,14 @@ We use the Chiral Pattern to avoid vendor lock-ins to 3rd-party state managers. 
 ### Description
 The Chiral Pattern is a software design approach for multi-cloud infrastructure management where an intent schema is used to generate native, 1st-party artifacts for each target cloud. 
 
-The pattern produces mirror-image outputs—for example, AWS CloudFormation via CDK and Azure Bicep—ensuring that both deployments share the same functional intent while remaining fully compatible with their respective cloud-native constructs. The Chiral Pattern allows vendor independence, auditability, and deterministic synchronization, enabling teams to change intent without relying on 3rd-party state files.
+The pattern produces mirror-image outputs (for example, AWS CloudFormation via CDK and Azure Bicep) to ensure that both deployments share the same functional intent while remaining fully compatible with their respective cloud-native constructs. The Chiral Pattern allows cloud independence, auditability, and synchronization, enabling teams to change intent without relying on 3rd-party state managers to avoid vendor lock-ins.
 
 Its metaphorical name emphasizes that the outputs are structurally identical in purpose but inherently distinct in implementation, like left and right hands.
 
 
 ---
 
-> We define our infrastructure in the **Chiral Config**. Our **Chiral Engine** generates the native **Enantiomers** (CloudFormation and Bicep), which are then deployed to their respective clouds.
+> We define our infrastructure in the **Chiral Config**. The **Chiral Engine** generates the native **Enantiomers** (for example, CloudFormation and Bicep), which are then deployed to their respective clouds.
 
 ---
 
@@ -39,7 +39,7 @@ Its metaphorical name emphasizes that the outputs are structurally identical in 
 
 *   **The Problem:** Your AWS EKS cluster, Azure AKS cluster, and GCP GKE cluster are mirror images. They do the exact same thing (orchestrate containers).
 *   **The Reality:** They are **non-superimposable**. You cannot overlay an AWS CloudFormation onto Azure Bicep or GCP Terraform. The APIs, IAM roles, and networking constructs simply do not line up.
-*   **The Solution:** You need a **Chiral Engine**—a central logic core that understands the shared DNA but generates the distinct "programmatic left-handed" (AWS), "declarative right-handed" (Azure), and "declarative right-handed" (GCP) artifacts.
+*   **The Solution:** You need a **Chiral Engine**—a central logic core that understands the shared DNA but generates the distinct programmatic "left-handed" (AWS) and declarative "right-handed" (Azure and/or GCP) artifacts.
 
 ---
 
@@ -54,7 +54,7 @@ Its metaphorical name emphasizes that the outputs are structurally identical in 
 - **Enantiomers**: Mirror-image outputs like left/right-handed molecules
 - **Intent-Driven**: Business requirements abstracted from cloud specifics
 - **Artifact Generation**: Compile intent into native cloud templates
-- **No Lock-in**: Avoid third-party tools; use each cloud's best IaC
+- **No 3rd-party Lock-in**: Avoid 3rd-party state managers; use each cloud's best IaC and native state manager
 
 ### Why It Works
 - **Consistency**: Same intent produces functionally identical infrastructure
