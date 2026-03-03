@@ -62,7 +62,7 @@ This generates:
 - For Azure validation: Azure CLI (`az`)
 - For GCP deployment: Terraform CLI (`terraform`)
 
-#### Deployment
+### Deployment
 
 - For AWS authentication: AWS CLI (`aws`)
 - For GCP authentication: Google Cloud CLI (`gcloud`)
