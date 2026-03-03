@@ -239,26 +239,30 @@ We define our infrastructure in the **Chiral Config**. Our **Chiral Engine** gen
 
 ```mermaid
 flowchart TD
-    classDef config  fill:#fffbe6,stroke:#c9a000,color:#6b4c00
-    classDef engine  fill:#f3e8ff,stroke:#7c3aed,color:#4a1d96
-    classDef awsNode fill:#fff3e0,stroke:#e67e00,color:#7a3800
-    classDef azNode  fill:#e3f2fd,stroke:#0063b1,color:#003a75
-    classDef gcpNode fill:#e8f5e9,stroke:#1e8a3e,color:#0d4a1f
+    classDef config   fill:#fffbe6,stroke:#c9a000,color:#6b4c00
+    classDef engine   fill:#f3e8ff,stroke:#7c3aed,color:#4a1d96
+    classDef awsNode  fill:#fff3e0,stroke:#e67e00,color:#7a3800
+    classDef azNode   fill:#e3f2fd,stroke:#0063b1,color:#003a75
+    classDef gcpNode  fill:#e8f5e9,stroke:#1e8a3e,color:#0d4a1f
+    classDef header   fill:#e2e8f0,stroke:#94a3b8,color:#1e293b
 
     CONFIG[chiral.config.ts<br/>──────────────────────────────<br/>Single Source of Truth<br/>Defines KubernetesIntent<br/>Defines DatabaseIntent<br/>Defines NetworkIntent<br/>──────────────────────────────<br/>ChiralSpec interface]:::config
 
-    subgraph ENGINE[Chiral Engine  -  src/main.ts  -  Zero-State Orchestrator]
+    subgraph ENGINE[Chiral Engine]
+        EH[src/main.ts<br/>──────────────────────────────<br/>Zero-State Orchestrator]:::header
         INTENT[Intent Schema<br/>──────────────────────────────<br/>src/intent/index.ts<br/>Abstracts business needs<br/>into cloud-agnostic types]:::engine
         ROSETTA[Rosetta Dictionary<br/>──────────────────────────────<br/>src/rosetta/<br/>hardware-map.ts<br/>Translates hardware specs<br/>e.g. m5.xlarge to D4s_v3]:::engine
     end
 
-    subgraph ADAPTERS[Enantiomers  -  src/adapters/  -  Mirror-Image Cloud Outputs]
+    subgraph ADAPTERS[Enantiomers]
+        AH[src/adapters/<br/>──────────────────────────────<br/>Mirror-Image Cloud Outputs]:::header
         AWS_A[aws-left.ts<br/>──────────────────────────────<br/>LEFT HAND - Programmatic<br/>AWS CDK L3 Constructs<br/>Most mature IaC tool<br/>Rich ecosystem and typing]:::awsNode
         AZURE_A[azure-right.ts<br/>──────────────────────────────<br/>RIGHT HAND - Declarative<br/>Azure Bicep Template<br/>Modern DSL for Azure<br/>Direct ARM API compat]:::azNode
         GCP_A[gcp-right.ts<br/>──────────────────────────────<br/>RIGHT HAND - Declarative<br/>GCP Terraform HCL<br/>Infrastructure Manager<br/>Native GCP IaC format]:::gcpNode
     end
 
-    subgraph DIST[dist/  -  Racemic Mixture  -  Native Cloud Artifacts]
+    subgraph DIST[Artifacts]
+        DH[dist/ - Racemic Mixture<br/>──────────────────────────────<br/>Native Cloud Artifacts]:::header
         AWS_D[aws-assembly/<br/>──────────────────────────────<br/>AwsStack.template.json<br/>AwsStack.assets.json<br/>manifest.json<br/>tree.json]:::awsNode
         AZURE_D[azure-deployment.bicep<br/>──────────────────────────────<br/>Native Bicep Enantiomer<br/>Deployable Azure template]:::azNode
         GCP_D[gcp-deployment.tf<br/>──────────────────────────────<br/>Native HCL Enantiomer<br/>Deployable GCP template]:::gcpNode
@@ -269,6 +273,8 @@ flowchart TD
     GCP_C([Google Cloud Platform<br/>──────────────────────────────<br/>Infrastructure Manager<br/>GKE - Google Kubernetes]):::gcpNode
 
     CONFIG --> ENGINE
+    EH --> INTENT
+    EH --> ROSETTA
     INTENT --> AWS_A
     INTENT --> AZURE_A
     INTENT --> GCP_A
