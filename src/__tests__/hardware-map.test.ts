@@ -1,4 +1,4 @@
-import { HardwareMap } from '../rosetta/hardware-map';
+import { HardwareMap } from '../translation/hardware-map';
 
 describe('HardwareMap', () => {
   describe('AWS mappings', () => {

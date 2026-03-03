@@ -14,7 +14,7 @@ import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { KubectlV26Layer } from '@aws-cdk/lambda-layer-kubectl-v26';
 import { Construct } from 'constructs';
 import { ChiralSystem } from '../../intent';
-import { getRegionalHardwareMap, validateRegionalCapabilities } from '../../rosetta/hardware-map';
+import { getRegionalHardwareMap, validateRegionalCapabilities } from '../../translation/hardware-map';
 
 export class AwsCdkAdapter extends cdk.Stack {
   public readonly vpc: ec2.IVpc;

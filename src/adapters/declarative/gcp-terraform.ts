@@ -5,7 +5,7 @@
 // The GCP Right Enantiomer: Terraform HCL Generator.
 
 import { ChiralSystem } from '../../intent';
-import { getRegionalHardwareMap, validateRegionalCapabilities } from '../../rosetta/hardware-map';
+import { getRegionalHardwareMap, validateRegionalCapabilities } from '../../translation/hardware-map';
 
 // =================================================================
 // GCP RIGHT ENANTIOMER (GCP Adapter)

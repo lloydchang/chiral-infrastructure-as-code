@@ -1,6 +1,6 @@
-// File: src/rosetta/hardware-map.ts
+// File: src/translation/hardware-map.ts
 
-// 3. The Rosetta Layer (Translation)
+// 3. The Translation Layer
 
 // Region-aware hardware mapping that adapts to regional capabilities and compliance requirements
 
