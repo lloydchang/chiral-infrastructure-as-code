@@ -160,26 +160,64 @@ chiral-infrastructure-as-code
 │   │   ├── AwsStack.template.json    # [NATIVE] The deployable AWS template.
 │   │   ├── manifest.json             # Metadata about the assembly, stacks, and assets.
 │   │   └── tree.json                 # A tree view of the stack's construct hierarchy.
-│   └── azure-deployment.bicep        # [NATIVE] The deployable Azure Bicep enantiomer.
+│   ├── azure-deployment.bicep        # [NATIVE] The deployable Azure Bicep enantiomer.
+│   └── gcp-deployment.tf             # [NATIVE] The deployable GCP Terraform enantiomer.
 ├── docs/                             # Documentation and Synchronization research.
 │   └── ideas/
 │       ├── AWS_CDK_To_Azure_Bicep_Guide.txt
 │       ├── Multi-Cloud_IaC_Synchronization_Challenges.txt
 │       └── Syncing_AWS_CDK_and_Bicep.txt
+├── examples/                         # [EXAMPLES] Comprehensive guides for different IaC approaches.
+│   ├── basic-setup/
+│   │   └── README.md
+│   ├── bicep-to-chiral/
+│   │   └── README.md
+│   ├── cdk-to-chiral/
+│   │   └── README.md
+│   ├── gcp-to-chiral/
+│   │   └── README.md
+│   ├── opentofu-to-chiral/
+│   │   └── README.md
+│   ├── pulumi-to-chiral/
+│   │   └── README.md
+│   └── terraform-to-chiral/
+│       └── README.md
 ├── src/
+│   ├── __tests__/                    # [TESTS] Unit and integration tests for adapters and synthesis.
+│   │   ├── azure-adapter.test.ts
+│   │   ├── gcp-adapter.test.ts
+│   │   ├── hardware-map.test.ts
+│   │   ├── intent.test.ts
+│   │   └── synthesis-integration.test.ts
+│   ├── adapters/                     # [LOGIC] The "Enantiomers".
+│   │   ├── aws-left.ts               # [AWS] Left Hand. Implements CDK L3 Constructs.
+│   │   ├── azure-right.ts            # [AZURE] Right Hand. Implements Bicep Template.
+│   │   └── gcp-right.ts              # [GCP] Right Hand. Implements Terraform Template.
 │   ├── intent/                       # [TYPES] The "Schema". Abstract business needs.
 │   │   └── index.ts                  # Defines KubernetesIntent, DatabaseIntent, etc.
 │   ├── rosetta/                      # [TRANSLATION] The "Dictionary". 
-│   │      └── hardware-map.ts        # Resolves hardware differences (e.g., m5.xlarge vs D4s_v3).
-│   ├── adapters/                     # [LOGIC] The "Enantiomers".
-│   │   ├── aws-left.ts               # [AWS] Left Hand. Implements CDK L3 Constructs.
-│   │   └── azure-right.ts            # [AZURE] Right Hand. Implements Bicep Template.
+│   │   └── hardware-map.ts           # Resolves hardware differences (e.g., m5.xlarge vs D4s_v3).
 │   └── main.ts                       # [ENGINE] The "Chiral Engine". 
 │                                     # Orchestrates the build. Synthesizes adapters into 'dist/'.
 ├── package.json                      # Dependencies and Scripts.
+├── package-lock.json                 # Lock file for exact dependency versions.
 ├── tsconfig.json                     # TypeScript configuration.
 └── README.md                         # Project documentation and Chiral Pattern definition.
 ```
+
+---
+
+## Examples
+
+The `examples/` directory provides practical guides for implementing the Chiral pattern:
+
+- **`basic-setup/`**: Contains a minimal example for setting up a new Chiral project from scratch, including simple configuration and intent interfaces.
+- **`bicep-to-chiral/`**: Guide for converting Azure Bicep templates to the Chiral pattern.
+- **`cdk-to-chiral/`**: Guide for converting AWS CDK stacks to the Chiral pattern.
+- **`gcp-to-chiral/`**: Guide for converting GCP Infrastructure Manager templates to the Chiral pattern.
+- **`opentofu-to-chiral/`**: Demonstrates how to convert OpenTofu projects to the Chiral pattern, extracting business intent and enabling multi-cloud generation.
+- **`pulumi-to-chiral/`**: Guide for converting Pulumi programs to the Chiral pattern.
+- **`terraform-to-chiral/`**: Guide for converting Terraform configurations to the Chiral pattern.
 
 ---
 
