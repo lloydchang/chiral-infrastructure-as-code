@@ -58,7 +58,7 @@ This complexity scales non-linearly as you add more infrastructure platforms and
 - **Maintenance burden**: Keeping abstractions in sync with cloud evolution
 
 ### Cloud-Native Approaches (CDK + Bicep + Terraform HCL)
-- **Manual synchronization**: No automated way to keep intent uniform
+- **Manual synchronization**: No automated way to keep intent consistent
 - **Drift detection**: Hard to validate that implementations match intent
 - **Coordination overhead**: Teams must manually maintain parallel implementations
 
