@@ -158,7 +158,7 @@ While Chiral addresses fundamental multi-cloud challenges, it introduces its own
 
 ### Limited Cloud Coverage
 - **Current scope**: Focused on AWS, Azure, and GCP—major clouds but not comprehensive
-- **Adapter maintenance**: Each cloud's API evolution requires corresponding adapter updates
+- **Adapter maintenance**: Each cloud's IaC format evolution requires corresponding adapter updates
 - **Regional variations**: Even within supported clouds, regional differences may require customization
 
 ### Operational Considerations
