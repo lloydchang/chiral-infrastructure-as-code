@@ -38,7 +38,7 @@ Its metaphorical name emphasizes that the outputs are structurally identical in 
 **Chirality** (from Greek *kheir*, "hand") is the property of an object being non-superimposable on its mirror image.
 
 *   **The Problem:** Your AWS EKS cluster, Azure AKS cluster, and GCP GKE cluster are mirror images. They do the exact same thing (orchestrate containers).
-*   **The Reality:** They are **non-superimposable**. You cannot overlay an AWS CDK / CloudFormation template onto Azure Bicep or GCP Terraform. The APIs, IAM roles, and networking constructs simply do not line up.
+*   **The Reality:** They are **non-superimposable**. You cannot overlay an AWS CloudFormation onto Azure Bicep or GCP Terraform. The APIs, IAM roles, and networking constructs simply do not line up.
 *   **The Solution:** You need a **Chiral Engine**—a central logic core that understands the shared DNA but generates the distinct "programmatic left-handed" (AWS), "declarative right-handed" (Azure), and "declarative right-handed" (GCP) artifacts.
 
 ---
