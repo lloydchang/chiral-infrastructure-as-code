@@ -84,7 +84,7 @@ describe('Chiral Synthesis Integration', () => {
       expect(tfContent).toContain('integration-test-adfs');
     });
 
-    it('should include Terraform provider configuration', () => {
+    it('should include proper Terraform structure', () => {
       const tfContent = GcpRightHandAdapter.synthesize(testIntent);
 
       expect(tfContent).toContain('required_providers {');

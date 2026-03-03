@@ -7,7 +7,7 @@
 ### Elevator Pitch
 We use the **Chiral Pattern** to avoid Infrastructure as Code (IaC) lock-in. Instead of relying on 3rd-party state managers, we maintain a central **Nucleus (Intent)** and use the **Chiral Engine** to synthesize first-party **Enantiomers (Native Templates)** for multiple clouds. This ensures native support without 3rd-party vendor lock-in.
 
-The pattern supports various IaC approaches through examples: AWS CDK, Azure Bicep, and GCP Infrastructure Manager.
+The pattern supports various IaC approaches through examples: AWS CDK, Azure Bicep, and GCP Infrastructure Manager (Terraform HCL).
 
 ---
 
@@ -69,26 +69,25 @@ The pattern supports various IaC approaches through comprehensive examples cover
 - Reduces complexity of managing different IaC tools
 - Enables true infrastructure portability
 - Maintains each cloud's optimization and features
-- **Abandon at any time**: Native outputs free you from Chiral dependency
 - **Intent-driven discipline**: Forces separation of business requirements from technical implementation
 
 The philosophy embraces cloud diversity while enforcing consistency through unified intent.
 
-### The "Abandon at Any Time" Promise
+### Native Artifacts
 
-Chiral produces native cloud artifacts (AWS CDK and CloudFormation, Azure Bicep, GCP Infrastructure Manager Blueprint) that can be deployed independently without the Chiral framework. Generated artifacts are standard cloud templates that work with native cloud tooling.
+Chiral produces native cloud artifacts that can be deployed independently: AWS CDK and CloudFormation for AWS, Azure Bicep for Azure, and GCP Infrastructure Manager (Terraform HCL) for GCP. These are standard cloud templates that work with native cloud tooling.
 
 ## How Chiral Compares to Traditional Multi-Cloud Tools
 
-Chiral takes a different approach to multi-cloud infrastructure management compared to tools like Terraform or Pulumi:
+Chiral takes a different approach to multi-cloud infrastructure management compared to traditional IaC tools:
 
 ### Multi-Cloud Synchronization
-- **Single change, everywhere**: Modify intent once → automatically generates CloudFormation, Bicep, and Terraform
-- **No manual coordination**: Eliminates keeping multiple cloud templates in sync manually  
-- **Atomic updates**: Change intent → regenerate all artifacts → deploy all clouds simultaneously
+- **Single intent change**: Modify intent once → generates AWS CDK and CloudFormation, Azure Bicep, and GCP Infrastructure Manager (Terraform HCL)
+- **Reduced coordination**: Reduces the need to manually keep multiple cloud templates in sync
+- **Regenerate artifacts**: Change intent → regenerate all artifacts → deploy to clouds
 
 ### Infrastructure Management
-- **No state files**: Traditional IaC requires managing complex state (Terraform .tfstate, CDK context.json)
+- **No state files**: Traditional IaC requires managing complex state (e.g., CDK context.json)
 - **No lock files**: No dealing with state locking, drift detection, or reconciliation
 - **No cleanup**: Artifacts are pure functions of intent - no orphaned resources or manual cleanup
 
@@ -96,8 +95,6 @@ Chiral takes a different approach to multi-cloud infrastructure management compa
 - **Intent-first coding**: Write business requirements, not cloud-specific APIs
 - **Built-in validation**: Automatic syntax checking and type safety
 - **Framework handles complexity**: You focus on "what", Chiral handles "how" across clouds
-
-Chiral's success is measured by teams who outgrow the framework while maintaining the disciplined, intent-driven approach it established.
 
 ---
 
@@ -161,7 +158,7 @@ chiral-infrastructure-as-code
 │   │   ├── manifest.json             # Metadata about the assembly, stacks, and assets.
 │   │   └── tree.json                 # A tree view of the stack's construct hierarchy.
 │   ├── azure-deployment.bicep        # [NATIVE] The deployable Azure Bicep enantiomer.
-│   └── gcp-deployment.tf             # [NATIVE] The deployable GCP Terraform enantiomer.
+│   └── gcp-deployment.tf             # [NATIVE] The deployable GCP Infrastructure Manager (Terraform HCL).
 ├── docs/                             # Documentation and Synchronization research.
 │   └── ideas/
 │       ├── AWS_CDK_To_Azure_Bicep_Guide.txt
@@ -192,7 +189,7 @@ chiral-infrastructure-as-code
 │   ├── adapters/                     # [LOGIC] The "Enantiomers".
 │   │   ├── aws-left.ts               # [AWS] Left Hand. Implements CDK L3 Constructs.
 │   │   ├── azure-right.ts            # [AZURE] Right Hand. Implements Bicep Template.
-│   │   └── gcp-right.ts              # [GCP] Right Hand. Implements Terraform Template.
+│   │   └── gcp-right.ts              # [GCP] Right Hand. Implements Infrastructure Manager (Terraform HCL).
 │   ├── intent/                       # [TYPES] The "Schema". Abstract business needs.
 │   │   └── index.ts                  # Defines KubernetesIntent, DatabaseIntent, etc.
 │   ├── rosetta/                      # [TRANSLATION] The "Dictionary". 

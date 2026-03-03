@@ -26,7 +26,7 @@ import { GcpRightHandAdapter } from './adapters/gcp-right';
 // 1. Reads chiral.config.ts
 // 2. Instantiates Left Adapter (AWS) -> Synthesizes to dist/
 // 3. Instantiates Right Adapter (Azure) -> Generates Bicep to dist/
-// 4. Instantiates Right Adapter (GCP) -> Generates Terraform HCL to dist/
+// 4. Instantiates Right Adapter (GCP) -> Generates Infrastructure Manager Blueprint to dist/
 // 5. VALIDATES the generated Bicep using Azure CLI
 // =================================================================
 
