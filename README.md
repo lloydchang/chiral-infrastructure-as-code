@@ -46,8 +46,8 @@ chiral --config config.js
 ```
 
 This generates:
-- `aws-assembly/` (CloudFormation templates)
-- `azure-deployment.bicep` (Azure Bicep templates)
+- `aws-assembly/` (CDK and CloudFormation Template)
+- `azure-deployment.bicep` (Azure Bicep Template)
 - `gcp-deployment.tf` (GCP Terraform Blueprint)
 
 ### Requirements
