@@ -245,28 +245,28 @@ flowchart TD
     classDef azNode  fill:#e3f2fd,stroke:#0063b1,color:#003a75
     classDef gcpNode fill:#e8f5e9,stroke:#1e8a3e,color:#0d4a1f
 
-    CONFIG["chiral.config.ts<br/>Single Source of Truth<br/>KubernetesIntent - DatabaseIntent - NetworkIntent"]:::config
+    CONFIG[chiral.config.ts<br/>─────────────────────────<br/>Single Source of Truth<br/>Defines KubernetesIntent<br/>Defines DatabaseIntent<br/>Defines NetworkIntent<br/>─────────────────────────<br/>ChiralSpec interface]:::config
 
-    subgraph ENGINE["Chiral Engine  |  src/main.ts  |  Zero-State Orchestrator"]
-        INTENT["Intent Schema<br/>src/intent/index.ts<br/>Defines abstract business needs"]:::engine
-        ROSETTA["Rosetta Dictionary<br/>src/rosetta/hardware-map.ts<br/>Translates hardware across clouds"]:::engine
+    subgraph ENGINE[Chiral Engine  -  src/main.ts  -  Zero-State Orchestrator]
+        INTENT[Intent Schema<br/>─────────────────────────<br/>src/intent/index.ts<br/>Abstracts business needs<br/>into cloud-agnostic types]:::engine
+        ROSETTA[Rosetta Dictionary<br/>─────────────────────────<br/>src/rosetta/hardware-map.ts<br/>Translates hardware specs<br/>e.g. m5.xlarge to D4s_v3]:::engine
     end
 
-    subgraph ADAPTERS["Enantiomers  |  src/adapters/  |  Mirror-Image Cloud Outputs"]
-        AWS_A["aws-left.ts<br/>LEFT HAND - Programmatic<br/>AWS CDK L3 Constructs"]:::awsNode
-        AZURE_A["azure-right.ts<br/>RIGHT HAND - Declarative<br/>Azure Bicep Template"]:::azNode
-        GCP_A["gcp-right.ts<br/>RIGHT HAND - Declarative<br/>GCP Infrastructure Manager HCL"]:::gcpNode
+    subgraph ADAPTERS[Enantiomers  -  src/adapters/  -  Mirror-Image Cloud Outputs]
+        AWS_A[aws-left.ts<br/>─────────────────────────<br/>LEFT HAND - Programmatic<br/>AWS CDK L3 Constructs<br/>Most mature IaC tool<br/>Rich ecosystem and typing]:::awsNode
+        AZURE_A[azure-right.ts<br/>─────────────────────────<br/>RIGHT HAND - Declarative<br/>Azure Bicep Template<br/>Modern DSL for Azure<br/>Direct ARM API compat]:::azNode
+        GCP_A[gcp-right.ts<br/>─────────────────────────<br/>RIGHT HAND - Declarative<br/>GCP Terraform HCL<br/>Infrastructure Manager<br/>Native GCP IaC format]:::gcpNode
     end
 
-    subgraph DIST["dist/  |  Racemic Mixture  |  Native Artifacts"]
-        AWS_D["aws-assembly/<br/>AwsStack.template.json<br/>AwsStack.assets.json - manifest.json"]:::awsNode
-        AZURE_D["azure-deployment.bicep<br/>Native Bicep Enantiomer"]:::azNode
-        GCP_D["gcp-deployment.tf<br/>Native HCL Enantiomer"]:::gcpNode
+    subgraph DIST[dist/  -  Racemic Mixture  -  Native Cloud Artifacts]
+        AWS_D[aws-assembly/<br/>─────────────────────────<br/>AwsStack.template.json<br/>AwsStack.assets.json<br/>manifest.json<br/>tree.json]:::awsNode
+        AZURE_D[azure-deployment.bicep<br/>─────────────────────────<br/>Native Bicep Enantiomer<br/>Deployable Azure template]:::azNode
+        GCP_D[gcp-deployment.tf<br/>─────────────────────────<br/>Native HCL Enantiomer<br/>Deployable GCP template]:::gcpNode
     end
 
-    AWS_C(["Amazon Web Services<br/>CloudFormation - EKS"]):::awsNode
-    AZURE_C(["Microsoft Azure<br/>ARM - AKS"]):::azNode
-    GCP_C(["Google Cloud Platform<br/>Infrastructure Manager - GKE"]):::gcpNode
+    AWS_C([Amazon Web Services<br/>─────────────────────────<br/>CloudFormation<br/>EKS - Elastic Kubernetes]):::awsNode
+    AZURE_C([Microsoft Azure<br/>─────────────────────────<br/>ARM - Azure Resource Mgr<br/>AKS - Azure Kubernetes]):::azNode
+    GCP_C([Google Cloud Platform<br/>─────────────────────────<br/>Infrastructure Manager<br/>GKE - Google Kubernetes]):::gcpNode
 
     CONFIG --> ENGINE
     INTENT --> AWS_A
