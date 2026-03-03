@@ -11,6 +11,7 @@ export interface KubernetesIntent {
   version: string;
   minNodes: number;
   maxNodes: number;
+  size: WorkloadSize; // For consistent node sizing across clouds
 }
 
 export interface DatabaseIntent {
