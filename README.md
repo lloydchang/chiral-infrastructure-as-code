@@ -22,7 +22,7 @@ We use the **Chiral Pattern** to avoid 3rd-party vendor lock-in. Instead of rely
 ### Description
 The Chiral Pattern is a software design approach for multi-cloud infrastructure management where a single source of truth (the Intent Schema) is used to generate native, 1st-party artifacts for each target cloud. 
 
-The pattern produces mirror-image outputs—for example, AWS CloudFormation via CDK and Azure Bicep—ensuring that both deployments share the same functional intent while remaining fully compatible with their respective cloud-native constructs. The Chiral Pattern allows vendor independence, auditability, and deterministic synchronization, allowing teams to evolve infrastructure declaratively without relying on third-party engines, managed state files, or cloud-agnostic compilers. 
+The pattern produces mirror-image outputs—for example, AWS CloudFormation via CDK and Azure Bicep—ensuring that both deployments share the same functional intent while remaining fully compatible with their respective cloud-native constructs. The Chiral Pattern allows vendor independence, auditability, and deterministic synchronization, enabling teams to change intent without relying on 3rd-party state files.
 
 Its metaphorical name emphasizes that the outputs are structurally identical in purpose but inherently distinct in implementation, like left and right hands.
 
