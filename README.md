@@ -245,28 +245,28 @@ flowchart TD
     classDef azNode  fill:#e3f2fd,stroke:#0063b1,color:#003a75
     classDef gcpNode fill:#e8f5e9,stroke:#1e8a3e,color:#0d4a1f
 
-    CONFIG[chiral.config.ts - Single Source of Truth]:::config
+    CONFIG["chiral.config.ts<br/>Single Source of Truth<br/>KubernetesIntent - DatabaseIntent - NetworkIntent"]:::config
 
-    subgraph ENGINE[Chiral Engine - src/main.ts]
-        INTENT[Intent Schema - src/intent/index.ts]:::engine
-        ROSETTA[Rosetta Dictionary - src/rosetta/hardware-map.ts]:::engine
+    subgraph ENGINE["Chiral Engine  |  src/main.ts  |  Zero-State Orchestrator"]
+        INTENT["Intent Schema<br/>src/intent/index.ts<br/>Defines abstract business needs"]:::engine
+        ROSETTA["Rosetta Dictionary<br/>src/rosetta/hardware-map.ts<br/>Translates hardware across clouds"]:::engine
     end
 
-    subgraph ADAPTERS[Enantiomers - src/adapters/]
-        AWS_A[aws-left.ts - LEFT HAND - CDK L3 Constructs]:::awsNode
-        AZURE_A[azure-right.ts - RIGHT HAND - Bicep Template]:::azNode
-        GCP_A[gcp-right.ts - RIGHT HAND - Terraform HCL]:::gcpNode
+    subgraph ADAPTERS["Enantiomers  |  src/adapters/  |  Mirror-Image Cloud Outputs"]
+        AWS_A["aws-left.ts<br/>LEFT HAND - Programmatic<br/>AWS CDK L3 Constructs"]:::awsNode
+        AZURE_A["azure-right.ts<br/>RIGHT HAND - Declarative<br/>Azure Bicep Template"]:::azNode
+        GCP_A["gcp-right.ts<br/>RIGHT HAND - Declarative<br/>GCP Infrastructure Manager HCL"]:::gcpNode
     end
 
-    subgraph DIST[dist/ - Native Artifacts]
-        AWS_D[aws-assembly/ - AwsStack.template.json]:::awsNode
-        AZURE_D[azure-deployment.bicep]:::azNode
-        GCP_D[gcp-deployment.tf]:::gcpNode
+    subgraph DIST["dist/  |  Racemic Mixture  |  Native Artifacts"]
+        AWS_D["aws-assembly/<br/>AwsStack.template.json<br/>AwsStack.assets.json - manifest.json"]:::awsNode
+        AZURE_D["azure-deployment.bicep<br/>Native Bicep Enantiomer"]:::azNode
+        GCP_D["gcp-deployment.tf<br/>Native HCL Enantiomer"]:::gcpNode
     end
 
-    AWS_C([Amazon Web Services]):::awsNode
-    AZURE_C([Microsoft Azure]):::azNode
-    GCP_C([Google Cloud Platform]):::gcpNode
+    AWS_C(["Amazon Web Services<br/>CloudFormation - EKS"]):::awsNode
+    AZURE_C(["Microsoft Azure<br/>ARM - AKS"]):::azNode
+    GCP_C(["Google Cloud Platform<br/>Infrastructure Manager - GKE"]):::gcpNode
 
     CONFIG --> ENGINE
     INTENT --> AWS_A
