@@ -39,6 +39,11 @@ module.exports = {
 };
 ```
 
+**Key Features:**
+- **minNodes/maxNodes**: Controls Kubernetes cluster sizing and autoscaling bounds
+- **Autoscaling**: All clouds support automatic scaling within configured limits
+- **Environment-aware**: Production vs development configurations
+
 Run the CLI:
 
 ```bash
@@ -56,9 +61,12 @@ This generates:
 - For AWS deployment: AWS CDK CLI (`cdk`)
 - For Azure validation: Azure CLI (`az`)
 - For GCP deployment: Terraform CLI (`terraform`)
-- For AWS authentication: AWS CLI (`aws`) [optional, for deployment]
-- For GCP authentication: Google Cloud CLI (`gcloud`) [optional, for deployment]
-- For Azure authentication: Azure CLI (`az`) [same as above]
+
+#### Deployment
+
+- For AWS authentication: AWS CLI (`aws`)
+- For GCP authentication: Google Cloud CLI (`gcloud`)
+- For Azure authentication: Azure CLI (`az`)
 
 ---
 
@@ -134,6 +142,11 @@ For a deeper dive into **why multi-cloud infrastructure management is fundamenta
 ### Native Artifacts
 
 Chiral produces native cloud artifacts that can be deployed independently: AWS CDK and CloudFormation for AWS, Azure Bicep for Azure, and GCP Infrastructure Manager (Terraform Blueprint) for GCP. These are standard cloud templates that work with native cloud tooling.
+
+**Autoscaling Support:**
+- **AWS EKS**: Auto-scaling node groups with `minSize`/`maxSize` from intent
+- **Azure AKS**: Auto-scaling agent pools with `minCount`/`maxCount` from intent  
+- **GCP GKE**: Auto-scaling node pools with `min_node_count`/`max_node_count` from intent
 
 ## How Chiral Compares to Traditional Multi-Cloud Tools
 
