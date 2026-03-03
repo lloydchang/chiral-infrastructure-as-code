@@ -123,6 +123,8 @@ Its metaphorical name emphasizes that the outputs are structurally identical in 
 
 The philosophy embraces cloud diversity while enforcing consistency through unified intent.
 
+For a deeper dive into **why multi-cloud infrastructure management is fundamentally challenging** and how Chiral addresses these structural difficulties, see [docs/CHALLENGES.md](docs/CHALLENGES.md).
+
 ### Native Artifacts
 
 Chiral produces native cloud artifacts that can be deployed independently: AWS CDK and CloudFormation for AWS, Azure Bicep for Azure, and GCP Infrastructure Manager (Terraform HCL) for GCP. These are standard cloud templates that work with native cloud tooling.
