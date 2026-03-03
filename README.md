@@ -5,7 +5,7 @@
 ---
 
 ### Elevator Pitch
-We use the **Chiral Pattern** to avoid 3rd-party vendor lock-in. Instead of relying on 3rd-party state managers, we maintain a central **Source (Intent)** and use the **Chiral Engine** to generate 1st-party **Distributions (Native Cloud Artifacts)** targeting AWS, Azure, GCP.
+We use the Chiral Pattern to avoid vendor lock-ins to 3rd-party state managers. We use a centralized source (Intent Schema) and the Chiral Engine to generate 1st-party distributions (Native Cloud Artifacts) targeting AWS, Azure, GCP.
 
 
 ---
