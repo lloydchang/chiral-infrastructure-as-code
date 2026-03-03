@@ -15,9 +15,9 @@
   "scripts": {
     "build": "tsc",
     "compile": "ts-node src/main.ts",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+    "test": "NODE_OPTIONS=\"--no-warnings\" jest",
+    "test:watch": "NODE_OPTIONS=\"--no-warnings\" jest --watch",
+    "test:coverage": "NODE_OPTIONS=\"--no-warnings\" jest --coverage",
     "cdk": "cdk",
     "deploy-aws": "cdk deploy",
     "diff-aws": "cdk diff",
