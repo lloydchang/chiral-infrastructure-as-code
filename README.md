@@ -55,6 +55,7 @@ This generates:
 - Node.js
 - For Azure validation: Azure CLI (`az`)
 - For AWS deployment: AWS CDK CLI (`cdk`)
+- For GCP deployment: Terraform CLI (`terraform`)
 
 ---
 
