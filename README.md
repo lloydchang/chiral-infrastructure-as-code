@@ -85,7 +85,8 @@ The philosophy embraces cloud diversity while enforcing consistency through unif
 - Strong typing and validation
 - Complex logic capabilities
 
-**Current**: AWS CDK (most mature programmatic IaC)
+**Current**: AWS CDK (most mature programmatic IaC) → CloudFormation (declarative output)
+**Why AWS is programmatic**: CDK is AWS's primary IaC tool, even though it generates declarative CloudFormation. This reflects AWS's ecosystem where programmatic CDK is preferred over raw CloudFormation templates.
 **Ideal**: CDK-equivalent tools (TypeScript/Python-based, construct libraries)
 
 ### Right Side (Secondary/Declarative)
