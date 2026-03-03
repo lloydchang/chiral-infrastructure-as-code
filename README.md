@@ -111,7 +111,7 @@ Its metaphorical name emphasizes that the outputs are structurally identical in 
 - **No 3rd-party Lock-in**: Avoid 3rd-party state managers; use each cloud's best IaC and native state manager
 
 ### Why It Works
-- **uniform**: Same intent produces functionally identical infrastructure
+- **Uniform**: Same intent produces functionally identical infrastructure
 - **Auditability**: Direct generation from code, no hidden state
 - **Evolution**: Change intent once, update all clouds simultaneously
 - **Vendor Independence**: Each cloud's native tools, not generic compromises
