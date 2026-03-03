@@ -147,6 +147,32 @@ Chiral isn't just another IaC tool—it's a **pattern for intent-driven multi-cl
 - **Enables progressive adoption**: Can bootstrap more complex orchestration systems
 - **Reduces operational burden**: Teams focus on intent, not implementation details
 
+## Chiral's Challenges and Limitations
+
+While Chiral addresses fundamental multi-cloud challenges, it introduces its own considerations:
+
+### Learning Curve and Paradigm Shift
+- **Intent-driven thinking**: Teams must learn to separate business intent from technical implementation
+- **Adapter pattern complexity**: Understanding how adapters translate intent to native artifacts requires new mental models
+- **TypeScript ecosystem dependency**: Requires JavaScript/TypeScript familiarity for configuration and customization
+
+### Limited Cloud Coverage
+- **Current scope**: Focused on AWS, Azure, and GCP—major clouds but not comprehensive
+- **Adapter maintenance**: Each cloud's API evolution requires corresponding adapter updates
+- **Regional variations**: Even within supported clouds, regional differences may require customization
+
+### Operational Considerations
+- **Code generation overhead**: Additional build step compared to direct native tool usage
+- **Debugging complexity**: Issues may span intent schema, adapter logic, and generated artifacts
+- **Ecosystem maturity**: Smaller community and tooling compared to established IaC platforms
+
+### Organizational Adoption
+- **Pattern buy-in**: Requires team consensus on intent-driven approach over traditional IaC methods
+- **Governance challenges**: Intent schemas must be maintained across teams and projects
+- **Migration effort**: Converting existing infrastructure to Chiral pattern requires planning
+
+These challenges are inherent to any novel approach that breaks from established patterns. Chiral's value proposition focuses on solving multi-cloud coordination problems that traditional tools cannot address, accepting these trade-offs as worthwhile for organizations facing genuine multi-cloud complexity.
+
 ## Conclusion
 
 The multi-cloud IaC space exists because enterprises legitimately need it, but all current approaches struggle due to fundamental architectural challenges. Chiral's intent-driven generation pattern is uniquely positioned to address these challenges by embracing cloud diversity while enforcing consistency through abstraction at the right level.
