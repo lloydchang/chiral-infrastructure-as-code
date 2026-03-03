@@ -81,11 +81,11 @@ Chiral's tagline emphasizes that you can **abandon the framework at any time** b
 - **No vendor lock-in**: Native outputs work without Chiral dependency
 - **Architecture over tool**: Chiral teaches intent-driven practices that transcend any specific framework
 - **Trust through transparency**: Users know they can graduate from the tool while retaining its benefits
-- **Delivers superior convenience**: Provides effortless multi-cloud synchronization, automated artifact generation, and zero-state management—making complex multi-cloud deployments as simple as single-cloud
+- **Delivers convenience**: Provides effortless multi-cloud synchronization, automated artifact generation, and zero-state management—making complex multi-cloud deployments as simple as single-cloud
 
-## Why Chiral vs Traditional Multi-Cloud Tools
+## How Chiral Compares to Traditional Multi-Cloud Tools
 
-Chiral provides superior convenience compared to Terraform multi-cloud or Pulumi approaches:
+Chiral takes a different approach to multi-cloud infrastructure management compared to tools like Terraform or Pulumi:
 
 ### Effortless Multi-Cloud Synchronization
 - **Single change, everywhere**: Modify intent once → automatically generates CloudFormation, Bicep, and Terraform
