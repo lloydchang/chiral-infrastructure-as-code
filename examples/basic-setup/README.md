@@ -20,11 +20,14 @@ export interface BasicChiralSystem {
   networkCidr: string;
   k8s: {
     version: string;
-    nodeCount: number;
+    minNodes: number;
+    maxNodes: number;
+    size: 'small' | 'large';
   };
   postgres: {
     engineVersion: string;
-    instanceClass: string;
+    size: 'small' | 'large';
+    storageGb: number;
   };
 }
 ```

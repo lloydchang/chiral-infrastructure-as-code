@@ -165,6 +165,7 @@ While Chiral addresses fundamental multi-cloud challenges, it introduces its own
 - **Code generation overhead**: Additional build step compared to direct native tool usage
 - **Debugging complexity**: Issues may span intent schema, adapter logic, and generated artifacts
 - **Ecosystem maturity**: Smaller community and tooling compared to established IaC platforms
+- **Autoscaling coordination**: Managing autoscaling policies across clouds requires careful intent design
 
 ### Organizational Adoption
 - **Pattern buy-in**: Requires team consensus on intent-driven approach over traditional IaC methods

@@ -18,7 +18,7 @@ import { getRegionalHardwareMap, validateRegionalCapabilities } from '../../tran
 // =================================================================
 
 export class AzureBicepAdapter {
-  static synthesize(intent: ChiralSystem): string {
+  static generate(intent: ChiralSystem): string {
     // Validate regional capabilities
     const azureRegion = intent.region?.azure || 'eastus';
     const regionalValidation = validateRegionalCapabilities('azure', azureRegion, ['kubernetes', 'postgresql', 'activeDirectory']);
@@ -82,7 +82,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {
 }
 
 // =================================================================
-// 2. KUBERNETES (AKS)
+// 2. KUBERNETES (AKS) - With Auto-scaling Support
 // =================================================================
 resource aks 'Microsoft.ContainerService/managedClusters@2024-01-01' = {
   name: '${intent.projectName}-aks'
@@ -96,7 +96,10 @@ resource aks 'Microsoft.ContainerService/managedClusters@2024-01-01' = {
     agentPoolProfiles: [
       {
         name: 'systempool'
-        count: ${intent.environment === 'prod' ? 2 : 1}
+        enableAutoScaling: true
+        minCount: ${intent.k8s.minNodes}
+        maxCount: ${intent.k8s.maxNodes}
+        count: ${intent.k8s.minNodes}
         vmSize: '${regionalHardware.k8s.small}' // System nodes use small size
         mode: 'System'
         osType: 'Linux'
@@ -104,7 +107,10 @@ resource aks 'Microsoft.ContainerService/managedClusters@2024-01-01' = {
       }
       {
         name: 'applicationpool'
-        count: 2
+        enableAutoScaling: true
+        minCount: ${intent.k8s.minNodes}
+        maxCount: ${intent.k8s.maxNodes}
+        count: ${intent.k8s.minNodes}
         vmSize: '${k8sSku}'
         mode: 'User'
         osType: 'Linux'

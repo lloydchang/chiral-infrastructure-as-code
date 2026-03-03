@@ -44,7 +44,7 @@ export class AwsCdkAdapter extends cdk.Stack {
     this.vpc = this.createVpc(intent);
 
     // =================================================================
-    // 2. KUBERNETES LAYER (Level 3 Construct - EKS)
+    // 2. KUBERNETES LAYER (Level 3 Construct - EKS) - With Auto-scaling Support
     // =================================================================
     this.eksCluster = this.createEksCluster(intent);
 

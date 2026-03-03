@@ -18,7 +18,7 @@ import { getRegionalHardwareMap, validateRegionalCapabilities } from '../../tran
 // =================================================================
 
 export class GcpTerraformAdapter {
-  static synthesize(intent: ChiralSystem): string {
+  static generate(intent: ChiralSystem): string {
     // Validate regional capabilities
     const gcpRegion = intent.region?.gcp || 'us-central1';
     const regionalValidation = validateRegionalCapabilities('gcp', gcpRegion, ['kubernetes', 'postgresql', 'activeDirectory']);
@@ -72,7 +72,7 @@ resource "google_compute_subnetwork" "subnet" {
 }
 
 # =================================================================
-# 2. KUBERNETES (GKE)
+# 2. KUBERNETES (GKE) - With Auto-scaling Support
 # =================================================================
 resource "google_container_cluster" "gke" {
   name     = "${intent.projectName}-gke"
@@ -89,7 +89,7 @@ resource "google_container_cluster" "gke" {
     ]
   }
 
-  initial_node_count = ${intent.environment === 'prod' ? 2 : 1}
+  initial_node_count = ${intent.k8s.minNodes}
 
   # Remove default node pool
   remove_default_node_pool = true
@@ -98,7 +98,12 @@ resource "google_container_cluster" "gke" {
 resource "google_container_node_pool" "primary_nodes" {
   name       = "primary-node-pool"
   cluster    = google_container_cluster.gke.name
-  node_count = 2
+  node_count = ${intent.k8s.minNodes}
+
+  autoscaling {
+    min_node_count = ${intent.k8s.minNodes}
+    max_node_count = ${intent.k8s.maxNodes}
+  }
 
   node_config {
     machine_type = "${k8sMachine}"
