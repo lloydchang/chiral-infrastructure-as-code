@@ -41,7 +41,7 @@ The pattern supports various IaC approaches through comprehensive examples cover
 
 *   **The Problem:** Your AWS EKS cluster, Azure AKS cluster, and GCP GKE cluster are mirror images. They do the exact same thing (orchestrate containers).
 *   **The Reality:** They are **non-superimposable**. You cannot overlay an AWS CloudFormation template onto Azure Bicep or GCP Terraform. The APIs, IAM roles, and networking constructs simply do not line up.
-*   **The Solution:** You need a **Chiral Engine**—a central logic core that understands the shared DNA but synthesizes the distinct "left-handed" (AWS), "right-handed" (Azure), and "center-handed" (GCP) artifacts.
+*   **The Solution:** You need a **Chiral Engine**—a central logic core that understands the shared DNA but synthesizes the distinct "left-handed" (AWS), "right-handed" (Azure), and "right-handed" (GCP) artifacts.
 
 ---
 
