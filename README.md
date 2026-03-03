@@ -1,6 +1,6 @@
 # Chiral Infrastructure as Code
 
-> **Generate mirrored, native cloud templates from a single source of truth. Multi-cloud infrastructure in sync across AWS, Azure, GCP, without 3rd-party vendor lock-in. Abandon Chiral at any time - you own the native cloud outputs.**
+> **Generate mirrored, native cloud templates from a single source of truth. Multi-cloud infrastructure in sync across AWS, Azure, GCP.**
 
 ---
 
@@ -76,28 +76,23 @@ The philosophy embraces cloud diversity while enforcing consistency through unif
 
 ### The "Abandon at Any Time" Promise
 
-Chiral's tagline emphasizes that you can **abandon the framework at any time** because it produces **native cloud artifacts** (CloudFormation, Bicep, Terraform) that you fully own and can deploy independently. This isn't contradictory marketing—it's **transparent positioning** that builds trust:
-
-- **No vendor lock-in**: Native outputs work without Chiral dependency
-- **Architecture over tool**: Chiral teaches intent-driven practices that transcend any specific framework
-- **Trust through transparency**: Users know they can graduate from the tool while retaining its benefits
-- **Delivers convenience**: Provides effortless multi-cloud synchronization, automated artifact generation, and zero-state management—making complex multi-cloud deployments as simple as single-cloud
+Chiral produces native cloud artifacts (CloudFormation, Bicep, Terraform) that can be deployed independently without the Chiral framework. Generated artifacts are standard cloud templates that work with native cloud tooling.
 
 ## How Chiral Compares to Traditional Multi-Cloud Tools
 
 Chiral takes a different approach to multi-cloud infrastructure management compared to tools like Terraform or Pulumi:
 
-### Effortless Multi-Cloud Synchronization
+### Multi-Cloud Synchronization
 - **Single change, everywhere**: Modify intent once → automatically generates CloudFormation, Bicep, and Terraform
 - **No manual coordination**: Eliminates keeping multiple cloud templates in sync manually  
 - **Atomic updates**: Change intent → regenerate all artifacts → deploy all clouds simultaneously
 
-### Zero Infrastructure Management Overhead
+### Infrastructure Management
 - **No state files**: Traditional IaC requires managing complex state (Terraform .tfstate, CDK context.json)
 - **No lock files**: No dealing with state locking, drift detection, or reconciliation
 - **No cleanup**: Artifacts are pure functions of intent - no orphaned resources or manual cleanup
 
-### Developer Experience Benefits
+### Developer Experience
 - **Intent-first coding**: Write business requirements, not cloud-specific APIs
 - **Built-in validation**: Automatic syntax checking and type safety
 - **Framework handles complexity**: You focus on "what", Chiral handles "how" across clouds
