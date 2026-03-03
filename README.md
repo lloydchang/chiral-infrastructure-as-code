@@ -245,68 +245,43 @@ flowchart TD
     classDef azNode  fill:#e3f2fd,stroke:#0063b1,color:#003a75
     classDef gcpNode fill:#e8f5e9,stroke:#1e8a3e,color:#0d4a1f
 
-    CONFIG(["chiral.config.ts
-    Single Source of Truth · ChiralSpec
-    KubernetesIntent · DatabaseIntent · NetworkIntent"]):::config
+    CONFIG["chiral.config.ts — Single Source of Truth"]:::config
 
-    subgraph ENGINE["Chiral Engine · src/main.ts · Zero-State Orchestrator"]
-        direction LR
-        INTENT["Intent Schema
-        src/intent/index.ts
-        Defines abstract business needs"]:::engine
-        ROSETTA["Rosetta Dictionary
-        src/rosetta/hardware-map.ts
-        Resolves hardware differences
-        e.g. m5.xlarge vs D4s_v3"]:::engine
+    subgraph ENGINE["Chiral Engine · src/main.ts"]
+        INTENT["Intent Schema · src/intent/index.ts"]:::engine
+        ROSETTA["Rosetta Dictionary · src/rosetta/hardware-map.ts"]:::engine
     end
 
-    subgraph ADAPTERS["Enantiomers · src/adapters/ · Mirror-Image Cloud Outputs"]
-        direction LR
-        AWS_A["aws-left.ts
-        LEFT HAND · Programmatic
-        AWS CDK L3 Constructs"]:::awsNode
-        AZURE_A["azure-right.ts
-        RIGHT HAND · Declarative
-        Azure Bicep Template"]:::azNode
-        GCP_A["gcp-right.ts
-        RIGHT HAND · Declarative
-        GCP Terraform HCL"]:::gcpNode
+    subgraph ADAPTERS["Enantiomers · src/adapters/"]
+        AWS_A["aws-left.ts — LEFT HAND — Programmatic CDK"]:::awsNode
+        AZURE_A["azure-right.ts — RIGHT HAND — Declarative Bicep"]:::azNode
+        GCP_A["gcp-right.ts — RIGHT HAND — Declarative HCL"]:::gcpNode
     end
 
-    subgraph DIST["dist/ · Racemic Mixture · Native Artifacts"]
-        direction LR
-        AWS_D["aws-assembly/
-        AwsStack.template.json
-        AwsStack.assets.json
-        manifest.json · tree.json"]:::awsNode
-        AZURE_D["azure-deployment.bicep
-        Native Bicep Enantiomer"]:::azNode
-        GCP_D["gcp-deployment.tf
-        Native HCL Enantiomer"]:::gcpNode
+    subgraph DIST["dist/ — Native Artifacts"]
+        AWS_D["aws-assembly/ — AwsStack.template.json"]:::awsNode
+        AZURE_D["azure-deployment.bicep"]:::azNode
+        GCP_D["gcp-deployment.tf"]:::gcpNode
     end
 
-    AWS_C(["Amazon Web Services
-    CloudFormation · EKS"]):::awsNode
-    AZURE_C(["Microsoft Azure
-    ARM · AKS"]):::azNode
-    GCP_C(["Google Cloud Platform
-    Infrastructure Manager · GKE"]):::gcpNode
+    AWS_C["Amazon Web Services — CloudFormation · EKS"]:::awsNode
+    AZURE_C["Microsoft Azure — ARM · AKS"]:::azNode
+    GCP_C["Google Cloud Platform — Infrastructure Manager · GKE"]:::gcpNode
 
-    CONFIG  -->|synthesize| ENGINE
-    INTENT  -->|intent|     AWS_A
-    INTENT  -->|intent|     AZURE_A
-    INTENT  -->|intent|     GCP_A
-    ROSETTA -->|hardware|   AWS_A
-    ROSETTA -->|hardware|   AZURE_A
-    ROSETTA -->|hardware|   GCP_A
-    AWS_A   -->|cdk synth|  AWS_D
-    AZURE_A -->|generate|   AZURE_D
-    GCP_A   -->|generate|   GCP_D
-    AWS_D   -->|cfn deploy| AWS_C
-    AZURE_D -->|az deploy|  AZURE_C
-    GCP_D   -->|gcloud apply| GCP_C
+    CONFIG --> ENGINE
+    INTENT --> AWS_A
+    INTENT --> AZURE_A
+    INTENT --> GCP_A
+    ROSETTA --> AWS_A
+    ROSETTA --> AZURE_A
+    ROSETTA --> GCP_A
+    AWS_A --> AWS_D
+    AZURE_A --> AZURE_D
+    GCP_A --> GCP_D
+    AWS_D --> AWS_C
+    AZURE_D --> AZURE_C
+    GCP_D --> GCP_C
 ```
-
 ---
 
 ## Open-Source
