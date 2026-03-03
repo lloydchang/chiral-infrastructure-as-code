@@ -245,28 +245,28 @@ flowchart TD
     classDef azNode  fill:#e3f2fd,stroke:#0063b1,color:#003a75
     classDef gcpNode fill:#e8f5e9,stroke:#1e8a3e,color:#0d4a1f
 
-    CONFIG["chiral.config.ts — Single Source of Truth"]:::config
+    CONFIG[chiral.config.ts - Single Source of Truth]:::config
 
-    subgraph ENGINE["Chiral Engine · src/main.ts"]
-        INTENT["Intent Schema · src/intent/index.ts"]:::engine
-        ROSETTA["Rosetta Dictionary · src/rosetta/hardware-map.ts"]:::engine
+    subgraph ENGINE[Chiral Engine - src/main.ts]
+        INTENT[Intent Schema - src/intent/index.ts]:::engine
+        ROSETTA[Rosetta Dictionary - src/rosetta/hardware-map.ts]:::engine
     end
 
-    subgraph ADAPTERS["Enantiomers · src/adapters/"]
-        AWS_A["aws-left.ts — LEFT HAND — Programmatic CDK"]:::awsNode
-        AZURE_A["azure-right.ts — RIGHT HAND — Declarative Bicep"]:::azNode
-        GCP_A["gcp-right.ts — RIGHT HAND — Declarative HCL"]:::gcpNode
+    subgraph ADAPTERS[Enantiomers - src/adapters/]
+        AWS_A[aws-left.ts - LEFT HAND - CDK L3 Constructs]:::awsNode
+        AZURE_A[azure-right.ts - RIGHT HAND - Bicep Template]:::azNode
+        GCP_A[gcp-right.ts - RIGHT HAND - Terraform HCL]:::gcpNode
     end
 
-    subgraph DIST["dist/ — Native Artifacts"]
-        AWS_D["aws-assembly/ — AwsStack.template.json"]:::awsNode
-        AZURE_D["azure-deployment.bicep"]:::azNode
-        GCP_D["gcp-deployment.tf"]:::gcpNode
+    subgraph DIST[dist/ - Native Artifacts]
+        AWS_D[aws-assembly/ - AwsStack.template.json]:::awsNode
+        AZURE_D[azure-deployment.bicep]:::azNode
+        GCP_D[gcp-deployment.tf]:::gcpNode
     end
 
-    AWS_C["Amazon Web Services — CloudFormation · EKS"]:::awsNode
-    AZURE_C["Microsoft Azure — ARM · AKS"]:::azNode
-    GCP_C["Google Cloud Platform — Infrastructure Manager · GKE"]:::gcpNode
+    AWS_C([Amazon Web Services]):::awsNode
+    AZURE_C([Microsoft Azure]):::azNode
+    GCP_C([Google Cloud Platform]):::gcpNode
 
     CONFIG --> ENGINE
     INTENT --> AWS_A
