@@ -70,7 +70,7 @@ This generates:
 
 ---
 
-### Elevator Pitch
+### How
 We use the Chiral Pattern to avoid vendor lock-ins to 3rd-party state managers. We use a centralized source (Intent Schema) and the Chiral Engine to generate 1st-party distributions (Native Cloud Artifacts) targeting AWS, Azure, GCP.
 
 
