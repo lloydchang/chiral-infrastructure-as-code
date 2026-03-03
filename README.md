@@ -58,7 +58,7 @@ This generates:
 - For GCP deployment: Terraform CLI (`terraform`)
 - For AWS authentication: AWS CLI (`aws`) [optional, for deployment]
 - For GCP authentication: Google Cloud CLI (`gcloud`) [optional, for deployment]
-- For Azure authentication: Azure CLI (`az`) [optional, for deployment]
+- For Azure authentication: Azure CLI (`az`) [same as above, optional for deployment]
 
 ---
 
