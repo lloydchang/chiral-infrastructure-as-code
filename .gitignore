@@ -1,0 +1,135 @@
+# .gitignore
+
+# ================================
+# OS and Editor Noise
+# ================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+
+.vscode/*
+!.vscode/extensions.json
+
+.idea/
+*.swp
+*.swo
+*~
+
+# ================================
+# Node.js and TypeScript
+# ================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+dist/
+build/
+out/
+lib/
+
+*.tsbuildinfo
+
+# ================================
+# AWS CDK
+# ================================
+cdk.out/
+.aws-sam/
+.aws/
+
+# CDK context cache
+cdk.context.json
+
+# CDK asset staging
+# can be committed
+# Hence commenting these lines out
+# .asset*
+# asset.*
+
+# ================================
+# CloudFormation
+# ================================
+# template.json
+# can be committed
+# Hence commenting this line out
+# *.template.json
+*.template.yaml
+*.template.yml
+
+# Packaged or transformed templates
+packaged.yaml
+packaged.yml
+
+# Change sets and deployment artifacts
+*.changeset.json
+
+# ================================
+# Azure Bicep
+# ================================
+bicepconfig.json
+*.bicep.json
+
+# Compiled ARM templates
+*.arm.json
+
+# Azure CLI and deployment state
+.azure/
+.azure-pipelines/
+azds.yaml
+
+# ================================
+# Terraform Guardrails (if ever used)
+# ================================
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+
+# ================================
+# Environment and Secrets
+# ================================
+.env
+.env.*
+!.env.example
+
+*.pem
+*.key
+*.crt
+*.pfx
+
+# ================================
+# Logs and Runtime Artifacts
+# ================================
+logs/
+*.log
+
+# ================================
+# Testing and Coverage
+# ================================
+coverage/
+.nyc_output/
+
+# ================================
+# Temporary Files
+# ================================
+tmp/
+temp/
+.cache/
+
+# ================================
+# Chiral Pattern Outputs
+# ================================
+# Generated native enantiomers
+# can be committed
+# Hence commenting these lines out
+# aws-assembly/
+# azure-assembly/
+
+# Any synthesized mirrors
+synth/
+synthesized/
+generated/
