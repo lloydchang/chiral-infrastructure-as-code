@@ -56,6 +56,8 @@ This generates:
 - For Azure validation: Azure CLI (`az`)
 - For AWS deployment: AWS CDK CLI (`cdk`)
 - For GCP deployment: Terraform CLI (`terraform`)
+- For AWS authentication: AWS CLI (`aws`) [optional, for deployment]
+- For GCP authentication: Google Cloud CLI (`gcloud`) [optional, for deployment]
 
 ---
 
