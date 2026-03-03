@@ -5,7 +5,7 @@
 ---
 
 ### Elevator Pitch
-We use the **Chiral Pattern** to avoid Infrastructure as Code (IaC) lock-in. Instead of relying on 3rd-party state managers, we maintain a central **Nucleus (Intent)** and use the **Chiral Engine** to synthesize 1st-party **Enantiomers (Native Templates)** for multiple clouds. This ensures native support without 3rd-party vendor lock-in.
+We use the **Chiral Pattern** to avoid 3rd-party vendor lock-in. Instead of relying on 3rd-party state managers, we maintain a central **Source (Intent)** and use the **Chiral Engine** to generate 1st-party **Enantiomers (Native Cloud Artifacts)** for targeting AWS, Azure, GCP.
 
 
 ---
@@ -15,8 +15,8 @@ We use the **Chiral Pattern** to avoid Infrastructure as Code (IaC) lock-in. Ins
 **Definition:** A multi-cloud infrastructure design where a single, cloud-agnostic intent schema is compiled simultaneously into non-superimposable, native intermediary artifacts for each cloud platform.
 
 ### The 3 Laws of Chirality
-1. **Single DNA:** There is only one source of truth (The *ChiralSpec*).
-2. **Native Separation:** AWS, Azure, and GCP outputs are generated independently and never mixed.
+1. **Shared DNA:** There is only one source of truth (The *ChiralSpec*).
+2. **Native Cloud Separation:** AWS, Azure, and GCP outputs are generated independently and never mixed.
 3. **Zero State:** The Chiral Engine never stores state; it only emits artifacts.
 
 ### Description
@@ -29,7 +29,7 @@ Its metaphorical name emphasizes that the outputs are structurally identical in 
 
 ---
 
-> We define our infrastructure in the **Chiral Config**. Our **Chiral Engine** synthesizes the native **Enantiomers** (CloudFormation and Bicep), which are then deployed to their respective clouds.
+> We define our infrastructure in the **Chiral Config**. Our **Chiral Engine** generates the native **Enantiomers** (CloudFormation and Bicep), which are then deployed to their respective clouds.
 
 ---
 
@@ -39,7 +39,7 @@ Its metaphorical name emphasizes that the outputs are structurally identical in 
 
 *   **The Problem:** Your AWS EKS cluster, Azure AKS cluster, and GCP GKE cluster are mirror images. They do the exact same thing (orchestrate containers).
 *   **The Reality:** They are **non-superimposable**. You cannot overlay an AWS CloudFormation template onto Azure Bicep or GCP Terraform. The APIs, IAM roles, and networking constructs simply do not line up.
-*   **The Solution:** You need a **Chiral Engine**—a central logic core that understands the shared DNA but synthesizes the distinct "programmatic left-handed" (AWS), "declarative right-handed" (Azure), and "declarative right-handed" (GCP) artifacts.
+*   **The Solution:** You need a **Chiral Engine**—a central logic core that understands the shared DNA but generates the distinct "programmatic left-handed" (AWS), "declarative right-handed" (Azure), and "declarative right-handed" (GCP) artifacts.
 
 ---
 
@@ -193,7 +193,7 @@ chiral-infrastructure-as-code
 │   ├── rosetta/                      # [TRANSLATION] The "Dictionary". 
 │   │   └── hardware-map.ts           # Resolves hardware differences (e.g., m5.xlarge vs D4s_v3).
 │   └── main.ts                       # [ENGINE] The "Chiral Engine". 
-│                                     # Orchestrates the build. Synthesizes adapters into 'dist/'.
+│                                     # Orchestrates the build. Generates adapters into 'dist/'.
 ├── package.json                      # Dependencies and Scripts.
 ├── package-lock.json                 # Lock file for exact dependency versions.
 ├── tsconfig.json                     # TypeScript configuration.
@@ -222,13 +222,13 @@ When writing your code, use these specific terms to reinforce the pattern:
 
 *   **Chiral Spec:** The abstract TypeScript interface defining what you want (e.g., `interface ChiralCluster`).
 *   **Enantiomers:** The specific cloud implementations. The AWS Stack and the Azure Bicep file are enantiomers of each other (mirror twins).
-*   **Synthesis:** The process of running the engine. You don't "deploy" directly—you **synthesize** artifacts, then deploy the native results.
+*   **Synthesis:** The process of running the engine. You don't "deploy" directly—you **generate** artifacts, then deploy the native results.
 
 ---
 
 ## Pipeline Summary
 
-We define our infrastructure in the **Chiral Config**. Our **Chiral Engine** synthesizes the native **Enantiomers** (CloudFormation and Bicep), which are then deployed to their respective clouds.
+We define our infrastructure in the **Chiral Config**. Our **Chiral Engine** generates the native **Enantiomers** (CloudFormation and Bicep), which are then deployed to their respective clouds.
 
 ---
 
