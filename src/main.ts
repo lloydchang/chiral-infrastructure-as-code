@@ -61,7 +61,7 @@ try {
 // 1. Reads chiral config
 // 2. Instantiates Programmatic Adapter (AWS) -> Generates CDK and CloudFormation to dist/
 // 3. Instantiates Declarative Adapter (Azure) -> Generates Bicep to dist/
-// 4. Instantiates Declarative Adapter (GCP) -> Generates Terraform HCL to dist/
+// 4. Instantiates Declarative Adapter (GCP) -> Generates GCP Terraform HCL to dist/
 // 5. VALIDATES the generated Bicep using Azure CLI
 // =================================================================
 
