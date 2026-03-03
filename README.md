@@ -16,7 +16,7 @@ We use the Chiral Pattern to avoid vendor lock-ins to 3rd-party state managers. 
 
 ### The 3 Laws of Chirality
 1. **Shared DNA:** There is only one source of truth (The *ChiralSpec*).
-2. **Native Cloud Separation:** AWS, Azure, and GCP outputs are generated independently and never mixed.
+2. **Native Cloud Separation:** AWS, Azure, and GCP outputs are generated separately.
 3. **Zero State:** The Chiral Engine never stores state; it only emits artifacts.
 
 ### Description
