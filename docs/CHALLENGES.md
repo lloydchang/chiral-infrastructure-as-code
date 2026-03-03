@@ -4,7 +4,7 @@ This document explains why multi-cloud infrastructure management is fundamentall
 
 ## The Core Challenge: Intent vs Implementation Divergence
 
-Multi-cloud infrastructure requires managing functionally identical systems across fundamentally different cloud platforms. Every major IaC tool attempts to solve this, but all face the same structural challenges:
+Multi-cloud infrastructure requires managing functionally uniform systems across fundamentally different cloud platforms. Every major IaC tool attempts to solve this, but all face the same structural challenges:
 
 ### Cloud Platform Divergence is Real
 - **APIs are different**: AWS EKS ≠ Azure AKS ≠ GCP GKE
@@ -58,7 +58,7 @@ This complexity scales non-linearly as you add more infrastructure platforms and
 - **Maintenance burden**: Keeping abstractions in sync with cloud evolution
 
 ### Cloud-Native Approaches (CDK + Bicep + Terraform HCL)
-- **Manual synchronization**: No automated way to keep intent consistent
+- **Manual synchronization**: No automated way to keep intent uniform
 - **Drift detection**: Hard to validate that implementations match intent
 - **Coordination overhead**: Teams must manually maintain parallel implementations
 
@@ -67,7 +67,7 @@ The same fundamental challenges existed with earlier generations of infrastructu
 
 - **Idempotency vs state**: Configuration management tools claimed "idempotent" execution, but state drifted in complex environments
 - **Agent dependencies**: Required agents or SSH access across different platforms
-- **Convergence challenges**: Multiple runs needed to reach desired state, with potential for inconsistent intermediate states
+- **Convergence challenges**: Multiple runs needed to reach desired state, with potential for drifted intermediate states
 - **Cloud abstraction gaps**: Early cloud modules were incomplete and evolved independently
 - **Multi-cloud complexity**: Orchestrating across different clouds required custom scripting and coordination
 
@@ -134,7 +134,7 @@ Chiral can generate the infrastructure needed for more complex tools:
 ### Why Existing Tools Don't Scale
 - **Operational complexity**: Multi-cloud adds exponential operational overhead
 - **Skill requirements**: Teams need expertise in multiple cloud platforms
-- **Consistency challenges**: Hard to ensure identical behavior across clouds
+- **Uniformity challenges**: Hard to ensure functionally uniform behavior across clouds
 - **Cost of coordination**: Maintaining parity across different toolchains
 
 ## Chiral's Unique Position
