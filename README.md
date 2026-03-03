@@ -148,10 +148,10 @@ Chiral takes a different approach to multi-cloud infrastructure management compa
 
 ---
 
-## Chiral Left vs Right: Design Guidelines
+## Implementation Approaches: Programmatic vs Declarative
 
-### Left Side (Primary/Programmatic)
-**Purpose**: The "entry point" - most feature-rich, developer-friendly IaC
+### Programmatic Approach (AWS CDK)
+**Purpose**: The primary approach - most feature-rich, developer-friendly IaC
 
 **Characteristics**:
 - Programmatic constructs (classes, methods)
@@ -161,12 +161,12 @@ Chiral takes a different approach to multi-cloud infrastructure management compa
 
 **Current**: AWS CDK (most mature programmatic IaC) → CloudFormation (declarative output)
 
-**Why AWS is programmatic**: CDK is AWS's primary IaC tool, even though it generates declarative CloudFormation. This reflects AWS's ecosystem where programmatic CDK is preferred over raw CloudFormation templates.
+**Why AWS CDK is programmatic**: CDK is AWS's primary IaC tool, even though it generates declarative CloudFormation. This reflects AWS's ecosystem where programmatic CDK is preferred over raw CloudFormation templates.
 
 **Ideal**: CDK-equivalent tools (TypeScript/Python-based, construct libraries)
 
-### Right Side (Secondary/Declarative)
-**Purpose**: The "mirror" - generates native declarative artifacts
+### Declarative Approaches (Azure Bicep, GCP Terraform)
+**Purpose**: Generate native declarative artifacts optimized for each cloud
 
 **Characteristics**:
 - DSL or template-based syntax
@@ -174,28 +174,30 @@ Chiral takes a different approach to multi-cloud infrastructure management compa
 - Simple deployment workflows
 - Direct API compatibility
 
-**Current**: Azure Bicep (modern declarative DSL)
+**Current**:
+- Azure Bicep (modern declarative DSL)
+- GCP Terraform HCL (Infrastructure Manager)
 
-**Ideal**: Each cloud's best native IaC (Bicep for Azure, Infrastructure Manager for GCP)
+**Ideal**: Each cloud's best native IaC format (Bicep for Azure, Terraform for GCP)
 
 ### Selection Criteria
 
-**For Left:**
+**For Programmatic Approach:**
 - Does it have rich programmatic APIs?
 - Can it generate complex infrastructure?
 - Is it the most mature tool for its cloud?
 
-**For Right:**
+**For Declarative Approaches:**
 - Is it the cloud's recommended native format?
 - Does it integrate best with cloud APIs?
 - Is it optimized for that cloud's features?
 
-### Philosophy-Driven Rules
+### Design Principles
 
 1. **Single Intent → Multiple Natives**: One config drives each cloud's best IaC
 2. **No Compromises**: Use each cloud's strongest tool, not lowest common denominator
-3. **Asymmetric by Design**: Left/right reflect different IaC philosophies, not equal capabilities
-4. **Evolve Independently**: Each side can change tools as clouds evolve
+3. **Asymmetric by Design**: Programmatic vs declarative reflect different IaC philosophies, not equal capabilities
+4. **Evolve Independently**: Each approach can change tools as clouds evolve
 
 The key is maintaining the intent-driven approach while letting each cloud use its optimal IaC paradigm.
 
@@ -239,16 +241,17 @@ chiral-infrastructure-as-code
 │   │   ├── hardware-map.test.ts
 │   │   ├── intent.test.ts
 │   │   └── synthesis-integration.test.ts
-│   ├── adapters/                     # [LOGIC] The "Enantiomers".
-│   │   ├── aws-left.ts               # [AWS] Left Hand. Implements CDK L3 Constructs.
-│   │   ├── azure-right.ts            # [AZURE] Right Hand. Implements Bicep Template.
-│   │   └── gcp-right.ts              # [GCP] Right Hand. Implements Infrastructure Manager (Terraform HCL).
-│   ├── intent/                       # [TYPES] The "Schema". Abstract business needs.
+│   ├── adapters/                     # [LOGIC] Implementation approaches.
+│   │   ├── programmatic/             # [PROGRAMMATIC] CDK-based imperative approach
+│   │   │   └── aws-cdk.ts            # [AWS] CDK constructs and classes
+│   │   └── declarative/              # [DECLARATIVE] DSL/template-based approaches
+│   │       ├── azure-bicep.ts        # [AZURE] Bicep template generation
+│   │       └── gcp-terraform.ts      # [GCP] Terraform HCL generation
+│   ├── intent/                       # [TYPES] Abstract business requirements.
 │   │   └── index.ts                  # Defines KubernetesIntent, DatabaseIntent, etc.
-│   ├── rosetta/                      # [TRANSLATION] The "Dictionary". 
-│   │   └── hardware-map.ts           # Resolves hardware differences (e.g., m5.xlarge vs D4s_v3).
-│   └── main.ts                       # [ENGINE] The "Chiral Engine". 
-│                                     # Orchestrates the build. Generates adapters into 'dist/'.
+│   ├── rosetta/                      # [TRANSLATION] Hardware mapping between clouds.
+│   │   └── hardware-map.ts           # Maps abstract sizes to cloud-specific SKUs
+│   └── main.ts                       # [ENGINE] Orchestrates synthesis from intent to artifacts.
 ├── package.json                      # Dependencies and Scripts.
 ├── package-lock.json                 # Lock file for exact dependency versions.
 ├── tsconfig.json                     # TypeScript configuration.
@@ -275,15 +278,27 @@ The `examples/` directory provides practical guides for implementing the Chiral 
 
 When writing your code, use these specific terms to reinforce the pattern:
 
-*   **Chiral Spec:** The abstract TypeScript interface defining what you want (e.g., `interface ChiralCluster`).
-*   **Enantiomers:** The specific cloud implementations. The AWS Stack and the Azure Bicep file are enantiomers of each other (mirror twins).
+*   **Intent Schema:** The abstract TypeScript interface defining what you want (e.g., `interface ChiralSystem`).
+*   **Adapters:** The cloud-specific implementations that translate intent into native IaC formats.
 *   **Synthesis:** The process of running the engine. You don't "deploy" directly—you **generate** artifacts, then deploy the native results.
+
+## About the Chiral Metaphor
+
+This project is named after the "Chiral Pattern" - a chemistry concept where molecules exist in left-handed and right-handed forms that are mirror images but cannot be superimposed. 
+
+**However, the metaphor is imperfect when applied to concrete cloud resources.** While programmatic (CDK) and declarative (Bicep/Terraform) approaches achieve the same functional goals, they produce fundamentally different architectures:
+
+- **CDK → CloudFormation**: AWS-native constructs that leverage AWS-specific APIs and services
+- **Bicep → ARM Templates**: Azure-native resource definitions optimized for Azure Resource Manager
+- **Terraform → HCL**: Provider-agnostic declarations that get translated to cloud-specific APIs
+
+These approaches don't "superimpose" on concrete cloud resources - they produce different architectural patterns, different API calls, and different deployment lifecycles. The value lies in abstracting the **intent** (what you want) while allowing each cloud to use its optimal **implementation approach** (how to achieve it).
 
 ---
 
 ## Pipeline Summary
 
-We define our infrastructure in the **Chiral Config**. Our **Chiral Engine** generates the native **Enantiomers** (CloudFormation and Bicep), which are then deployed to their respective clouds.
+We define our infrastructure in the **Intent Schema**. Our **Chiral Engine** generates native artifacts using **Programmatic** (AWS CDK) and **Declarative** (Azure Bicep, GCP Terraform) approaches, which are then deployed to their respective clouds.
 
 ---
 
@@ -306,18 +321,18 @@ flowchart TD
         ROSETTA[Rosetta Dictionary<br/>──────────────────────────────<br/>src/rosetta/<br/>hardware-map.ts<br/>Translates hardware specs<br/>e.g. m5.xlarge to D4s_v3]:::engine
     end
 
-    subgraph ADAPTERS[Enantiomers]
-        AH[src/adapters/<br/>──────────────────────────────<br/>Mirror-Image Cloud Outputs]:::header
-        AWS_A[aws-left.ts<br/>──────────────────────────────<br/>LEFT HAND - Programmatic<br/>AWS CDK L3 Constructs<br/>Most mature IaC tool<br/>Rich ecosystem and typing]:::awsNode
-        AZURE_A[azure-right.ts<br/>──────────────────────────────<br/>RIGHT HAND - Declarative<br/>Azure Bicep Template<br/>Modern DSL for Azure<br/>Direct ARM API compat]:::azNode
-        GCP_A[gcp-right.ts<br/>──────────────────────────────<br/>RIGHT HAND - Declarative<br/>GCP Terraform HCL<br/>Infrastructure Manager<br/>Native GCP IaC format]:::gcpNode
+    subgraph ADAPTERS[Implementation Approaches]
+        AH[src/adapters/<br/>──────────────────────────────<br/>Programmatic & Declarative<br/>Cloud-Specific Adapters]:::header
+        AWS_A[programmatic/aws-cdk.ts<br/>──────────────────────────────<br/>PROGRAMMATIC<br/>AWS CDK Constructs<br/>TypeScript classes & methods<br/>Rich ecosystem and typing]:::awsNode
+        AZURE_A[declarative/azure-bicep.ts<br/>──────────────────────────────<br/>DECLARATIVE<br/>Azure Bicep Template<br/>Modern DSL for Azure<br/>Direct ARM API compat]:::azNode
+        GCP_A[declarative/gcp-terraform.ts<br/>──────────────────────────────<br/>DECLARATIVE<br/>GCP Terraform HCL<br/>Infrastructure Manager<br/>Native GCP IaC format]:::gcpNode
     end
 
     subgraph DIST[Artifacts]
-        DH[dist/ - Racemic Mixture<br/>──────────────────────────────<br/>Native Cloud Artifacts]:::header
-        AWS_D[aws-assembly/<br/>──────────────────────────────<br/>AwsStack.template.json<br/>AwsStack.assets.json<br/>manifest.json<br/>tree.json]:::awsNode
-        AZURE_D[azure-deployment.bicep<br/>──────────────────────────────<br/>Native Bicep Enantiomer<br/>Deployable Azure template]:::azNode
-        GCP_D[gcp-deployment.tf<br/>──────────────────────────────<br/>Native HCL Enantiomer<br/>Deployable GCP template]:::gcpNode
+        DH[dist/ - Generated Artifacts<br/>──────────────────────────────<br/>Native Cloud IaC Formats]:::header
+        AWS_D[aws-assembly/<br/>──────────────────────────────<br/>CloudFormation Template<br/>AwsStack.template.json<br/>CDK Assets & Manifest]:::awsNode
+        AZURE_D[azure-deployment.bicep<br/>──────────────────────────────<br/>Azure Bicep Template<br/>Native ARM DSL<br/>Deployable Azure template]:::azNode
+        GCP_D[gcp-deployment.tf<br/>──────────────────────────────<br/>Terraform HCL<br/>Infrastructure Manager<br/>Deployable GCP template]:::gcpNode
     end
 
     AWS_C([Amazon Web Services<br/>──────────────────────────────<br/>CloudFormation<br/>EKS - Elastic Kubernetes]):::awsNode
