@@ -1,6 +1,6 @@
 # Chiral Infrastructure as Code
 
-**One Intent, Many Clouds**
+**One Intent, Many Clouds: Optimized Enterprise Deployments**
 
 > **Solving multi-cloud infrastructure's enterprise challenges**: Different native cloud IaCs, state management complexity, and third-party vendor lock-in make consistent deployments across AWS, Azure, and GCP extremely difficult. **Chiral generates native cloud artifacts from a single intent schema**, ensuring consistency through optimal trade-offs.
 
