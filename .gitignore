@@ -51,6 +51,22 @@ cdk.context.json
 # asset.*
 
 # ================================
+# Chiral Infra
+# ================================
+infra/aws-assembly/asset*
+.aws-sam/
+.aws/
+
+# CDK context cache
+cdk.context.json
+
+# CDK asset staging
+# can be committed
+# Hence commenting these lines out
+# .asset*
+# asset.*
+
+# ================================
 # CloudFormation
 # ================================
 # template.json
