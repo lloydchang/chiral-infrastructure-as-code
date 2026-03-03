@@ -5,7 +5,7 @@
 ---
 
 ### Elevator Pitch
-We use the **Chiral Pattern** to avoid Infrastructure as Code (IaC) lock-in. Instead of relying on 3rd-party state managers, we maintain a central **Nucleus (Intent)** and use the **Chiral Engine** to synthesize first-party **Enantiomers (Native Templates)** for both AWS and Azure. This ensures native support and zero vendor dependency.
+We use the **Chiral Pattern** to avoid Infrastructure as Code (IaC) lock-in. Instead of relying on 3rd-party state managers, we maintain a central **Nucleus (Intent)** and use the **Chiral Engine** to synthesize first-party **Enantiomers (Native Templates)** for both AWS and Azure. This ensures native support without third-party vendor lock-in.
 
 ---
 
