@@ -1,4 +1,4 @@
-import { GcpTerraformAdapter } from '../adapters/gcp-terraform';
+import { GcpTerraformAdapter } from '../adapters/declarative/gcp-terraform';
 import { ChiralSystem } from '../intent';
 
 describe('GcpTerraformAdapter', () => {

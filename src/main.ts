@@ -17,9 +17,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { execSync } from 'child_process'; // <--- Import for running CLI commands
 import { Command } from 'commander';
-import { AwsCdkAdapter } from './adapters/aws-cdk';
-import { AzureBicepAdapter } from './adapters/azure-bicep';
-import { GcpTerraformAdapter } from './adapters/gcp-terraform';
+import { AwsCdkAdapter } from './adapters/programmatic/aws-cdk';
+import { AzureBicepAdapter } from './adapters/declarative/azure-bicep';
+import { GcpTerraformAdapter } from './adapters/declarative/gcp-terraform';
 import { ChiralSystem } from './intent';
 
 // Export types for users to import in their configs

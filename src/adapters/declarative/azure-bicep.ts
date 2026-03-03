@@ -4,8 +4,8 @@
 
 // The Right Enantiomer: Azure Bicep Generator.
 
-import { ChiralSystem } from '../intent';
-import { HardwareMap } from '../rosetta/hardware-map';
+import { ChiralSystem } from '../../intent';
+import { HardwareMap } from '../../rosetta/hardware-map';
 
 // =================================================================
 // RIGHT ENANTIOMER (Azure Adapter)

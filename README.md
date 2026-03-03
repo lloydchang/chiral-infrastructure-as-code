@@ -342,7 +342,7 @@ flowchart TD
 ```
 ---
 
-## Open-Source
+## Open-source software
 
 https://github.com/lloydchang/chiral-infrastructure-as-code
 

@@ -13,8 +13,8 @@ import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { KubectlV26Layer } from '@aws-cdk/lambda-layer-kubectl-v26';
 import { Construct } from 'constructs';
-import { ChiralSystem } from '../intent';
-import { HardwareMap } from '../rosetta/hardware-map';
+import { ChiralSystem } from '../../intent';
+import { HardwareMap } from '../../rosetta/hardware-map';
 
 export class AwsCdkAdapter extends cdk.Stack {
   public readonly vpc: ec2.IVpc;

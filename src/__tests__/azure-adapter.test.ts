@@ -1,4 +1,4 @@
-import { AzureBicepAdapter } from '../adapters/azure-bicep';
+import { AzureBicepAdapter } from '../adapters/declarative/azure-bicep';
 import { ChiralSystem } from '../intent';
 
 describe('AzureBicepAdapter', () => {

@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { AzureBicepAdapter } from '../adapters/azure-bicep';
-import { GcpTerraformAdapter } from '../adapters/gcp-terraform';
+import { AzureBicepAdapter } from '../adapters/declarative/azure-bicep';
+import { GcpTerraformAdapter } from '../adapters/declarative/gcp-terraform';
 import { ChiralSystem } from '../intent';
 
 describe('Chiral Synthesis Integration', () => {
