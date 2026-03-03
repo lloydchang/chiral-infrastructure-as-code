@@ -54,10 +54,11 @@ console.log(`✅ [AWS]   CloudFormation synthesized to: dist/aws-assembly/`);
 // -----------------------------------------------------
 // 2. Synthesize Right Enantiomer (Azure Bicep)
 // -----------------------------------------------------
+let bicepPath: string;
 try {
   // A. Generate the Bicep String
   const bicepContent = AzureRightHandAdapter.synthesize(config);
-  const bicepPath = path.join(DIST_DIR, 'azure-deployment.bicep');
+  bicepPath = path.join(DIST_DIR, 'azure-deployment.bicep');
 
   // B. Write to Disk
   fs.writeFileSync(bicepPath, bicepContent);
@@ -81,7 +82,7 @@ try {
   console.error('='.repeat(60));
   console.error('\nDEBUGGING WORKFLOW:');
   console.error(`1. IDENTIFY: Run the following command to see the exact error and line number:`);
-  console.error(`   > az bicep build --file ${BICEP_PATH}`);
+  console.error(`   > az bicep build --file ${path.join(DIST_DIR, 'azure-deployment.bicep')}`);
   
   console.error(`\n2. LOCATE: Open "src/adapters/azure-right.ts" and find the code corresponding`);
   console.error(`   to the line number reported in Step 1.`);

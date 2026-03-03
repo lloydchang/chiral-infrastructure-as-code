@@ -81,13 +81,29 @@ resource aks 'Microsoft.ContainerService/managedClusters@2024-01-01' = {
     kubernetesVersion: '${intent.k8s.version}'
     agentPoolProfiles: [
       {
-        name: 'agentpool'
-        count: ${intent.k8s.minNodes}
+        name: 'systempool'
+        count: ${intent.environment === 'prod' ? 2 : 1}
         vmSize: 'Standard_D2s_v3' // System nodes usually fixed size
         mode: 'System'
+        osType: 'Linux'
+        orchestratorVersion: '${intent.k8s.version}'
       }
-      // Note: Application node pools could be added here dynamically
+      {
+        name: 'applicationpool'
+        count: 2
+        vmSize: 'Standard_D4s_v3'
+        mode: 'User'
+        osType: 'Linux'
+        orchestratorVersion: '${intent.k8s.version}'
+      }
     ]
+    networkProfile: {
+      networkPlugin: 'azure'
+      networkPolicy: 'azure'
+      serviceCidr: '10.0.2.0/24'
+      dnsServiceIP: '10.0.2.10'
+      dockerBridgeCidr: '172.17.0.1/16'
+    }
   }
 }
 
@@ -110,6 +126,9 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2023-06-01-preview'
     }
     highAvailability: {
       mode: '${intent.environment === 'prod' ? 'ZoneRedundant' : 'Disabled'}'
+    }
+    backup: {
+      backupRetentionDays: ${intent.environment === 'prod' ? 30 : 7}
     }
   }
 }
@@ -189,6 +208,14 @@ resource adfsInstall 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' =
     }
   }
 }
+
+// =================================================================
+// 5. OUTPUTS
+// =================================================================
+output vnetId string = vnet.id
+output aksClusterName string = aks.name
+output postgresEndpoint string = postgres.properties.fullyQualifiedDomainName
+output adfsVmId string = adfsVm.id
     `.trim();
   }
 }

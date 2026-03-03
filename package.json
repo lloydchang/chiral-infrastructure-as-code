@@ -6,7 +6,10 @@
   "scripts": {
     "build": "tsc",
     "compile": "ts-node src/main.ts",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "deploy-aws": "cdk deploy",
+    "diff-aws": "cdk diff",
+    "destroy-aws": "cdk destroy"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
