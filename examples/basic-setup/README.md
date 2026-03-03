@@ -40,11 +40,14 @@ export const minimalConfig: BasicChiralSystem = {
   networkCidr: '10.0.0.0/16',
   k8s: {
     version: '1.29',
-    nodeCount: 2
+    minNodes: 2,
+    maxNodes: 5,
+    size: 'small'
   },
   postgres: {
     engineVersion: '15',
-    instanceClass: 't3.medium'
+    size: 'small',
+    storageGb: 20
   }
 };
 ```
