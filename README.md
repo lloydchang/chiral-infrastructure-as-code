@@ -1,4 +1,4 @@
-# Chiral Infrastructure-as-Code
+# Chiral Infrastructure as Code
 
 > **Generate mirrored, native cloud templates from a single source of truth. AWS and Azure in sync, without third-party vendor lock-in.**
 
