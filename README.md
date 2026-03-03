@@ -108,7 +108,9 @@ Chiral takes a different approach to multi-cloud infrastructure management compa
 - Complex logic capabilities
 
 **Current**: AWS CDK (most mature programmatic IaC) → CloudFormation (declarative output)
+
 **Why AWS is programmatic**: CDK is AWS's primary IaC tool, even though it generates declarative CloudFormation. This reflects AWS's ecosystem where programmatic CDK is preferred over raw CloudFormation templates.
+
 **Ideal**: CDK-equivalent tools (TypeScript/Python-based, construct libraries)
 
 ### Right Side (Secondary/Declarative)
@@ -121,6 +123,7 @@ Chiral takes a different approach to multi-cloud infrastructure management compa
 - Direct API compatibility
 
 **Current**: Azure Bicep (modern declarative DSL)
+
 **Ideal**: Each cloud's best native IaC (Bicep for Azure, Infrastructure Manager for GCP)
 
 ### Selection Criteria
