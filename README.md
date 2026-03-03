@@ -1,21 +1,23 @@
 # Chiral Infrastructure as Code
 
-> **Generate mirrored, native cloud templates from a single source of truth. AWS and Azure in sync, without 3rd-party vendor lock-in.**
+> **Generate mirrored, native cloud templates from a single source of truth. Multi-cloud infrastructure in sync across AWS, Azure, GCP, without 3rd-party vendor lock-in.**
 
 ---
 
 ### Elevator Pitch
-We use the **Chiral Pattern** to avoid Infrastructure as Code (IaC) lock-in. Instead of relying on 3rd-party state managers, we maintain a central **Nucleus (Intent)** and use the **Chiral Engine** to synthesize first-party **Enantiomers (Native Templates)** for both AWS and Azure. This ensures native support without 3rd-party vendor lock-in.
+We use the **Chiral Pattern** to avoid Infrastructure as Code (IaC) lock-in. Instead of relying on 3rd-party state managers, we maintain a central **Nucleus (Intent)** and use the **Chiral Engine** to synthesize first-party **Enantiomers (Native Templates)** for multiple clouds. This ensures native support without 3rd-party vendor lock-in.
+
+The pattern supports various IaC approaches through examples: CDK, Terraform, Bicep, Pulumi, OpenTofu, and cloud-native tools.
 
 ---
 
 ## Name: The Chiral Pattern
 
-**Definition:** A multi-cloud infrastructure design where a single, cloud-agnostic intent schema is compiled simultaneously into non-superimposable, native intermediary artifacts (CloudFormation & Bicep).
+**Definition:** A multi-cloud infrastructure design where a single, cloud-agnostic intent schema is compiled simultaneously into non-superimposable, native intermediary artifacts for each cloud platform.
 
 ### The 3 Laws of Chirality
 1. **Single DNA:** There is only one source of truth (The *ChiralSpec*).
-2. **Native Separation:** AWS and Azure outputs are generated independently and never mixed.
+2. **Native Separation:** AWS, Azure, and GCP outputs are generated independently and never mixed.
 3. **Zero State:** The Chiral Engine never stores state; it only emits artifacts.
 
 ### Description
@@ -24,6 +26,8 @@ The Chiral Pattern is a software design approach for multi-cloud infrastructure 
 The pattern produces mirror-image outputs—for example, AWS CloudFormation via CDK and Azure Bicep—ensuring that both deployments share the same functional intent while remaining fully compatible with their respective cloud-native constructs. The Chiral Pattern guarantees vendor independence, auditability, and deterministic synchronization, allowing teams to evolve infrastructure declaratively without relying on third-party engines, managed state files, or cloud-agnostic compilers. 
 
 Its metaphorical name emphasizes that the outputs are structurally identical in purpose but inherently distinct in implementation, like left and right hands.
+
+The pattern supports various IaC approaches through comprehensive examples covering CDK, Terraform, Bicep, Pulumi, OpenTofu, and cloud-native tools across AWS, Azure, and GCP.
 
 ---
 
@@ -41,7 +45,83 @@ Its metaphorical name emphasizes that the outputs are structurally identical in 
 
 ---
 
-## The Repository Structure
+## Chiral Design Philosophy
+
+### Core Principles
+1. **Single DNA**: One cloud-agnostic intent schema drives all outputs
+2. **Native Separation**: Each cloud gets its preferred native IaC format
+3. **Zero State**: No external state management or databases
+
+### Key Concepts
+- **Enantiomers**: Mirror-image outputs like left/right-handed molecules
+- **Intent-Driven**: Business requirements abstracted from cloud specifics
+- **Artifact Generation**: Compile intent into native cloud templates
+- **No Lock-in**: Avoid third-party tools; use each cloud's best IaC
+
+### Why It Works
+- **Consistency**: Same intent produces functionally identical infrastructure
+- **Auditability**: Direct generation from code, no hidden state
+- **Evolution**: Change intent once, update all clouds simultaneously
+- **Vendor Independence**: Each cloud's native tools, not generic compromises
+
+### Pattern Benefits
+- Eliminates drift between multi-cloud deployments
+- Reduces complexity of managing different IaC tools
+- Enables true infrastructure portability
+- Maintains each cloud's optimization and features
+
+The philosophy embraces cloud diversity while enforcing consistency through unified intent.
+
+---
+
+## Chiral Left vs Right: Design Guidelines
+
+### Left Side (Primary/Programmatic)
+**Purpose**: The "entry point" - most feature-rich, developer-friendly IaC
+
+**Characteristics**:
+- Programmatic constructs (classes, methods)
+- Rich ecosystem and tooling
+- Strong typing and validation
+- Complex logic capabilities
+
+**Current**: AWS CDK (most mature programmatic IaC)
+**Ideal**: CDK-equivalent tools (TypeScript/Python-based, construct libraries)
+
+### Right Side (Secondary/Declarative)
+**Purpose**: The "mirror" - generates native declarative artifacts
+
+**Characteristics**:
+- DSL or template-based syntax
+- Cloud-native validation
+- Simple deployment workflows
+- Direct API compatibility
+
+**Current**: Azure Bicep (modern declarative DSL)
+**Ideal**: Each cloud's best native IaC (Bicep for Azure, Infrastructure Manager for GCP)
+
+### Selection Criteria
+
+**For Left:**
+- Does it have rich programmatic APIs?
+- Can it generate complex infrastructure?
+- Is it the most mature tool for its cloud?
+
+**For Right:**
+- Is it the cloud's recommended native format?
+- Does it integrate best with cloud APIs?
+- Is it optimized for that cloud's features?
+
+### Philosophy-Driven Rules
+
+1. **Single Intent → Multiple Natives**: One config drives each cloud's best IaC
+2. **No Compromises**: Use each cloud's strongest tool, not lowest common denominator
+3. **Asymmetric by Design**: Left/right reflect different IaC philosophies, not equal capabilities
+4. **Evolve Independently**: Each side can change tools as clouds evolve
+
+The key is maintaining the intent-driven approach while letting each cloud use its optimal IaC paradigm.
+
+---
 
 ```text
 chiral-infrastructure-as-code
