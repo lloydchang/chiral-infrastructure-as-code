@@ -1,7 +1,7 @@
 {
   "//": "1. Root Configuration Files: package.json, tsconfig.json",
   "name": "chiral-infrastructure-as-code",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "Chiral Pattern: Syncing K8s, Postgres, and AD FS across AWS and Azure.",
   "scripts": {
     "build": "tsc",
