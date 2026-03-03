@@ -2,7 +2,7 @@
 
 // 3. The Rosetta Layer (Translation)
 
-// Maps abstract sizes to specific AWS Instance Types and Azure SKUs.
+// Maps abstract sizes to specific AWS Instance Types, Azure SKUs, and GCP machine types.
 
 import { WorkloadSize } from '../intent';
 

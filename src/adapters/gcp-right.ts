@@ -132,7 +132,7 @@ resource "google_compute_instance" "adfs" {
 
   boot_disk {
     initialize_params {
-      image = "windows-cloud/windows-2019"
+      image = "windows-cloud/windows-${intent.adfs.windowsVersion}"
       size  = 50
     }
   }

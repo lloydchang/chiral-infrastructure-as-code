@@ -84,7 +84,7 @@ resource aks 'Microsoft.ContainerService/managedClusters@2024-01-01' = {
       {
         name: 'systempool'
         count: ${intent.environment === 'prod' ? 2 : 1}
-        vmSize: 'Standard_D2s_v3' // System nodes usually fixed size
+        vmSize: '${HardwareMap.azure.k8s.small}' // System nodes use small size
         mode: 'System'
         osType: 'Linux'
         orchestratorVersion: '${intent.k8s.version}'
