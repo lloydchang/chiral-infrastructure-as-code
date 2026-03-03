@@ -336,7 +336,7 @@ flowchart TD
         DH[dist/ - Generated Artifacts<br/>──────────────────────────────<br/>Native Cloud IaC Formats]:::header
         AWS_D[aws-assembly/<br/>──────────────────────────────<br/>CloudFormation Template<br/>AwsStack.template.json<br/>CDK Assets & Manifest]:::awsNode
         AZURE_D[azure-deployment.bicep<br/>──────────────────────────────<br/>Azure Bicep Template<br/>Native ARM DSL<br/>Deployable Azure template]:::azNode
-        GCP_D[gcp-deployment.tf<br/>──────────────────────────────<br/>Terraform HCL<br/>Infrastructure Manager<br/>Deployable GCP template]:::gcpNode
+        GCP_D[gcp-deployment.tf<br/>──────────────────────────────<br/>Terraform HCL<br/>Infrastructure Manager<br/>Deployable GCP blueprint]:::gcpNode
     end
 
     AWS_C([Amazon Web Services<br/>──────────────────────────────<br/>CloudFormation<br/>EKS - Elastic Kubernetes]):::awsNode
