@@ -4,6 +4,58 @@
 
 ---
 
+## Installation
+
+```bash
+npm install -g chiral-infrastructure-as-code
+```
+
+## Usage
+
+Create a config file (e.g., `config.js` or `config.ts`):
+
+```javascript
+module.exports = {
+  projectName: 'myproject',
+  environment: 'dev',
+  networkCidr: '10.0.0.0/16',
+  k8s: {
+    version: '1.28',
+    minNodes: 1,
+    maxNodes: 3,
+    size: 'small'
+  },
+  postgres: {
+    engineVersion: '15',
+    storageGb: 20,
+    size: 'small'
+  },
+  adfs: {
+    size: 'small',
+    windowsVersion: '2022'
+  }
+};
+```
+
+Run the CLI:
+
+```bash
+chiral --config config.js
+```
+
+This generates:
+- `aws-assembly/` (CloudFormation templates)
+- `azure-deployment.bicep` (Azure Bicep)
+- `gcp-deployment.tf` (GCP Terraform HCL)
+
+### Requirements
+
+- Node.js
+- For Azure validation: Azure CLI (`az`)
+- For AWS deployment: AWS CDK CLI (`cdk`)
+
+---
+
 ### Elevator Pitch
 We use the Chiral Pattern to avoid vendor lock-ins to 3rd-party state managers. We use a centralized source (Intent Schema) and the Chiral Engine to generate 1st-party distributions (Native Cloud Artifacts) targeting AWS, Azure, GCP.
 
@@ -298,4 +350,4 @@ https://github.com/lloydchang/chiral-infrastructure-as-code
 
 ## License
 
-[GNU Affero General Public License v3.0](https://github.com/lloydchang/chiral-infrastructure-as-code/blob/main/LICENSE)
+[GNU Affero General Public License v3.0 or later](https://github.com/lloydchang/chiral-infrastructure-as-code/blob/main/LICENSE)

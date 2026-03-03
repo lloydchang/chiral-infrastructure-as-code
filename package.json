@@ -1,8 +1,17 @@
 {
-  "//": "1. Root Configuration Files: package.json, tsconfig.json",
   "name": "chiral-infrastructure-as-code",
   "version": "0.0.0",
+  "license": "AGPL-3.0-or-later",
   "description": "Chiral Pattern: Syncing K8s, Postgres, and AD FS across AWS and Azure.",
+  "main": "dist/main.js",
+  "bin": {
+    "chiral": "dist/main.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "compile": "ts-node src/main.ts",
@@ -12,7 +21,27 @@
     "cdk": "cdk",
     "deploy-aws": "cdk deploy",
     "diff-aws": "cdk diff",
-    "destroy-aws": "cdk destroy"
+    "destroy-aws": "cdk destroy",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "iac",
+    "infrastructure-as-code",
+    "aws",
+    "azure",
+    "gcp",
+    "cdk",
+    "bicep",
+    "terraform",
+    "kubernetes",
+    "postgres",
+    "adfs"
+  ],
+  "author": "Lloyd Chang",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lloydchang/chiral-infrastructure-as-code"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
@@ -24,7 +53,9 @@
     "typescript": "^5.3.0"
   },
   "dependencies": {
+    "@aws-cdk/lambda-layer-kubectl-v26": "^2.0.0",
     "aws-cdk-lib": "^2.130.0",
-    "constructs": "^10.0.0"
+    "constructs": "^10.0.0",
+    "commander": "^12.0.0"
   }
 }

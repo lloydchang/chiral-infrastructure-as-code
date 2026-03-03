@@ -97,10 +97,7 @@ export class AwsLeftHandAdapter extends cdk.Stack {
       clusterName: `${intent.projectName}-eks`,
       endpointAccess: eks.EndpointAccess.PUBLIC_AND_PRIVATE,
       mastersRole: clusterAdminRole,
-      albController: {
-        version: eks.AlbControllerVersion.V2_6_0,
-      },
-      kubectlLayer: KubectlV26Layer.getOrCreate(this),
+      kubectlLayer: new KubectlV26Layer(this, 'KubectlLayer'),
     });
 
     // Add managed node group for system workloads
