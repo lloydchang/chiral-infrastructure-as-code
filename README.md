@@ -2,7 +2,7 @@
 
 **One Intent, Many Clouds: Native IaC Generation**
 
-> **Solving multi-cloud infrastructure's enterprise challenges**: Different native cloud IaCs, state management complexity, and third-party vendor lock-in make uniform deployments across AWS, Azure, and GCP extremely difficult. **Chiral generates native cloud artifacts from a single intent schema**, ensuring consistency through optimal trade-offs.
+> **Solving [multi-cloud infrastructure's enterprise challenges](docs/CHALLENGES.md)**: Different native cloud IaCs, state management complexity, and third-party vendor lock-in make uniform deployments across AWS, Azure, and GCP extremely difficult. **Chiral generates native cloud artifacts from a single intent schema**, ensuring consistency through optimal trade-offs.
 
 ---
 
@@ -46,9 +46,9 @@ chiral --config config.js
 ```
 
 This generates:
-- `aws-assembly/` (CloudFormation templates)
-- `azure-deployment.bicep` (Azure Bicep)
-- `gcp-deployment.tf` (GCP Terraform HCL)
+- `aws-assembly/` (Directory of CDK and CloudFormation Template)
+- `azure-deployment.bicep` (Azure Bicep Template)
+- `gcp-deployment.tf` (GCP Terraform Blueprint)
 
 ### Requirements
 
@@ -112,7 +112,7 @@ Its metaphorical name emphasizes that the outputs are structurally identical in 
 - **No 3rd-party Lock-in**: Avoid 3rd-party state managers; use each cloud's best IaC and native state manager
 
 ### Why It Works
-- **Consistency**: Same intent produces functionally identical infrastructure
+- **Uniform**: Same intent produces functionally identical infrastructure
 - **Auditability**: Direct generation from code, no hidden state
 - **Evolution**: Change intent once, update all clouds simultaneously
 - **Vendor Independence**: Each cloud's native tools, not generic compromises
@@ -124,20 +124,20 @@ Its metaphorical name emphasizes that the outputs are structurally identical in 
 - Maintains each cloud's optimization and features
 - Intent-driven discipline: Forces separation of business requirements from technical implementation
 
-The philosophy embraces cloud diversity while enforcing consistency through unified intent.
+The philosophy embraces cloud diversity while striving for functional uniformity through intent.
 
 For a deeper dive into **why multi-cloud infrastructure management is fundamentally challenging** and how Chiral addresses these structural difficulties, see [docs/CHALLENGES.md](docs/CHALLENGES.md).
 
 ### Native Artifacts
 
-Chiral produces native cloud artifacts that can be deployed independently: AWS CDK and CloudFormation for AWS, Azure Bicep for Azure, and GCP Infrastructure Manager (Terraform HCL) for GCP. These are standard cloud templates that work with native cloud tooling.
+Chiral produces native cloud artifacts that can be deployed independently: AWS CDK and CloudFormation for AWS, Azure Bicep for Azure, and GCP Infrastructure Manager (Terraform Blueprint) for GCP. These are standard cloud templates that work with native cloud tooling.
 
 ## How Chiral Compares to Traditional Multi-Cloud Tools
 
 Chiral takes a different approach to multi-cloud infrastructure management compared to traditional IaC tools:
 
 ### Multi-Cloud Synchronization
-- **Single intent change**: Modify intent once → generates AWS CDK and CloudFormation, Azure Bicep, and GCP Infrastructure Manager (Terraform HCL)
+- **Single intent change**: Modify intent once → generates AWS CDK and CloudFormation, Azure Bicep, and GCP Infrastructure Manager (Terraform Blueprint)
 - **Reduced coordination**: Reduces the need to manually keep multiple cloud templates in sync
 - **Regenerate artifacts**: Change intent → regenerate all artifacts → deploy to clouds
 
@@ -181,7 +181,7 @@ Chiral takes a different approach to multi-cloud infrastructure management compa
 
 **Current**:
 - Azure Bicep (modern declarative DSL)
-- GCP Terraform HCL (Infrastructure Manager)
+- GCP Terraform Blueprint (Infrastructure Manager)
 
 **Ideal**: Each cloud's best native IaC format (Bicep for Azure, Terraform for GCP)
 
@@ -218,7 +218,7 @@ chiral-infrastructure-as-code
 │   │   ├── manifest.json             # Metadata about the assembly, stacks, and assets.
 │   │   └── tree.json                 # A tree view of the stack's construct hierarchy.
 │   ├── azure-deployment.bicep        # [NATIVE] The deployable Azure Bicep enantiomer.
-│   └── gcp-deployment.tf             # [NATIVE] The deployable GCP Infrastructure Manager (Terraform HCL).
+│   └── gcp-deployment.tf             # [NATIVE] The deployable GCP Infrastructure Manager (Terraform Blueprint).
 ├── docs/                             # Documentation and Synchronization research.
 │   └── ideas/
 │       ├── AWS_CDK_To_Azure_Bicep_Guide.txt
@@ -251,7 +251,7 @@ chiral-infrastructure-as-code
 │   │   │   └── aws-cdk.ts            # [AWS] CDK constructs and classes
 │   │   └── declarative/              # [DECLARATIVE] DSL/template-based approaches
 │   │       ├── azure-bicep.ts        # [AZURE] Bicep template generation
-│   │       └── gcp-terraform.ts      # [GCP] Terraform HCL generation
+│   │       └── gcp-terraform.ts      # [GCP] Terraform Blueprint generation
 │   ├── intent/                       # [TYPES] Abstract business requirements.
 │   │   └── index.ts                  # Defines KubernetesIntent, DatabaseIntent, etc.
 │   ├── rosetta/                      # [TRANSLATION] Hardware mapping between clouds.
@@ -295,7 +295,7 @@ This project is named after the "Chiral Pattern" - a chemistry concept where mol
 
 - **CDK → CloudFormation**: AWS-native constructs that leverage AWS-specific APIs and services
 - **Bicep → ARM Templates**: Azure-native resource definitions optimized for Azure Resource Manager
-- **Terraform → HCL**: Provider-agnostic declarations that get translated to cloud-specific APIs
+- **Terraform → Blueprint**: Provider-agnostic declarations that get translated to cloud-specific APIs
 
 These approaches don't "superimpose" on concrete cloud resources - they produce different architectural patterns, different API calls, and different deployment lifecycles. The value lies in abstracting the **intent** (what you want) while allowing each cloud to use its optimal **implementation approach** (how to achieve it).
 
@@ -318,31 +318,31 @@ flowchart TD
     classDef gcpNode  fill:#e8f5e9,stroke:#1e8a3e,color:#0d4a1f
     classDef header   fill:#e2e8f0,stroke:#94a3b8,color:#1e293b
 
-    CONFIG[chiral.config.ts<br/>──────────────────────────────<br/>Single Source of Truth<br/>Defines KubernetesIntent<br/>Defines DatabaseIntent<br/>Defines NetworkIntent<br/>──────────────────────────────<br/>ChiralSpec interface]:::config
+    CONFIG[chiral.config.ts<br/>────────────────────────────────────────────────────────────<br/>Single Source of Truth<br/>Defines KubernetesIntent<br/>Defines DatabaseIntent<br/>Defines NetworkIntent<br/>────────────────────────────────────────────────────────────<br/>ChiralSpec interface]:::config
 
     subgraph ENGINE[Chiral Engine]
-        EH[src/main.ts<br/>──────────────────────────────<br/>Zero-State Orchestrator]:::header
-        INTENT[Intent Schema<br/>──────────────────────────────<br/>src/intent/index.ts<br/>Abstracts business needs<br/>into cloud-agnostic types]:::engine
-        ROSETTA[Translation Layer<br/>──────────────────────────────<br/>src/translation/<br/>hardware-map.ts & regional-metadata.ts<br/>Translates & validates regional specs<br/>e.g. m5.xlarge to D4s_v3]:::engine
+        EH[src/main.ts<br/>────────────────────────────────────────────────────────────<br/>Zero-State Orchestrator]:::header
+        INTENT[Intent Schema<br/>────────────────────────────────────────────────────────────<br/>src/intent/index.ts<br/>Abstracts business needs<br/>into cloud-agnostic types]:::engine
+        ROSETTA[Translation Layer<br/>────────────────────────────────────────────────────────────<br/>src/translation/<br/>hardware-map.ts & regional-metadata.ts<br/>Translates & validates regional specs<br/>e.g. m5.xlarge to D4s_v3]:::engine
     end
 
     subgraph ADAPTERS[Implementation Approaches]
-        AH[src/adapters/<br/>──────────────────────────────<br/>Programmatic & Declarative<br/>Cloud-Specific Adapters]:::header
-        AWS_A[programmatic/aws-cdk.ts<br/>──────────────────────────────<br/>PROGRAMMATIC<br/>AWS CDK Constructs<br/>TypeScript classes & methods<br/>Rich ecosystem and typing]:::awsNode
-        AZURE_A[declarative/azure-bicep.ts<br/>──────────────────────────────<br/>DECLARATIVE<br/>Azure Bicep Template<br/>Modern DSL for Azure<br/>Direct ARM API compat]:::azNode
-        GCP_A[declarative/gcp-terraform.ts<br/>──────────────────────────────<br/>DECLARATIVE<br/>GCP Terraform HCL<br/>Infrastructure Manager<br/>Native GCP IaC format]:::gcpNode
+        AH[src/adapters/<br/>────────────────────────────────────────────────────────────<br/>Programmatic & Declarative<br/>Cloud-Specific Adapters]:::header
+        AWS_A[programmatic/aws-cdk.ts<br/>────────────────────────────────────────────────────────────<br/>PROGRAMMATIC<br/>AWS CDK Constructs<br/>TypeScript classes & methods<br/>Rich ecosystem and typing]:::awsNode
+        AZURE_A[declarative/azure-bicep.ts<br/>────────────────────────────────────────────────────────────<br/>DECLARATIVE<br/>Azure Bicep Template<br/>Modern DSL for Azure<br/>Direct ARM compatibility]:::azNode
+        GCP_A[declarative/gcp-terraform.ts<br/>────────────────────────────────────────────────────────────<br/>DECLARATIVE<br/>GCP Terraform Blueprint<br/>Infrastructure Manager<br/>Native GCP IaC format]:::gcpNode
     end
 
     subgraph DIST[Artifacts]
-        DH[dist/ - Generated Artifacts<br/>──────────────────────────────<br/>Native Cloud IaC Formats]:::header
-        AWS_D[aws-assembly/<br/>──────────────────────────────<br/>CloudFormation Template<br/>AwsStack.template.json<br/>CDK Assets & Manifest]:::awsNode
-        AZURE_D[azure-deployment.bicep<br/>──────────────────────────────<br/>Azure Bicep Template<br/>Native ARM DSL<br/>Deployable Azure template]:::azNode
-        GCP_D[gcp-deployment.tf<br/>──────────────────────────────<br/>Terraform HCL<br/>Infrastructure Manager<br/>Deployable GCP template]:::gcpNode
+        DH[dist/ - Generated Artifacts<br/>────────────────────────────────────────────────────────────<br/>Native Cloud IaC Formats]:::header
+        AWS_D[aws-assembly/<br/>────────────────────────────────────────────────────────────<br/>CloudFormation Template<br/>AwsStack.template.json<br/>CDK Assets & Manifest]:::awsNode
+        AZURE_D[azure-deployment.bicep<br/>────────────────────────────────────────────────────────────<br/>Azure Bicep Template<br/>Native ARM DSL<br/>Deployable Azure template]:::azNode
+        GCP_D[gcp-deployment.tf<br/>────────────────────────────────────────────────────────────<br/>Terraform Blueprint<br/>Infrastructure Manager<br/>Deployable GCP blueprint]:::gcpNode
     end
 
-    AWS_C([Amazon Web Services<br/>──────────────────────────────<br/>CloudFormation<br/>EKS - Elastic Kubernetes]):::awsNode
-    AZURE_C([Microsoft Azure<br/>──────────────────────────────<br/>ARM - Azure Resource Mgr<br/>AKS - Azure Kubernetes]):::azNode
-    GCP_C([Google Cloud Platform<br/>──────────────────────────────<br/>Infrastructure Manager<br/>GKE - Google Kubernetes]):::gcpNode
+    AWS_C([Amazon Web Services<br/>────────────────────────────────────────────────────────────<br/>CloudFormation<br/>EKS - Elastic Kubernetes]):::awsNode
+    AZURE_C([Microsoft Azure<br/>────────────────────────────────────────────────────────────<br/>ARM - Azure Resource Mgr<br/>AKS - Azure Kubernetes]):::azNode
+    GCP_C([Google Cloud Platform<br/>────────────────────────────────────────────────────────────<br/>Infrastructure Manager<br/>GKE - Google Kubernetes]):::gcpNode
 
     CONFIG --> ENGINE
     EH --> INTENT
