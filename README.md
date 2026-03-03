@@ -1,6 +1,6 @@
 # Chiral Infrastructure as Code
 
-> **From a single source of truth, generate native cloud artifacts targeting AWS, Azure, GCP.**
+> **From an intent schema, generate native cloud artifacts targeting AWS, Azure, GCP.**
 
 ---
 
@@ -12,7 +12,7 @@ We use the **Chiral Pattern** to avoid 3rd-party vendor lock-in. Instead of rely
 
 ## Name: The Chiral Pattern
 
-**Definition:** A multi-cloud infrastructure design where a single, cloud-agnostic intent schema is compiled simultaneously into non-superimposable, native intermediary artifacts for each cloud platform.
+**Definition:** A multi-cloud infrastructure design where an intent schema is compiled simultaneously into non-superimposable, native intermediary artifacts for each cloud platform.
 
 ### The 3 Laws of Chirality
 1. **Shared DNA:** There is only one source of truth (The *ChiralSpec*).
@@ -20,7 +20,7 @@ We use the **Chiral Pattern** to avoid 3rd-party vendor lock-in. Instead of rely
 3. **Zero State:** The Chiral Engine never stores state; it only emits artifacts.
 
 ### Description
-The Chiral Pattern is a software design approach for multi-cloud infrastructure management where a single source of truth (the Intent Schema) is used to generate native, 1st-party artifacts for each target cloud. 
+The Chiral Pattern is a software design approach for multi-cloud infrastructure management where an intent schema is used to generate native, 1st-party artifacts for each target cloud. 
 
 The pattern produces mirror-image outputs—for example, AWS CloudFormation via CDK and Azure Bicep—ensuring that both deployments share the same functional intent while remaining fully compatible with their respective cloud-native constructs. The Chiral Pattern allows vendor independence, auditability, and deterministic synchronization, enabling teams to change intent without relying on 3rd-party state files.
 
@@ -46,7 +46,7 @@ Its metaphorical name emphasizes that the outputs are structurally identical in 
 ## Chiral Design Philosophy
 
 ### Core Principles
-1. **Single DNA**: One cloud-agnostic intent schema drives all outputs
+1. **Single DNA**: Intent schema drives all outputs
 2. **Native Separation**: Each cloud gets its preferred native IaC format
 3. **Zero State**: No external state management or databases
 
