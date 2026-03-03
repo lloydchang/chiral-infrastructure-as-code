@@ -114,10 +114,10 @@ export class AwsCdkAdapter extends cdk.Stack {
 
     // Add managed node group for system workloads
     cluster.addNodegroupCapacity('SystemNodeGroup', {
-      instanceTypes: [new ec2.InstanceType(HardwareMap.aws.k8s[intent.k8s.size])],
-      minSize: intent.environment === 'prod' ? 2 : 1,
-      maxSize: 3,
-      desiredSize: intent.environment === 'prod' ? 2 : 1,
+      instanceTypes: [new ec2.InstanceType(this.regionalHardware.k8s[intent.k8s.size])],
+      minSize: intent.k8s.minNodes,
+      maxSize: intent.k8s.maxNodes,
+      desiredSize: intent.k8s.minNodes,
       nodegroupName: 'system-nodes',
       subnets: {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
@@ -126,7 +126,7 @@ export class AwsCdkAdapter extends cdk.Stack {
 
     // Add managed node group for application workloads
     cluster.addNodegroupCapacity('ApplicationNodeGroup', {
-      instanceTypes: [new ec2.InstanceType(HardwareMap.aws.k8s[intent.k8s.size])],
+      instanceTypes: [new ec2.InstanceType(this.regionalHardware.k8s[intent.k8s.size])],
       minSize: 1,
       maxSize: 5,
       desiredSize: 2,
@@ -146,7 +146,7 @@ export class AwsCdkAdapter extends cdk.Stack {
   }
 
   private createPostgresDatabase(intent: ChiralSystem) {
-    const dbInstanceType = new ec2.InstanceType(HardwareMap.aws.db[intent.postgres.size]);
+    const dbInstanceType = new ec2.InstanceType(this.regionalHardware.db[intent.postgres.size]);
 
     // Create database secret
     const secret = new secretsmanager.Secret(this, 'PostgresSecret', {
