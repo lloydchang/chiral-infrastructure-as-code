@@ -55,9 +55,9 @@ chiral-infrastructure-as-code
 │   └── azure-deployment.bicep        # [NATIVE] The deployable Azure Bicep enantiomer.
 ├── docs/                             # Documentation and Synchronization research.
 │   └── ideas/
-│       ├── AWS_CDK_To_Azure_Bicep_Guide.md
-│       ├── Multi-Cloud_IaC_Synchronization_Challenges.md
-│       └── Syncing_AWS_CDK_and_Bicep.md
+│       ├── AWS_CDK_To_Azure_Bicep_Guide.txt
+│       ├── Multi-Cloud_IaC_Synchronization_Challenges.txt
+│       └── Syncing_AWS_CDK_and_Bicep.txt
 ├── src/
 │   ├── intent/                       # [TYPES] The "Schema". Abstract business needs.
 │   │   └── index.ts                  # Defines KubernetesIntent, DatabaseIntent, etc.
