@@ -74,6 +74,17 @@ The pattern supports various IaC approaches through comprehensive examples cover
 
 The philosophy embraces cloud diversity while enforcing consistency through unified intent.
 
+### The "Abandon at Any Time" Promise
+
+Chiral's tagline emphasizes that you can **abandon the framework at any time** because it produces **native cloud artifacts** (CloudFormation, Bicep, Terraform) that you fully own and can deploy independently. This isn't contradictory marketing—it's **transparent positioning** that builds trust:
+
+- **No vendor lock-in**: Native outputs work without Chiral dependency
+- **Architecture over tool**: Chiral teaches intent-driven practices that transcend any specific framework
+- **Trust through transparency**: Users know they can graduate from the tool while retaining its benefits
+- **Attracts serious teams**: Appeals to engineers who value clean IaC architecture over convenience
+
+Chiral's success is measured by teams who outgrow the framework while maintaining the disciplined, intent-driven approach it established.
+
 ---
 
 ## Chiral Left vs Right: Design Guidelines
