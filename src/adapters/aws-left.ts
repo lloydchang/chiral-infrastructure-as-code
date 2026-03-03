@@ -11,6 +11,7 @@ import * as rds from 'aws-cdk-lib/aws-rds';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import { KubectlV26Layer } from '@aws-cdk/lambda-layer-kubectl-v26';
 import { Construct } from 'constructs';
 import { ChiralSystem } from '../intent';
 import { HardwareMap } from '../rosetta/hardware-map';
@@ -99,12 +100,12 @@ export class AwsLeftHandAdapter extends cdk.Stack {
       albController: {
         version: eks.AlbControllerVersion.V2_6_0,
       },
-      kubectlLayer: undefined as any,
+      kubectlLayer: KubectlV26Layer.getOrCreate(this),
     });
 
     // Add managed node group for system workloads
     cluster.addNodegroupCapacity('SystemNodeGroup', {
-      instanceTypes: [new ec2.InstanceType('t3.medium')],
+      instanceTypes: [new ec2.InstanceType(HardwareMap.aws.k8s[intent.k8s.size])],
       minSize: intent.environment === 'prod' ? 2 : 1,
       maxSize: 3,
       desiredSize: intent.environment === 'prod' ? 2 : 1,
@@ -116,7 +117,7 @@ export class AwsLeftHandAdapter extends cdk.Stack {
 
     // Add managed node group for application workloads
     cluster.addNodegroupCapacity('ApplicationNodeGroup', {
-      instanceTypes: [new ec2.InstanceType('m5.large')],
+      instanceTypes: [new ec2.InstanceType(HardwareMap.aws.k8s[intent.k8s.size])],
       minSize: 1,
       maxSize: 5,
       desiredSize: 2,
