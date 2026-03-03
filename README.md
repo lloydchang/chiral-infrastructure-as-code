@@ -1,11 +1,11 @@
-# Chiral Infrastructure-as-Code
+# Chiral Infrastructure as Code
 
-> **Generate mirrored, native cloud templates from a single source of truth. AWS and Azure in sync, without third-party vendor lock-in.**
+> **Generate mirrored, native cloud templates from a single source of truth. AWS and Azure in sync, without 3rd-party vendor lock-in.**
 
 ---
 
 ### Elevator Pitch
-We use the **Chiral Pattern** to avoid Infrastructure as Code (IaC) lock-in. Instead of relying on 3rd-party state managers, we maintain a central **Nucleus (Intent)** and use the **Chiral Engine** to synthesize first-party **Enantiomers (Native Templates)** for both AWS and Azure. This ensures native support and zero vendor dependency.
+We use the **Chiral Pattern** to avoid Infrastructure as Code (IaC) lock-in. Instead of relying on 3rd-party state managers, we maintain a central **Nucleus (Intent)** and use the **Chiral Engine** to synthesize first-party **Enantiomers (Native Templates)** for both AWS and Azure. This ensures native support without 3rd-party vendor lock-in.
 
 ---
 
@@ -55,9 +55,9 @@ chiral-infrastructure-as-code
 │   └── azure-deployment.bicep        # [NATIVE] The deployable Azure Bicep enantiomer.
 ├── docs/                             # Documentation and Synchronization research.
 │   └── ideas/
-│       ├── AWS_CDK_To_Azure_Bicep_Guide.md
-│       ├── Multi-Cloud_IaC_Synchronization_Challenges.md
-│       └── Syncing_AWS_CDK_and_Bicep.md
+│       ├── AWS_CDK_To_Azure_Bicep_Guide.txt
+│       ├── Multi-Cloud_IaC_Synchronization_Challenges.txt
+│       └── Syncing_AWS_CDK_and_Bicep.txt
 ├── src/
 │   ├── intent/                       # [TYPES] The "Schema". Abstract business needs.
 │   │   └── index.ts                  # Defines KubernetesIntent, DatabaseIntent, etc.
@@ -88,3 +88,9 @@ When writing your code, use these specific terms to reinforce the pattern:
 ## Pipeline Summary
 
 We define our infrastructure in the **Chiral Config**. Our **Chiral Engine** synthesizes the native **Enantiomers** (CloudFormation and Bicep), which are then deployed to their respective clouds.
+
+---
+
+## License
+
+AGPL-3.0
