@@ -1,43 +1,19 @@
-Skip to main content
-AWS CDK To Azure Bicep Guide
-83,767 tokens
+# AWS CDK To Azure Bicep Guide
 
-User 9:37 PM
-Write a TypeScript file that uses AWS CDK and Level 3 Construct to deploy Kubernetes, Postgresql, ActiveDriectory Federal Services, run cdk sync to conver it from TypeScript to CloudFormation, then convert the CloudFormation file to a Azure Bicep file. This is so that the AWS CDK TypeScript file, CloudFormation file, and Bicep file, stay in synch.
-Model 9:37 PM
-ThinkingThoughts
-Begin Constructing Infrastructure
-I'm starting to analyze the request. My initial goal is to construct a TypeScript file using AWS CDK and "Level 3 Constructs." This file will deploy Kubernetes (EKS), PostgreSQL (RDS), and, eventually, Active Directory Federation Services (AD FS). I'm putting AD FS on hold for now until I have EKS and PostgreSQL in place.
-Refining Cross-Cloud Strategy
-I'm now focusing on cross-cloud infrastructure synchronization. My current plan involves using AWS CDK to generate CloudFormation, then converting it to an Azure Bicep file. AD FS will require custom EC2 or managed AD in AWS. I need to make sure the TS file, the CFN file, and the Bicep file remain in sync. I also realize that the user probably meant cdk synth, not cdk sync.
-Clarifying Feasibility Limitations
-I am now focusing on the feasibility limitations of direct AWS CloudFormation to Azure Bicep conversion. My assessment indicates a complete lack of direct, functional translation due to the different underlying resource providers, APIs, and services (e.g., EKS vs. AKS, RDS vs. Azure Database for PostgreSQL). Therefore, I must clarify that a direct conversion script is not possible for resource equivalence, and instead requires a high-level, semantic translation approach, involving rewriting IaC for the target cloud provider. I will need to clearly explain this constraint.
-Detailing Code Snippets
-I'm now generating the code examples. I'm focusing on providing a CDK TypeScript file with high-level constructs for EKS and RDS PostgreSQL, with a placeholder for AD FS (using EC2, since there's no native L3 construct for it). I'll also demonstrate the cdk synth command to generate CloudFormation. I'm starting to think about the Azure Bicep template. I must ensure the provided example clearly demonstrates the required architecture components.
-Generating Code Examples
-I'm now drafting the code examples and instructions. I've chosen eks.Cluster and rds.DatabaseInstance (or rds.DatabaseCluster) for the CDK code, with an EC2 instance as a placeholder for AD FS. Then I will describe the cdk synth command. For the Bicep code, I'll go with an AKS cluster and PostgreSQL Flexible Server, omitting detailed AD FS VM deployment for brevity. I also plan to clarify the expectation gap and suggest Terraform or Pulumi as better cross-cloud solutions.
-Finalizing Documentation Structure
-I'm now putting the finishing touches on the documentation, focusing on clarity. I'll start by acknowledging the limitations of direct AWS CloudFormation to Azure Bicep conversion, correcting the cdk sync to cdk synth misunderstanding. Then I'll meticulously detail the steps, including the CDK TypeScript file (EKS, RDS, EC2 placeholder for AD FS), the cdk synth command, and the Azure Bicep equivalent (AKS, Azure DB for PostgreSQL, and Azure Entra/Windows VM). Finally, I'll explain synchronization strategies.
-Composing CDK Code
-I'm now writing the CDK code, including EKS and RDS constructs. I'm focusing on providing a clean TypeScript example with a VPC, EKS cluster, and RDS PostgreSQL database instance. I've included eks.Cluster and rds.DatabaseInstance and I'm using ec2.Vpc. The example is now ready to be rendered as an independent example.
-Generating Bicep Translation
-I'm now focused on the Azure Bicep equivalent of the CDK TypeScript code. I'm translating the VPC into an Azure VNet. I'm also constructing an Azure Kubernetes Service (AKS) cluster as an EKS equivalent, along with a PostgreSQL Flexible Server. Finally, I'm defining a placeholder Windows VM resource that represents AD FS. The Bicep template is starting to take shape with the key components.
-Refining Bicep Translation
-I'm making the Bicep code more robust, and including a simplified explanation of the AD FS equivalent, acknowledging its legacy status. I'm focusing on the AKS cluster with an assigned system identity, and a flexible PostgreSQL server. I also included the AD FS replacement concept with Entra ID.
-Clarifying Multi-Cloud Strategy
-I'm now focusing on the multi-cloud strategy aspect, addressing the conceptual flaws of direct CFN-to-Bicep conversion. I'll highlight the need for either parallel configurations or the use of cloud-agnostic tools for true multi-cloud synchronization, as direct execution is impossible due to provider gaps. I'm also ensuring the user understands the key concepts, such as Azure Active Directory (formerly Azure AD) for the cloud-native equivalent of AD FS.
-Collapse to hide model thoughts
-
-chevron_right
 To achieve your goal of multi-cloud infrastructure deployment, it is important to clarify a fundamental concept about how cloud providers work: You cannot directly convert an AWS CloudFormation file into an Azure Bicep file using a command-line tool.
+
 AWS CloudFormation provisions AWS-specific resources (like AWS::EKS::Cluster), while Azure Bicep provisions Azure-specific resources (like Microsoft.ContainerService/managedClusters). Because the underlying services, network architectures, and APIs are entirely different, there is no direct, automated translation between the two. Furthermore, the command to convert AWS CDK to CloudFormation is cdk synth (synthesize), not cdk sync.
+
 However, you can achieve parallel, synchronized deployments by writing the AWS infrastructure in AWS CDK (TypeScript) and the equivalent Azure infrastructure in Azure Bicep.
+
 Below is the complete guide, including the TypeScript file, the synthesis command, and the functionally equivalent Azure Bicep file.
-Step 1: AWS CDK (TypeScript)
+## Step 1: AWS CDK (TypeScript)
+
 This AWS CDK code uses "Level 3" (high-level, opinionated) constructs to deploy Amazon EKS, Amazon RDS (PostgreSQL), and a Windows Server EC2 instance to act as your Active Directory Federation Services (AD FS) server. (Note: AD FS is a Windows role, so it requires deploying a Windows virtual machine or using AWS Managed Microsoft AD).
-lib/multi-cloud-stack.ts
-code
-TypeScript
+
+### lib/multi-cloud-stack.ts
+
+```typescript
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
@@ -80,17 +56,26 @@ export class MultiCloudStack extends cdk.Stack {
     });
   }
 }
-Step 2: Convert TypeScript to CloudFormation
+```
+
+## Step 2: Convert TypeScript to CloudFormation
+
 To convert your AWS CDK TypeScript code into a CloudFormation YAML/JSON template, run the synthesize command in your terminal:
-code
-Bash
+
+### Synthesize Command
+
+```bash
 # Synthesize the TypeScript into a CloudFormation template
 cdk synth > template.yaml
-Step 3: The Azure Equivalent (Bicep)
+```
+
+## Step 3: The Azure Equivalent (Bicep)
+
 Because CloudFormation cannot be converted to Bicep mechanically, you must maintain an equivalent Bicep file to deploy the identical architecture to Azure. Here is the Bicep code to deploy Azure Kubernetes Service (AKS), Azure Database for PostgreSQL, and a Windows Server Virtual Machine for AD FS.
-main.bicep
-code
-Bicep
+
+### main.bicep
+
+```bicep
 param location string = resourceGroup().location
 param adminUsername string = 'azureadmin'
 @secure()
@@ -182,7 +167,8 @@ resource adfsVm 'Microsoft.Compute/virtualMachines@2023-03-01' = {
     }
   }
 }
-How to Actually "Keep Them In Sync"
+```
+## How to Actually "Keep Them In Sync"
 Since there is no converter, attempting to maintain parity between two separate IaC languages (CDK and Bicep) manually is highly error-prone. If your genuine goal is to write code once and have it deploy synchronized infrastructure to both AWS and Azure, you should abandon native tools (CloudFormation/Bicep) and use cloud-agnostic tools:
 Pulumi: Like AWS CDK, Pulumi allows you to write infrastructure in TypeScript. However, Pulumi supports both AWS and Azure natively. You can define your EKS and AKS clusters side-by-side in the same TypeScript file.
 Terraform: The industry standard for multi-cloud. You write your infrastructure in HashiCorp Configuration Language (HCL), allowing you to maintain AWS and Azure deployments in parallel using a single state management system and CI/CD workflow.
