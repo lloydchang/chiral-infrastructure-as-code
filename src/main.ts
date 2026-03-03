@@ -59,9 +59,9 @@ try {
 // =================================================================
 // THE CHIRAL ENGINE (Orchestrator)
 // 1. Reads chiral config
-// 2. Instantiates Left Adapter (AWS) -> Synthesizes to dist/
-// 3. Instantiates Right Adapter (Azure) -> Generates Bicep to dist/
-// 4. Instantiates Right Adapter (GCP) -> Generates Terraform HCL to dist/
+// 2. Instantiates Programmatic Adapter (AWS) -> Generates to dist/
+// 3. Instantiates Declarative Adapter (Azure) -> Generates Bicep to dist/
+// 4. Instantiates Declarative Adapter (GCP) -> Generates Terraform HCL to dist/
 // 5. VALIDATES the generated Bicep using Azure CLI
 // =================================================================
 
@@ -70,10 +70,10 @@ if (!fs.existsSync(DIST_DIR)) {
   fs.mkdirSync(DIST_DIR, { recursive: true });
 }
 
-console.log(`\n🧪 Starting Chiral Synthesis for: [${config.projectName}]`);
+console.log(`\n🧪 Starting Chiral Generation for: [${config.projectName}]`);
 
 // -----------------------------------------------------
-// 1. Synthesize Left Enantiomer (AWS CloudFormation)
+// 1. Generate via Programmatic Adapter (AWS CloudFormation)
 // -----------------------------------------------------
 const app = new cdk.App({
   outdir: path.join(DIST_DIR, 'aws-assembly')
@@ -90,12 +90,12 @@ app.synth(); // This writes the CloudFormation template natively.
 console.log(`✅ [AWS]   CloudFormation synthesized to: ${path.relative(process.cwd(), path.join(DIST_DIR, 'aws-assembly'))}/`);
 
 // -----------------------------------------------------
-// 2. Synthesize Right Enantiomer (Azure Bicep)
+// 2. Generate via Declarative Adapter (Azure Bicep)
 // -----------------------------------------------------
 let bicepPath: string;
 try {
   // A. Generate the Bicep String
-  const bicepContent = AzureBicepAdapter.synthesize(config);
+  const bicepContent = AzureBicepAdapter.generate(config);
   bicepPath = path.join(DIST_DIR, 'azure-deployment.bicep');
 
   // B. Write to Disk
@@ -150,11 +150,11 @@ try {
 }
 
 // -----------------------------------------------------
-// 3. Synthesize GCP Right Enantiomer (Terraform HCL)
+// 3. Generate via Declarative Adapter (GCP Terraform HCL)
 // -----------------------------------------------------
 try {
   // A. Generate the Terraform HCL String
-  const gcpTf = GcpTerraformAdapter.synthesize(config);
+  const gcpTf = GcpTerraformAdapter.generate(config);
   const gcpTfPath = path.join(DIST_DIR, 'gcp-deployment.tf');
 
   // B. Write to Disk
@@ -170,4 +170,4 @@ try {
   process.exit(1);
 }
 
-console.log(`\n🎉 Chiral Synthesis Complete! Check ${options.out} for generated artifacts.`);
+console.log(`\n🎉 Chiral Generation Complete! Check ${options.out} for generated artifacts.`);
