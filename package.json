@@ -6,16 +6,22 @@
   "scripts": {
     "build": "tsc",
     "compile": "ts-node src/main.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "cdk": "cdk",
     "deploy-aws": "cdk deploy",
     "diff-aws": "cdk diff",
     "destroy-aws": "cdk destroy"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/node": "^20.0.0",
+    "aws-cdk": "^2.130.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.0",
-    "typescript": "^5.3.0",
-    "aws-cdk": "^2.130.0"
+    "typescript": "^5.3.0"
   },
   "dependencies": {
     "aws-cdk-lib": "^2.130.0",
