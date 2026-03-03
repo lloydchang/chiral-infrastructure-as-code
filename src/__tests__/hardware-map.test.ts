@@ -3,11 +3,11 @@ import { HardwareMap } from '../translation/hardware-map';
 describe('HardwareMap', () => {
   describe('AWS mappings', () => {
     it('should map small database size correctly', () => {
-      expect(HardwareMap.aws.db.small).toBe('t3.medium');
+      expect(HardwareMap.aws.db.small).toBe('db.t3.medium');
     });
 
     it('should map large database size correctly', () => {
-      expect(HardwareMap.aws.db.large).toBe('m5.large');
+      expect(HardwareMap.aws.db.large).toBe('db.m5.large');
     });
 
     it('should map small VM size correctly', () => {

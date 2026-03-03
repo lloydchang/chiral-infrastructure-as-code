@@ -129,19 +129,19 @@ try {
 } catch (error) {
   console.error('\n' + '='.repeat(60));
   console.error('❌ [Azure] FATAL: Generated Bicep file contains syntax errors.');
-  console.error('   The text in src/adapters/azure-right.ts produced invalid Bicep.');
+  console.error('   The text in src/adapters/declarative/azure-bicep.ts produced invalid Bicep.');
   console.error('   Run "az bicep build --file dist/azure-deployment.bicep" to see exact errors.');
   console.error('='.repeat(60));
   console.error('\nDEBUGGING WORKFLOW:');
   console.error(`1. IDENTIFY: Run the following command to see the exact error and line number:`);
   console.error(`   > az bicep build --file ${path.join(DIST_DIR, 'azure-deployment.bicep')}`);
 
-  console.error(`\n2. LOCATE: Open "src/adapters/azure-right.ts" and find the code corresponding`);
+  console.error(`\n2. LOCATE: Open "src/adapters/declarative/azure-bicep.ts" and find the code corresponding`);
   console.error(`   to the line number reported in Step 1.`);
 
   console.error(`\n3. FIX: Correct the typo or syntax error inside the TypeScript backticks (\`).`);
   console.error(`   Alternatively, copy the error message from Step 1 and provide it to your`);
-  console.error(`   AI Coding Agent's LLM (Large Language Model) to receive a corrected "azure-right.ts" file.`);
+  console.error(`   AI Coding Agent's LLM (Large Language Model) to receive a corrected "azure-bicep.ts" file.`);
 
   console.error(`\n4. RETRY: Run "npm run compile" again.`);
   console.error('='.repeat(60) + '\n');
@@ -164,7 +164,7 @@ try {
 } catch (error) {
   console.error('\n' + '='.repeat(60));
   console.error('❌ [GCP] FATAL: Generated Terraform HCL file contains errors.');
-  console.error('   The text in src/adapters/gcp-right.ts produced invalid Terraform.');
+  console.error('   The text in src/adapters/declarative/gcp-terraform.ts produced invalid Terraform.');
   console.error('='.repeat(60) + '\n');
 
   process.exit(1);

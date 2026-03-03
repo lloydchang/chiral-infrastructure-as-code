@@ -159,7 +159,7 @@ While Chiral addresses fundamental multi-cloud challenges, it introduces its own
 ### Limited Cloud Coverage
 - **Current scope**: Focused on AWS, Azure, and GCP—major clouds but not comprehensive
 - **Adapter maintenance**: Each cloud's IaC format evolution requires corresponding adapter updates
-- **Regional support**: Current adapters assume standard regional configurations; compliance-specific regions may need customization
+- **Regional expansion**: Regional intelligence system can be extended to additional regions and compliance boundaries as needed
 
 ### Operational Considerations
 - **Code generation overhead**: Additional build step compared to direct native tool usage

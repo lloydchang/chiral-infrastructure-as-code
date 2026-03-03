@@ -1,4 +1,4 @@
-// File: src/rosetta/regional-metadata.ts
+// File: src/translation/regional-metadata.ts
 
 // Regional intelligence and compliance handling for multi-cloud deployments
 

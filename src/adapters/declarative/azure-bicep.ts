@@ -30,7 +30,7 @@ export class AzureBicepAdapter {
     // Get region-aware hardware mappings
     const regionalHardware = getRegionalHardwareMap('azure', azureRegion);
 
-    // 1. ROSETTA TRANSLATION (Hardware Mapping)
+    // 1. TRANSLATION (Hardware Mapping)
     // ------------------------------------------------
     // Convert abstract sizes (small/large) into Azure SKUs (Standard_B2s, etc.)
     const dbSku = regionalHardware.db[intent.postgres.size];
@@ -97,7 +97,7 @@ resource aks 'Microsoft.ContainerService/managedClusters@2024-01-01' = {
       {
         name: 'systempool'
         count: ${intent.environment === 'prod' ? 2 : 1}
-        vmSize: '${HardwareMap.azure.k8s.small}' // System nodes use small size
+        vmSize: '${regionalHardware.k8s.small}' // System nodes use small size
         mode: 'System'
         osType: 'Linux'
         orchestratorVersion: '${intent.k8s.version}'

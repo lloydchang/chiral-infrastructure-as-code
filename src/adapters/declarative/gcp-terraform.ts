@@ -30,7 +30,7 @@ export class GcpTerraformAdapter {
     // Get region-aware hardware mappings
     const regionalHardware = getRegionalHardwareMap('gcp', gcpRegion);
 
-    // 1. ROSETTA TRANSLATION (Hardware Mapping)
+    // 1. TRANSLATION (Hardware Mapping)
     // ------------------------------------------------
     // Convert abstract sizes (small/large) into GCP machine types
     const dbMachine = regionalHardware.db[intent.postgres.size];
@@ -39,7 +39,6 @@ export class GcpTerraformAdapter {
 
     // 2. CONFIGURABLE SETTINGS
     // ------------------------------------------------
-    const gcpRegion = intent.region?.gcp || 'us-central1';
     const gcpZone = `${gcpRegion}-a`; // Default to first zone in region
 
     // 3. TERRAFORM HCL TEMPLATE GENERATION ("Mad Libs")

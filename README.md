@@ -320,7 +320,7 @@ flowchart TD
     subgraph ENGINE[Chiral Engine]
         EH[src/main.ts<br/>──────────────────────────────<br/>Zero-State Orchestrator]:::header
         INTENT[Intent Schema<br/>──────────────────────────────<br/>src/intent/index.ts<br/>Abstracts business needs<br/>into cloud-agnostic types]:::engine
-        ROSETTA[Rosetta Dictionary<br/>──────────────────────────────<br/>src/rosetta/<br/>hardware-map.ts<br/>Translates hardware specs<br/>e.g. m5.xlarge to D4s_v3]:::engine
+        ROSETTA[Translation Layer<br/>──────────────────────────────<br/>src/translation/<br/>hardware-map.ts & regional-metadata.ts<br/>Translates & validates regional specs<br/>e.g. m5.xlarge to D4s_v3]:::engine
     end
 
     subgraph ADAPTERS[Implementation Approaches]
