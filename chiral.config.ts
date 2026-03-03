@@ -14,17 +14,18 @@ export const config: ChiralSystem = {
   k8s: {
     version: '1.29',
     minNodes: 2,
-    maxNodes: 5
+    maxNodes: 5,
+    size: 'large' // Resolves to m5.large (AWS) / Standard_D4s_v3 (Azure)
   },
 
   postgres: {
     engineVersion: '15',
-    size: 'large', // Resolves to m5.large (AWS) / D4s_v3 (Azure)
+    size: 'large', // Resolves to m5.large (AWS) / Standard_D4s_v3 (Azure)
     storageGb: 100
   },
 
   adfs: {
-    size: 'large', // Resolves to m5.xlarge (AWS) / D4s_v3 (Azure)
+    size: 'large', // Resolves to m5.xlarge (AWS) / Standard_D4s_v3 (Azure)
     windowsVersion: '2022'
   }
 };
