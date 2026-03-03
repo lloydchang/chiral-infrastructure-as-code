@@ -239,18 +239,17 @@ We define our infrastructure in the **Chiral Config**. Our **Chiral Engine** gen
 
 ```mermaid
 flowchart TD
-    classDef config   fill:#fffbe6,stroke:#c9a000,color:#6b4c00
-    classDef engine   fill:#f3e8ff,stroke:#7c3aed,color:#4a1d96
-    classDef awsNode  fill:#fff3e0,stroke:#e67e00,color:#7a3800
-    classDef azNode   fill:#e3f2fd,stroke:#0063b1,color:#003a75
-    classDef gcpNode  fill:#e8f5e9,stroke:#1e8a3e,color:#0d4a1f
-    classDef cloud    fill:#f1f5f9,stroke:#64748b,color:#1e293b
+    classDef config  fill:#fffbe6,stroke:#c9a000,color:#6b4c00
+    classDef engine  fill:#f3e8ff,stroke:#7c3aed,color:#4a1d96
+    classDef awsNode fill:#fff3e0,stroke:#e67e00,color:#7a3800
+    classDef azNode  fill:#e3f2fd,stroke:#0063b1,color:#003a75
+    classDef gcpNode fill:#e8f5e9,stroke:#1e8a3e,color:#0d4a1f
 
-    CONFIG(["📄 chiral.config.ts
+    CONFIG(["chiral.config.ts
     Single Source of Truth · ChiralSpec
     KubernetesIntent · DatabaseIntent · NetworkIntent"]):::config
 
-    subgraph ENGINE["⚙️ Chiral Engine · src/main.ts · Zero-State Orchestrator"]
+    subgraph ENGINE["Chiral Engine · src/main.ts · Zero-State Orchestrator"]
         direction LR
         INTENT["Intent Schema
         src/intent/index.ts
@@ -263,18 +262,18 @@ flowchart TD
 
     subgraph ADAPTERS["Enantiomers · src/adapters/ · Mirror-Image Cloud Outputs"]
         direction LR
-        AWS_A["🟠 aws-left.ts
+        AWS_A["aws-left.ts
         LEFT HAND · Programmatic
         AWS CDK L3 Constructs"]:::awsNode
-        AZURE_A["🔵 azure-right.ts
+        AZURE_A["azure-right.ts
         RIGHT HAND · Declarative
         Azure Bicep Template"]:::azNode
-        GCP_A["🟢 gcp-right.ts
+        GCP_A["gcp-right.ts
         RIGHT HAND · Declarative
         GCP Terraform HCL"]:::gcpNode
     end
 
-    subgraph DIST["📦 dist/ · Racemic Mixture · Native Artifacts"]
+    subgraph DIST["dist/ · Racemic Mixture · Native Artifacts"]
         direction LR
         AWS_D["aws-assembly/
         AwsStack.template.json
@@ -286,22 +285,26 @@ flowchart TD
         Native HCL Enantiomer"]:::gcpNode
     end
 
-    AWS_C(["☁️ Amazon Web Services
+    AWS_C(["Amazon Web Services
     CloudFormation · EKS"]):::awsNode
-    AZURE_C(["🔷 Microsoft Azure
+    AZURE_C(["Microsoft Azure
     ARM · AKS"]):::azNode
-    GCP_C(["🌐 Google Cloud Platform
+    GCP_C(["Google Cloud Platform
     Infrastructure Manager · GKE"]):::gcpNode
 
-    CONFIG     -->|"synthesize"| ENGINE
-    INTENT     -->               AWS_A & AZURE_A & GCP_A
-    ROSETTA    -->               AWS_A & AZURE_A & GCP_A
-    AWS_A      -->|"cdk synth"| AWS_D
-    AZURE_A    -->|"generate"|  AZURE_D
-    GCP_A      -->|"generate"|  GCP_D
-    AWS_D      -->|"cfn deploy"| AWS_C
-    AZURE_D    -->|"az deploy"|  AZURE_C
-    GCP_D      -->|"gcloud apply"| GCP_C
+    CONFIG  -->|synthesize| ENGINE
+    INTENT  -->|intent|     AWS_A
+    INTENT  -->|intent|     AZURE_A
+    INTENT  -->|intent|     GCP_A
+    ROSETTA -->|hardware|   AWS_A
+    ROSETTA -->|hardware|   AZURE_A
+    ROSETTA -->|hardware|   GCP_A
+    AWS_A   -->|cdk synth|  AWS_D
+    AZURE_A -->|generate|   AZURE_D
+    GCP_A   -->|generate|   GCP_D
+    AWS_D   -->|cfn deploy| AWS_C
+    AZURE_D -->|az deploy|  AZURE_C
+    GCP_D   -->|gcloud apply| GCP_C
 ```
 
 ---
