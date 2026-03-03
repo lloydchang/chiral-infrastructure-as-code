@@ -317,31 +317,31 @@ flowchart TD
     classDef gcpNode  fill:#e8f5e9,stroke:#1e8a3e,color:#0d4a1f
     classDef header   fill:#e2e8f0,stroke:#94a3b8,color:#1e293b
 
-    CONFIG[chiral.config.ts<br/>──────────────────────────────<br/>Single Source of Truth<br/>Defines KubernetesIntent<br/>Defines DatabaseIntent<br/>Defines NetworkIntent<br/>──────────────────────────────<br/>ChiralSpec interface]:::config
+    CONFIG[chiral.config.ts<br/>────────────────────────────────────────────────────────────<br/>Single Source of Truth<br/>Defines KubernetesIntent<br/>Defines DatabaseIntent<br/>Defines NetworkIntent<br/>────────────────────────────────────────────────────────────<br/>ChiralSpec interface]:::config
 
     subgraph ENGINE[Chiral Engine]
-        EH[src/main.ts<br/>──────────────────────────────<br/>Zero-State Orchestrator]:::header
-        INTENT[Intent Schema<br/>──────────────────────────────<br/>src/intent/index.ts<br/>Abstracts business needs<br/>into cloud-agnostic types]:::engine
-        ROSETTA[Translation Layer<br/>──────────────────────────────<br/>src/translation/<br/>hardware-map.ts & regional-metadata.ts<br/>Translates & validates regional specs<br/>e.g. m5.xlarge to D4s_v3]:::engine
+        EH[src/main.ts<br/>────────────────────────────────────────────────────────────<br/>Zero-State Orchestrator]:::header
+        INTENT[Intent Schema<br/>────────────────────────────────────────────────────────────<br/>src/intent/index.ts<br/>Abstracts business needs<br/>into cloud-agnostic types]:::engine
+        ROSETTA[Translation Layer<br/>────────────────────────────────────────────────────────────<br/>src/translation/<br/>hardware-map.ts & regional-metadata.ts<br/>Translates & validates regional specs<br/>e.g. m5.xlarge to D4s_v3]:::engine
     end
 
     subgraph ADAPTERS[Implementation Approaches]
-        AH[src/adapters/<br/>──────────────────────────────<br/>Programmatic & Declarative<br/>Cloud-Specific Adapters]:::header
-        AWS_A[programmatic/aws-cdk.ts<br/>──────────────────────────────<br/>PROGRAMMATIC<br/>AWS CDK Constructs<br/>TypeScript classes & methods<br/>Rich ecosystem and typing]:::awsNode
-        AZURE_A[declarative/azure-bicep.ts<br/>──────────────────────────────<br/>DECLARATIVE<br/>Azure Bicep Template<br/>Modern DSL for Azure<br/>Direct ARM API compat]:::azNode
-        GCP_A[declarative/gcp-terraform.ts<br/>──────────────────────────────<br/>DECLARATIVE<br/>GCP Terraform HCL<br/>Infrastructure Manager<br/>Native GCP IaC format]:::gcpNode
+        AH[src/adapters/<br/>────────────────────────────────────────────────────────────<br/>Programmatic & Declarative<br/>Cloud-Specific Adapters]:::header
+        AWS_A[programmatic/aws-cdk.ts<br/>────────────────────────────────────────────────────────────<br/>PROGRAMMATIC<br/>AWS CDK Constructs<br/>TypeScript classes & methods<br/>Rich ecosystem and typing]:::awsNode
+        AZURE_A[declarative/azure-bicep.ts<br/>────────────────────────────────────────────────────────────<br/>DECLARATIVE<br/>Azure Bicep Template<br/>Modern DSL for Azure<br/>Direct ARM API compat]:::azNode
+        GCP_A[declarative/gcp-terraform.ts<br/>────────────────────────────────────────────────────────────<br/>DECLARATIVE<br/>GCP Terraform HCL<br/>Infrastructure Manager<br/>Native GCP IaC format]:::gcpNode
     end
 
     subgraph DIST[Artifacts]
-        DH[dist/ - Generated Artifacts<br/>──────────────────────────────<br/>Native Cloud IaC Formats]:::header
-        AWS_D[aws-assembly/<br/>──────────────────────────────<br/>CloudFormation Template<br/>AwsStack.template.json<br/>CDK Assets & Manifest]:::awsNode
-        AZURE_D[azure-deployment.bicep<br/>──────────────────────────────<br/>Azure Bicep Template<br/>Native ARM DSL<br/>Deployable Azure template]:::azNode
-        GCP_D[gcp-deployment.tf<br/>──────────────────────────────<br/>Terraform HCL<br/>Infrastructure Manager<br/>Deployable GCP blueprint]:::gcpNode
+        DH[dist/ - Generated Artifacts<br/>────────────────────────────────────────────────────────────<br/>Native Cloud IaC Formats]:::header
+        AWS_D[aws-assembly/<br/>────────────────────────────────────────────────────────────<br/>CloudFormation Template<br/>AwsStack.template.json<br/>CDK Assets & Manifest]:::awsNode
+        AZURE_D[azure-deployment.bicep<br/>────────────────────────────────────────────────────────────<br/>Azure Bicep Template<br/>Native ARM DSL<br/>Deployable Azure template]:::azNode
+        GCP_D[gcp-deployment.tf<br/>────────────────────────────────────────────────────────────<br/>Terraform HCL<br/>Infrastructure Manager<br/>Deployable GCP blueprint]:::gcpNode
     end
 
-    AWS_C([Amazon Web Services<br/>──────────────────────────────<br/>CloudFormation<br/>EKS - Elastic Kubernetes]):::awsNode
-    AZURE_C([Microsoft Azure<br/>──────────────────────────────<br/>ARM - Azure Resource Mgr<br/>AKS - Azure Kubernetes]):::azNode
-    GCP_C([Google Cloud Platform<br/>──────────────────────────────<br/>Infrastructure Manager<br/>GKE - Google Kubernetes]):::gcpNode
+    AWS_C([Amazon Web Services<br/>────────────────────────────────────────────────────────────<br/>CloudFormation<br/>EKS - Elastic Kubernetes]):::awsNode
+    AZURE_C([Microsoft Azure<br/>────────────────────────────────────────────────────────────<br/>ARM - Azure Resource Mgr<br/>AKS - Azure Kubernetes]):::azNode
+    GCP_C([Google Cloud Platform<br/>────────────────────────────────────────────────────────────<br/>Infrastructure Manager<br/>GKE - Google Kubernetes]):::gcpNode
 
     CONFIG --> ENGINE
     EH --> INTENT
