@@ -1,6 +1,6 @@
 # Chiral Infrastructure as Code
 
-> **Generate mirrored, native cloud templates from a single source of truth. Multi-cloud infrastructure in sync across AWS, Azure, GCP, without 3rd-party vendor lock-in. Abandon Chiral at any time - you own the native outputs.**
+> **Generate mirrored, native cloud templates from a single source of truth. Multi-cloud infrastructure in sync across AWS, Azure, GCP, without 3rd-party vendor lock-in. Abandon Chiral at any time - you own the native cloud outputs.**
 
 ---
 
