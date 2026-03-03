@@ -7,7 +7,7 @@
 ### Elevator Pitch
 We use the **Chiral Pattern** to avoid Infrastructure as Code (IaC) lock-in. Instead of relying on 3rd-party state managers, we maintain a central **Nucleus (Intent)** and use the **Chiral Engine** to synthesize first-party **Enantiomers (Native Templates)** for multiple clouds. This ensures native support without 3rd-party vendor lock-in.
 
-The pattern supports various IaC approaches through examples: CDK, Bicep, Terraform, OpenTofu, and Pulumi.
+The pattern supports various IaC approaches through examples: AWS CDK, Azure Bicep, and GCP Infrastructure Manager.
 
 ---
 
