@@ -1,6 +1,6 @@
 # Chiral Infrastructure as Code
 
-> **Solving multi-cloud infrastructure's impossible challenge**: Different cloud APIs, state management complexity, and vendor lock-in make consistent deployments across AWS, Azure, and GCP nearly impossible. **Chiral generates native cloud artifacts from a single intent schema**, ensuring consistency without compromise.
+> **Solving multi-cloud infrastructure's core challenges**: Different cloud APIs, state management complexity, and vendor lock-in make consistent deployments across AWS, Azure, and GCP extremely difficult. **Chiral generates native cloud artifacts from a single intent schema**, ensuring consistency without compromise.
 
 ---
 
