@@ -48,7 +48,7 @@ chiral --config config.js
 This generates:
 - `aws-assembly/` (CloudFormation templates)
 - `azure-deployment.bicep` (Azure Bicep)
-- `gcp-deployment.tf` (GCP Terraform HCL)
+- `gcp-deployment.tf` (GCP Terraform Blueprint)
 
 ### Requirements
 
@@ -129,14 +129,14 @@ For a deeper dive into **why multi-cloud infrastructure management is fundamenta
 
 ### Native Artifacts
 
-Chiral produces native cloud artifacts that can be deployed independently: AWS CDK and CloudFormation for AWS, Azure Bicep for Azure, and GCP Infrastructure Manager (Terraform HCL) for GCP. These are standard cloud templates that work with native cloud tooling.
+Chiral produces native cloud artifacts that can be deployed independently: AWS CDK and CloudFormation for AWS, Azure Bicep for Azure, and GCP Infrastructure Manager (Terraform Blueprint) for GCP. These are standard cloud templates that work with native cloud tooling.
 
 ## How Chiral Compares to Traditional Multi-Cloud Tools
 
 Chiral takes a different approach to multi-cloud infrastructure management compared to traditional IaC tools:
 
 ### Multi-Cloud Synchronization
-- **Single intent change**: Modify intent once → generates AWS CDK and CloudFormation, Azure Bicep, and GCP Infrastructure Manager (Terraform HCL)
+- **Single intent change**: Modify intent once → generates AWS CDK and CloudFormation, Azure Bicep, and GCP Infrastructure Manager (Terraform Blueprint)
 - **Reduced coordination**: Reduces the need to manually keep multiple cloud templates in sync
 - **Regenerate artifacts**: Change intent → regenerate all artifacts → deploy to clouds
 
@@ -180,7 +180,7 @@ Chiral takes a different approach to multi-cloud infrastructure management compa
 
 **Current**:
 - Azure Bicep (modern declarative DSL)
-- GCP Terraform HCL (Infrastructure Manager)
+- GCP Terraform Blueprint (Infrastructure Manager)
 
 **Ideal**: Each cloud's best native IaC format (Bicep for Azure, Terraform for GCP)
 
@@ -217,7 +217,7 @@ chiral-infrastructure-as-code
 │   │   ├── manifest.json             # Metadata about the assembly, stacks, and assets.
 │   │   └── tree.json                 # A tree view of the stack's construct hierarchy.
 │   ├── azure-deployment.bicep        # [NATIVE] The deployable Azure Bicep enantiomer.
-│   └── gcp-deployment.tf             # [NATIVE] The deployable GCP Infrastructure Manager (Terraform HCL).
+│   └── gcp-deployment.tf             # [NATIVE] The deployable GCP Infrastructure Manager (Terraform Blueprint).
 ├── docs/                             # Documentation and Synchronization research.
 │   └── ideas/
 │       ├── AWS_CDK_To_Azure_Bicep_Guide.txt
@@ -250,7 +250,7 @@ chiral-infrastructure-as-code
 │   │   │   └── aws-cdk.ts            # [AWS] CDK constructs and classes
 │   │   └── declarative/              # [DECLARATIVE] DSL/template-based approaches
 │   │       ├── azure-bicep.ts        # [AZURE] Bicep template generation
-│   │       └── gcp-terraform.ts      # [GCP] Terraform HCL generation
+│   │       └── gcp-terraform.ts      # [GCP] Terraform Blueprint generation
 │   ├── intent/                       # [TYPES] Abstract business requirements.
 │   │   └── index.ts                  # Defines KubernetesIntent, DatabaseIntent, etc.
 │   ├── rosetta/                      # [TRANSLATION] Hardware mapping between clouds.
@@ -294,7 +294,7 @@ This project is named after the "Chiral Pattern" - a chemistry concept where mol
 
 - **CDK → CloudFormation**: AWS-native constructs that leverage AWS-specific APIs and services
 - **Bicep → ARM Templates**: Azure-native resource definitions optimized for Azure Resource Manager
-- **Terraform → HCL**: Provider-agnostic declarations that get translated to cloud-specific APIs
+- **Terraform → Blueprint**: Provider-agnostic declarations that get translated to cloud-specific APIs
 
 These approaches don't "superimpose" on concrete cloud resources - they produce different architectural patterns, different API calls, and different deployment lifecycles. The value lies in abstracting the **intent** (what you want) while allowing each cloud to use its optimal **implementation approach** (how to achieve it).
 
@@ -329,14 +329,14 @@ flowchart TD
         AH[src/adapters/<br/>────────────────────────────────────────────────────────────<br/>Programmatic & Declarative<br/>Cloud-Specific Adapters]:::header
         AWS_A[programmatic/aws-cdk.ts<br/>────────────────────────────────────────────────────────────<br/>PROGRAMMATIC<br/>AWS CDK Constructs<br/>TypeScript classes & methods<br/>Rich ecosystem and typing]:::awsNode
         AZURE_A[declarative/azure-bicep.ts<br/>────────────────────────────────────────────────────────────<br/>DECLARATIVE<br/>Azure Bicep Template<br/>Modern DSL for Azure<br/>Direct ARM compatibility]:::azNode
-        GCP_A[declarative/gcp-terraform.ts<br/>────────────────────────────────────────────────────────────<br/>DECLARATIVE<br/>GCP Terraform HCL<br/>Infrastructure Manager<br/>Native GCP IaC format]:::gcpNode
+        GCP_A[declarative/gcp-terraform.ts<br/>────────────────────────────────────────────────────────────<br/>DECLARATIVE<br/>GCP Terraform Blueprint<br/>Infrastructure Manager<br/>Native GCP IaC format]:::gcpNode
     end
 
     subgraph DIST[Artifacts]
         DH[dist/ - Generated Artifacts<br/>────────────────────────────────────────────────────────────<br/>Native Cloud IaC Formats]:::header
         AWS_D[aws-assembly/<br/>────────────────────────────────────────────────────────────<br/>CloudFormation Template<br/>AwsStack.template.json<br/>CDK Assets & Manifest]:::awsNode
         AZURE_D[azure-deployment.bicep<br/>────────────────────────────────────────────────────────────<br/>Azure Bicep Template<br/>Native ARM DSL<br/>Deployable Azure template]:::azNode
-        GCP_D[gcp-deployment.tf<br/>────────────────────────────────────────────────────────────<br/>Terraform HCL<br/>Infrastructure Manager<br/>Deployable GCP blueprint]:::gcpNode
+        GCP_D[gcp-deployment.tf<br/>────────────────────────────────────────────────────────────<br/>Terraform Blueprint<br/>Infrastructure Manager<br/>Deployable GCP blueprint]:::gcpNode
     end
 
     AWS_C([Amazon Web Services<br/>────────────────────────────────────────────────────────────<br/>CloudFormation<br/>EKS - Elastic Kubernetes]):::awsNode
