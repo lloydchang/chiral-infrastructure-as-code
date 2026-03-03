@@ -88,3 +88,9 @@ When writing your code, use these specific terms to reinforce the pattern:
 ## Pipeline Summary
 
 We define our infrastructure in the **Chiral Config**. Our **Chiral Engine** synthesizes the native **Enantiomers** (CloudFormation and Bicep), which are then deployed to their respective clouds.
+
+---
+
+## License
+
+AGPL-3.0
