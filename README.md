@@ -53,7 +53,7 @@ chiral --config config.js
 This generates:
 - `aws-assembly/` (Directory of CDK and CloudFormation Template)
 - `azure-deployment.bicep` (Azure Bicep Template)
-- `gcp-deployment.tf` (GCP Terraform Blueprint)
+- `gcp-deployment.tf` (Google Infrastructure Manager Terraform Blueprint)
 
 ### Importing Existing IaC
 
@@ -113,7 +113,7 @@ Its metaphorical name emphasizes that the outputs are structurally identical in 
 
 ---
 
-> We define our infrastructure in the **Chiral Config**. The **Chiral Engine** generates the native **Enantiomers** (for example, AWS CDK, AWS CloudFormation, Azure Bicep, Azure Resource Manager, Google Infrastructure Manager Terraform Blueprints), which are then deployed to their respective clouds.
+> We define our infrastructure in the **Chiral Config**. The **Chiral Engine** generates the native **Enantiomers** (for example, AWS CDK, AWS CloudFormation, Azure Bicep, Azure Resource Manager, Google Infrastructure Manager Terraform Blueprint), which are then deployed to their respective clouds.
 
 ---
 
@@ -159,7 +159,7 @@ For a deeper dive into **why multi-cloud infrastructure management is fundamenta
 
 ### Native Artifacts
 
-Chiral produces native cloud artifacts that can be deployed independently: AWS CDK and CloudFormation for AWS, Azure Bicep for Azure, and GCP Infrastructure Manager (Terraform Blueprint) for GCP. These are standard cloud templates that work with native cloud tooling, with GCP's Terraform Blueprint leveraging Infrastructure Manager for state-managed deployment, avoiding traditional Terraform state issues.
+Chiral produces native cloud artifacts that can be deployed independently: AWS CDK and CloudFormation for AWS, Azure Bicep for Azure, and Google Infrastructure Manager Terraform Blueprint. These are standard cloud templates that work with native cloud tooling. Meanwhile, [Google Infrastructure Manager Terraform Blueprint](https://cloud.google.com/blog/products/management-tools/introducing-infrastructure-manager-powered-by-terraform), is a managed service, reducing self-management overhead.
 
 **Autoscaling Support:**
 - **AWS EKS**: Auto-scaling node groups with `minSize`/`maxSize` from intent
@@ -169,7 +169,7 @@ Chiral produces native cloud artifacts that can be deployed independently: AWS C
 **State Management Considerations:**
 - **AWS CDK/CloudFormation**: Managed natively by AWS; no external state files required.
 - **Azure Bicep/ARM**: Handled by Azure Resource Manager; built-in consistency and rollback.
-- **GCP Infrastructure Manager**: Google Infrastructure Manager runs Terraform as a managed service. Users deploy via Terraform configurations or Blueprints without directly handling state. The service handles state storage, locking, and policy enforcement, reducing operational and compliance overhead. Core Terraform risks, such as shared mutable state and partial apply failures, remain but are managed by Google rather than by individual teams. See [docs/CHALLENGES.md](docs/CHALLENGES.md) for details on these structural risks.
+- **GCP Infrastructure Manager**: Google Infrastructure Manager runs Terraform as a managed service. Users deploy via Google Infrastructure Manager Terraform Blueprint without directly handling state. The service handles state storage, locking, and policy enforcement, reducing operational and compliance overhead. Core Terraform risks, such as shared mutable state and partial apply failures, remain but are managed by Google rather than by individual teams. See [docs/CHALLENGES.md](docs/CHALLENGES.md) for details on these structural risks.
 
 ## Chiral vs Terraform State Management
 
@@ -220,7 +220,7 @@ gcloud infra-manager blueprints apply --gcp-deployment.tf
 Chiral takes a different approach to multi-cloud infrastructure management compared to traditional IaC tools:
 
 ### Multi-Cloud Synchronization
-- **Single intent change**: Modify intent once → generates AWS CDK and CloudFormation, Azure Bicep, and GCP Infrastructure Manager (Terraform Blueprint)
+- **Single intent change**: Modify intent once → generates AWS CDK and CloudFormation, Azure Bicep, and Google Infrastructure Manager Terraform Blueprint
 - **Reduced coordination**: Reduces the need to manually keep multiple cloud templates in sync
 - **Regenerate artifacts**: Change intent → regenerate all artifacts → deploy to clouds
 
@@ -264,7 +264,7 @@ Chiral takes a different approach to multi-cloud infrastructure management compa
 
 **Current**:
 - Azure Bicep (modern declarative DSL)
-- GCP Terraform Blueprint (Infrastructure Manager)
+- Google Infrastructure Manager Terraform Blueprint
 
 **Ideal**: Each cloud's best native IaC format (Bicep for Azure, Terraform for GCP)
 
@@ -303,7 +303,7 @@ chiral-infrastructure-as-code
 │   │   ├── manifest.json             # Metadata about the assembly, stacks, and assets.
 │   │   └── tree.json                 # A tree view of the stack's construct hierarchy.
 │   ├── azure-deployment.bicep        # [NATIVE] The deployable Azure Bicep enantiomer.
-│   └── gcp-deployment.tf             # [NATIVE] The deployable GCP Infrastructure Manager (Terraform Blueprint).
+│   └── gcp-deployment.tf             # [NATIVE] The deployable Google Infrastructure Manager Terraform Blueprint.
 ├── docs/                             # Documentation and Synchronization research.
 │   └── ideas/
 │       ├── AWS_CDK_To_Azure_Bicep_Guide.md
@@ -336,7 +336,7 @@ chiral-infrastructure-as-code
 │   │   │   └── aws-cdk.ts            # [AWS] CDK constructs and classes
 │   │   └── declarative/              # [DECLARATIVE] DSL/template-based approaches
 │   │       ├── azure-bicep.ts        # [AZURE] Bicep template generation
-│   │       └── gcp-terraform.ts      # [GCP] Terraform Blueprint generation
+│   │       └── gcp-terraform.ts      # [GCP] Google Infrastructure Manager Terraform Blueprint generation
 │   ├── intent/                       # [TYPES] Abstract business requirements.
 │   │   └── index.ts                  # Defines KubernetesIntent, DatabaseIntent, etc.
 │   ├── translation/                   # [TRANSLATION] Hardware mapping between clouds.
@@ -380,7 +380,7 @@ This project is named after the "Chiral Pattern" - a chemistry concept where mol
 
 - **CDK → CloudFormation**: AWS-native constructs that leverage AWS-specific APIs and services
 - **Bicep → ARM Templates**: Azure-native resource definitions optimized for Azure Resource Manager
-- **Terraform → Blueprint**: Provider-agnostic declarations that get translated to cloud-specific APIs
+- **Google Infrastructure Manager Terraform Blueprint**: Provider-agnostic declarations that get translated to cloud-specific APIs
 
 These approaches don't "superimpose" on concrete cloud resources - they produce different architectural patterns, different API calls, and different deployment lifecycles. The value lies in abstracting the **intent** (what you want) while allowing each cloud to use its optimal **implementation approach** (how to achieve it).
 
@@ -415,14 +415,14 @@ flowchart TD
         AH[src/adapters/<br/>────────────────────────────────────────────────────────────<br/>Programmatic & Declarative<br/>Cloud-Specific Adapters]:::header
         AWS_A[programmatic/aws-cdk.ts<br/>────────────────────────────────────────────────────────────<br/>PROGRAMMATIC<br/>AWS CDK Constructs<br/>TypeScript classes & methods<br/>Rich ecosystem and typing]:::awsNode
         AZURE_A[declarative/azure-bicep.ts<br/>────────────────────────────────────────────────────────────<br/>DECLARATIVE<br/>Azure Bicep Template<br/>Modern DSL for Azure<br/>Direct ARM compatibility]:::azNode
-        GCP_A[declarative/gcp-terraform.ts<br/>────────────────────────────────────────────────────────────<br/>DECLARATIVE<br/>GCP Terraform Blueprint<br/>Infrastructure Manager<br/>Native GCP IaC format]:::gcpNode
+        GCP_A[declarative/gcp-terraform.ts<br/>────────────────────────────────────────────────────────────<br/>DECLARATIVE<br/>Google Infrastructure Manager Terraform Blueprint<br/> Terraform's Declarative Syntax<br/>Reusable Modules]:::gcpNode
     end
 
     subgraph DIST[Artifacts]
         DH[dist/ - Generated Artifacts<br/>────────────────────────────────────────────────────────────<br/>Native Cloud IaC Formats]:::header
         AWS_D[aws-assembly/<br/>────────────────────────────────────────────────────────────<br/>CloudFormation Template<br/>AwsStack.template.json<br/>CDK Assets & Manifest]:::awsNode
         AZURE_D[azure-deployment.bicep<br/>────────────────────────────────────────────────────────────<br/>Azure Bicep Template<br/>Native ARM DSL<br/>Deployable Azure template]:::azNode
-        GCP_D[gcp-deployment.tf<br/>────────────────────────────────────────────────────────────<br/>Terraform Blueprint<br/>Infrastructure Manager<br/>Deployable GCP blueprint]:::gcpNode
+        GCP_D[gcp-deployment.tf<br/>────────────────────────────────────────────────────────────<br/>Google Infrastructure Manager Terraform Blueprint<br/>Terraform's Declarative Syntax<br/>Deployable Google Infrastructure Manager Terraform Blueprint]:::gcpNode
     end
 
     AWS_C([Amazon Web Services<br/>────────────────────────────────────────────────────────────<br/>CloudFormation<br/>EKS - Elastic Kubernetes]):::awsNode
@@ -537,7 +537,7 @@ chiral-infrastructure-as-code
 │   ├── adapters/                     # [LOGIC] Implementation approaches.
 │   │   ├── declarative/              # [DECLARATIVE] DSL/template-based approaches
 │   │   │   ├── azure-bicep.ts        # [AZURE] Bicep template generation
-│   │   │   └── gcp-terraform.ts      # [GCP] Terraform Blueprint generation
+│   │   │   └── gcp-terraform.ts      # [GCP] Google Infrastructure Manager Terraform Blueprint generation
 │   │   └── programmatic/             # [PROGRAMMATIC] CDK-based imperative approach
 │   │       └── aws-cdk.ts            # [AWS] CDK constructs and classes
 │   ├── intent/                       # [TYPES] Abstract business requirements.
