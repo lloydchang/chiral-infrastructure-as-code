@@ -43,6 +43,26 @@ Every tool that attempts cross-cloud management must handle state, and state bec
 
 This complexity scales non-linearly as you add more infrastructure platforms and environments.
 
+## Stateless vs Stateful IaC: User Perspective
+
+**Stateless Approaches Overview:**
+- **AWS CDK and CloudFormation**: Managed natively by AWS CloudFormation service.
+- **Azure Bicep and ARM**: Handled by Azure Resource Manager.
+- **GCP Infrastructure Manager Terraform Blueprint**: State managed by GCP Infrastructure Manager service.
+
+| Problem | Stateless Approaches | Stateful (Terraform) |
+|---------|----------------------|----------------------|
+| Multi-account spanning | Managed natively by cloud provider; deployments isolated per account/region with built-in security controls. | Cannot securely span accounts without breaking trust boundaries; state files must be shared or duplicated across accounts, risking exposure. |
+| State corruption | Cloud enforces consistency; failures roll back automatically without external state corruption. | Prone to corruption from concurrent modifications, network issues, or partial failures; manual recovery often required. |
+| Security risks | State managed internally by cloud; no external files to leak or misconfigure. | State files can leak sensitive data (e.g., secrets, IPs); must be encrypted and access-controlled externally. |
+| Backend management | No backend configuration needed; cloud handles storage and versioning natively. | Requires setup and maintenance of backends (Amazon S3, Azure Storage, Google Cloud Storage); migration between backends is complex and error-prone. |
+| Locking and concurrency | Cloud handles locking automatically; no user intervention for consistency. | Manual locking prevents concurrent changes but can cause deadlocks or require manual unlocking. |
+| Disaster recovery | Cloud replicates state internally; automatic recovery without user-managed backups. | State loss requires backups and manual restoration; complex for multi-environment setups. |
+| Operational overhead | Simplifies pipelines; native tooling integrates directly with cloud controls. | Adds complexity for CI/CD, auditing, and compliance due to external dependencies. |
+| Provider dependency | No provider dependencies; cloud services are native and reliable. | Dependent on third-party provider quality; bugs can corrupt state and require manual fixes. |
+| Versioning | Cloud handles versioning natively with audit logs and rollbacks. | No built-in versioning; requires Terraform Cloud, Git, or manual snapshots for state history. |
+| Upgrade complexity | Cloud services evolve without requiring user state migrations. | State tied to specific Terraform versions/backends, complicating upgrades and migrations. |
+
 ## Why Traditional Approaches Struggle
 
 ### Traditional IaC Tools (Terraform, Pulumi, etc.)
