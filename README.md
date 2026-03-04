@@ -55,12 +55,30 @@ This generates:
 - `azure-deployment.bicep` (Azure Bicep Template)
 - `gcp-deployment.tf` (GCP Terraform Blueprint)
 
+### Importing Existing IaC
+
+If you have existing infrastructure defined in Terraform, CloudFormation, or Bicep, you can import it into a Chiral config to get started:
+
+```bash
+npx ts-node src/main.ts import -s path/to/your/infrastructure.tf -p aws -o chiral.config.ts
+```
+
+Supported formats:
+- `.tf` (Terraform HCL)
+- `.tfstate` (Terraform state files)
+- `.yaml`/`.yml` (CloudFormation templates)
+- `.json` (CloudFormation templates)
+- `.bicep` (Azure Bicep templates)
+
+The import command attempts to map existing resources to Chiral intent, generating a starting config that you can refine. See [docs/MIGRATION.md](docs/MIGRATION.md) for detailed usage and limitations.
+
 ### Requirements
 
 - Node.js
 - For AWS deployment: AWS CDK CLI (`cdk`)
 - For Azure validation: Azure CLI (`az`)
 - For GCP deployment: Terraform CLI (`terraform`)
+- For importing Bicep: Azure CLI (`az`)
 
 ### Deployment
 
