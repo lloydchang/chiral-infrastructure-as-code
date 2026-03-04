@@ -23,7 +23,7 @@ describe('GcpTerraformAdapter', () => {
     }
   };
 
-  describe('synthesize method', () => {
+  describe('generate method', () => {
     it('should generate valid Terraform HCL', () => {
       const result = GcpTerraformAdapter.generate(testIntent);
 

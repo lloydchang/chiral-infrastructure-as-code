@@ -23,7 +23,7 @@ describe('AzureBicepAdapter', () => {
     }
   };
 
-  describe('synthesize method', () => {
+  describe('generate method', () => {
     it('should generate valid Bicep template', () => {
       const result = AzureBicepAdapter.generate(testIntent);
 

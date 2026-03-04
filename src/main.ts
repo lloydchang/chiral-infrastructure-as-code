@@ -2,7 +2,7 @@
 
 // 6. The Chiral Engine (Orchestrator)
 
-// The executable that synthesizes the logic from
+// The executable that generates the logic from
 //
 //   5. The Adapters (Logic)
 //     File: src/adapters/aws-left.ts
