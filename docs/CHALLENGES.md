@@ -181,9 +181,9 @@ While Chiral takes a unique intent-driven generation approach, other tools attem
 
 Each approach represents legitimate attempts to solve multi-cloud complexity, but they all carry different operational and architectural trade-offs. Chiral's intent-driven generation provides a complementary path focused on simplicity and native artifact generation.
 
-## Terraform State Management Challenges in GCP
+## Terraform State Management Challenges in Self-Managed Environments
 
-While Chiral uses Terraform for GCP to generate native Infrastructure Manager blueprints, the underlying Terraform state management introduces significant operational challenges. Based on industry assessments of Terraform state practices, the following risks are particularly relevant for GCP deployments:
+While Chiral uses Terraform in Self-Managed Environments to generate Terraform files, the underlying Terraform state management introduces significant operational challenges. Based on an assessment of Terraform state practices in self-managed environments, the following risks are particularly relevant:
 
 ### State Corruption and Recovery
 - **Corruption from partial applies**: Failed or interrupted `terraform apply` commands can leave state files in inconsistent states, requiring manual recovery procedures like `terraform taint` and resource replacement.
