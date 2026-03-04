@@ -2,25 +2,14 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"flag"
-	"fmt"
 	"log"
-	"os"
-	"path/filepath"
 
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk/plugin"
 )
 
 func main() {
-	if err := run(context.Background()); err != nil {
-		log.Fatalf("Failed to run Chiral Terraform provider: %v", err)
-	}
-}
-
-func run(ctx context.Context) error {
-	plugin.Serve(ctx, &plugin.ServeOpts{
+	plugin.Serve(context.Background(), plugin.ServeOpts{
 		Name: "chiral",
 		ProviderAddr: "registry.terraform.io/chiral/chiral",
 	})

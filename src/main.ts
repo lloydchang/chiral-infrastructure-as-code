@@ -885,90 +885,160 @@ program
 // Migrate command
 program
   .command('migrate')
-  .description('Migrate from Terraform to Chiral with analysis and guidance')
-  .requiredOption('-s, --source <path>', 'Path to Terraform state file (.tfstate) or directory')
+  .description('Migrate from Terraform or Pulumi to Chiral with analysis and guidance')
+  .requiredOption('-s, --source <path>', 'Path to IaC source (Terraform .tfstate or Pulumi project directory)')
   .requiredOption('-p, --provider <provider>', 'Cloud provider: aws, azure, gcp')
   .option('-o, --output <path>', 'Output path for chiral config', 'chiral.config.ts')
   .option('--strategy <strategy>', 'Migration strategy: greenfield, progressive, parallel', 'progressive')
-  .option('--analyze-only', 'Only analyze Terraform setup without migration', false)
+  .option('--analyze-only', 'Only analyze setup without migration', false)
+  .option('--iac-tool <tool>', 'IaC tool to migrate from: terraform, pulumi', 'terraform')
   .action(async (options) => {
     const sourcePath = path.resolve(options.source);
     const provider = options.provider as 'aws' | 'azure' | 'gcp';
     const outputPath = path.resolve(options.output);
     const strategy = options.strategy as 'greenfield' | 'progressive' | 'parallel';
+    const iacTool = options.iacTool as 'terraform' | 'pulumi';
 
-    console.log(`\n🔄 Terraform to Chiral Migration Analysis`);
+    console.log(`\n🔄 ${iacTool.charAt(0).toUpperCase() + iacTool.slice(1)} to Chiral Migration Analysis`);
     console.log(`   Source: ${sourcePath}`);
     console.log(`   Provider: ${provider}`);
     console.log(`   Strategy: ${strategy}`);
 
     try {
-      // Analyze Terraform setup first
-      await analyzeTerraformSetup(sourcePath, provider, true);
+      if (iacTool === 'terraform') {
+        // Analyze Terraform setup first
+        await analyzeTerraformSetup(sourcePath, provider, true);
 
-      if (options.analyzeOnly) {
-        console.log(`\n📊 Analysis complete. Use --no-analyze-only to proceed with migration.`);
-        console.log(`\n📋 Migration Strategy Overview:`);
-        console.log(getMigrationStrategyInfo(strategy));
-        return;
-      }
+        if (options.analyzeOnly) {
+          console.log(`\n📊 Analysis complete. Use --no-analyze-only to proceed with migration.`);
+          console.log(`\n📋 Migration Strategy Overview:`);
+          console.log(getMigrationStrategyInfo(strategy));
+          return;
+        }
 
-      // Generate migration plan
-      console.log(`\n📋 Generating Migration Plan...`);
-      const migrationPlan = await generateMigrationPlan(sourcePath, provider, strategy);
+        // Generate migration plan
+        console.log(`\n📋 Generating Migration Plan...`);
+        const migrationPlan = await generateMigrationPlan(sourcePath, provider, strategy);
 
-      console.log(`\n📝 Migration Plan:`);
-      console.log(`   Estimated Duration: ${migrationPlan.estimatedDuration}`);
-      console.log(`   Risk Level: ${migrationPlan.riskLevel}`);
-      console.log(`   Steps Required: ${migrationPlan.steps.length}`);
+        console.log(`\n📝 Migration Plan:`);
+        console.log(`   Estimated Duration: ${migrationPlan.estimatedDuration}`);
+        console.log(`   Risk Level: ${migrationPlan.riskLevel}`);
+        console.log(`   Steps Required: ${migrationPlan.steps.length}`);
 
-      if (migrationPlan.preRequisites.length > 0) {
-        console.log(`\n⚠️  Prerequisites:`);
-        migrationPlan.preRequisites.forEach(prereq => console.log(`   • ${prereq}`));
-      }
+        if (migrationPlan.preRequisites.length > 0) {
+          console.log(`\n⚠️  Prerequisites:`);
+          migrationPlan.preRequisites.forEach(prereq => console.log(`   • ${prereq}`));
+        }
 
-      console.log(`\n📋 Migration Steps:`);
-      migrationPlan.steps.forEach((step, index) => {
-        console.log(`   ${index + 1}. ${step.description}`);
-        if (step.notes) console.log(`      Note: ${step.notes}`);
-      });
+        console.log(`\n📋 Migration Steps:`);
+        migrationPlan.steps.forEach((step, index) => {
+          console.log(`   ${index + 1}. ${step.description}`);
+          if (step.notes) console.log(`      Note: ${step.notes}`);
+        });
 
-      // Confirm before proceeding
-      console.log(`\n🚨 This will generate a Chiral configuration from your Terraform state.`);
-      console.log(`   Ensure you have backups and understand the migration process.`);
+        // Confirm before proceeding
+        console.log(`\n🚨 This will generate a Chiral configuration from your Terraform state.`);
+        console.log(`   Ensure you have backups and understand the migration process.`);
 
-      // Import and migrate
-      const config = await importIaC(sourcePath, provider, 'migrated-infrastructure');
+        // Import and migrate
+        const config = await importIaC(sourcePath, provider, 'migrated-infrastructure');
 
-      // Add migration settings
-      config.migration = {
-        strategy: strategy,
-        sourceState: sourcePath,
-        validateCompliance: true,
-        rollbackPlan: migrationPlan.rollbackSteps
-      };
+        // Add migration settings
+        config.migration = {
+          strategy: strategy,
+          sourceState: sourcePath,
+          validateCompliance: true,
+          rollbackPlan: migrationPlan.rollbackSteps
+        };
 
-      writeChiralConfig(config, outputPath);
+        writeChiralConfig(config, outputPath);
 
-      console.log(`\n✅ Migration completed!`);
-      console.log(`   Config written to: ${outputPath}`);
-      console.log(`   Next steps:`);
-      console.log(`   1. Review the generated config for accuracy`);
-      console.log(`   2. Test with 'chiral validate --config ${outputPath}'`);
-      console.log(`   3. Generate artifacts with 'chiral --config ${outputPath}'`);
-      console.log(`   4. Deploy using cloud-native tools (no Terraform state required)`);
+        console.log(`\n✅ Migration completed!`);
+        console.log(`   Config written to: ${outputPath}`);
+        console.log(`   Next steps:`);
+        console.log(`   1. Review the generated config for accuracy`);
+        console.log(`   2. Test with 'chiral validate --config ${outputPath}'`);
+        console.log(`   3. Generate artifacts with 'chiral --config ${outputPath}'`);
+        console.log(`   4. Deploy using cloud-native tools (no Terraform state required)`);
 
-      if (migrationPlan.postMigration.length > 0) {
-        console.log(`\n📋 Post-Migration Tasks:`);
-        migrationPlan.postMigration.forEach(task => console.log(`   • ${task}`));
+        if (migrationPlan.postMigration.length > 0) {
+          console.log(`\n📋 Post-Migration Tasks:`);
+          migrationPlan.postMigration.forEach(task => console.log(`   • ${task}`));
+        }
+      } else if (iacTool === 'pulumi') {
+        // Analyze Pulumi setup first
+        await analyzePulumiSetup(sourcePath, provider, true);
+
+        if (options.analyzeOnly) {
+          console.log(`\n📊 Analysis complete. Use --no-analyze-only to proceed with migration.`);
+          console.log(`\n📋 Migration Strategy Overview:`);
+          console.log(getMigrationStrategyInfo(strategy));
+          return;
+        }
+
+        // Generate migration plan
+        console.log(`\n📋 Generating Migration Plan...`);
+        const migrationPlan = await generateMigrationPlan(sourcePath, provider, strategy);
+
+        console.log(`\n📝 Migration Plan:`);
+        console.log(`   Estimated Duration: ${migrationPlan.estimatedDuration}`);
+        console.log(`   Risk Level: ${migrationPlan.riskLevel}`);
+        console.log(`   Steps Required: ${migrationPlan.steps.length}`);
+
+        if (migrationPlan.preRequisites.length > 0) {
+          console.log(`\n⚠️  Prerequisites:`);
+          migrationPlan.preRequisites.forEach(prereq => console.log(`   • ${prereq}`));
+        }
+
+        console.log(`\n📋 Migration Steps:`);
+        migrationPlan.steps.forEach((step, index) => {
+          console.log(`   ${index + 1}. ${step.description}`);
+          if (step.notes) console.log(`      Note: ${step.notes}`);
+        });
+
+        // Confirm before proceeding
+        console.log(`\n🚨 This will generate a Chiral configuration from your Pulumi project.`);
+        console.log(`   Ensure you have backups and understand the migration process.`);
+
+        // Import and migrate
+        const config = await importIaC(sourcePath, provider, 'migrated-infrastructure');
+
+        // Add migration settings
+        config.migration = {
+          strategy: strategy,
+          sourceState: sourcePath,
+          validateCompliance: true,
+          rollbackPlan: migrationPlan.rollbackSteps
+        };
+
+        writeChiralConfig(config, outputPath);
+
+        console.log(`\n✅ Migration completed!`);
+        console.log(`   Config written to: ${outputPath}`);
+        console.log(`   Next steps:`);
+        console.log(`   1. Review the generated config for accuracy`);
+        console.log(`   2. Test with 'chiral validate --config ${outputPath}'`);
+        console.log(`   3. Generate artifacts with 'chiral --config ${outputPath}'`);
+        console.log(`   4. Deploy using cloud-native tools (no Pulumi state required)`);
+
+        if (migrationPlan.postMigration.length > 0) {
+          console.log(`\n📋 Post-Migration Tasks:`);
+          migrationPlan.postMigration.forEach(task => console.log(`   • ${task}`));
+        }
       }
 
     } catch (error) {
       console.error(`❌ Migration failed: ${error}`);
       console.error(`\n💡 Troubleshooting:`);
-      console.error(`   1. Check that your Terraform state files are not corrupted`);
-      console.error(`   2. Ensure you have the correct provider specified`);
-      console.error(`   3. Try running 'chiral analyze --source ${sourcePath} --provider ${provider}' first`);
+      if (iacTool === 'terraform') {
+        console.error(`   1. Check that your Terraform state files are not corrupted`);
+        console.error(`   2. Ensure you have the correct provider specified`);
+        console.error(`   3. Try running 'chiral analyze --source ${sourcePath} --provider ${provider}' first`);
+      } else if (iacTool === 'pulumi') {
+        console.error(`   1. Check that your Pulumi.yaml file is valid`);
+        console.error(`   2. Ensure you have the correct provider specified`);
+        console.error(`   3. Try running 'chiral analyze --source ${sourcePath} --provider ${provider}' first`);
+      }
       process.exit(1);
     }
   });
@@ -976,20 +1046,26 @@ program
 // Analyze command
 program
   .command('analyze')
-  .description('Analyze current Terraform setup for state management risks and costs')
-  .requiredOption('-s, --source <path>', 'Path to Terraform state file (.tfstate) or directory')
+  .description('Analyze current IaC setup for state management risks and costs')
+  .requiredOption('-s, --source <path>', 'Path to IaC source (Terraform .tfstate, Pulumi directory)')
   .requiredOption('-p, --provider <provider>', 'Cloud provider: aws, azure, gcp')
+  .option('--iac-tool <tool>', 'IaC tool to analyze: terraform, pulumi', 'terraform')
   .option('--cost-comparison', 'Show detailed cost comparison with Chiral', false)
   .action(async (options) => {
     const sourcePath = path.resolve(options.source);
     const provider = options.provider as 'aws' | 'azure' | 'gcp';
+    const iacTool = options.iacTool as 'terraform' | 'pulumi';
 
-    console.log(`\n🔍 Analyzing Terraform Setup`);
+    console.log(`\n🔍 Analyzing ${iacTool.charAt(0).toUpperCase() + iacTool.slice(1)} Setup`);
     console.log(`   Source: ${sourcePath}`);
     console.log(`   Provider: ${provider}`);
 
     try {
-      await analyzeTerraformSetup(sourcePath, provider, options.costComparison);
+      if (iacTool === 'terraform') {
+        await analyzeTerraformSetup(sourcePath, provider, options.costComparison);
+      } else if (iacTool === 'pulumi') {
+        await analyzePulumiSetup(sourcePath, provider, options.costComparison);
+      }
     } catch (error) {
       console.error(`❌ Analysis failed: ${error}`);
       process.exit(1);
@@ -1467,6 +1543,199 @@ async function analyzeTerraformSetup(sourcePath: string, provider: string, detai
   }
 }
 
+async function analyzePulumiSetup(sourcePath: string, provider: string, detailedCosts: boolean = false) {
+  console.log(`\n📋 Pulumi Setup Analysis`);
+
+  // Check if it's a directory containing Pulumi.yaml
+  const stats = fs.statSync(sourcePath);
+  if (!stats.isDirectory()) {
+    console.log(`⚠️  Pulumi analysis requires a directory containing Pulumi.yaml`);
+    return;
+  }
+
+  const pulumiYamlPath = path.join(sourcePath, 'Pulumi.yaml');
+  if (!fs.existsSync(pulumiYamlPath)) {
+    console.log(`⚠️  No Pulumi.yaml found at ${pulumiYamlPath}`);
+    return;
+  }
+
+  let totalResources = 0;
+  let projectConfig: any = {};
+  let hasBackend = false;
+  let backendType = 'local';
+  let language = 'unknown';
+  let stateCorruptionIssues: string[] = [];
+  let securityRisks: string[] = [];
+  let complexityIssues: string[] = [];
+
+  try {
+    // Parse Pulumi.yaml
+    const yamlContent = fs.readFileSync(pulumiYamlPath, 'utf8');
+    projectConfig = yaml.load(yamlContent);
+
+    console.log(`   📄 Pulumi.yaml found`);
+    console.log(`   📄 Project: ${projectConfig.name || 'unnamed'}`);
+    console.log(`   📄 Runtime: ${projectConfig.runtime || 'unknown'}`);
+
+    language = projectConfig.runtime || 'unknown';
+
+    // Check for backend configuration
+    if (projectConfig.backend?.url) {
+      hasBackend = true;
+      backendType = projectConfig.backend.url.includes('s3://') ? 's3' :
+                   projectConfig.backend.url.includes('azblob://') ? 'azblob' :
+                   projectConfig.backend.url.includes('gs://') ? 'gcs' : 'custom';
+    }
+
+    // Look for Pulumi program files
+    const programFiles = fs.readdirSync(sourcePath).filter(file => {
+      if (language === 'python') return file.endsWith('__main__.py') || file.endsWith('.py');
+      if (language === 'typescript' || language === 'nodejs') return file.endsWith('.ts') || file.endsWith('.js');
+      if (language === 'go') return file.endsWith('.go');
+      if (language === 'csharp' || language === 'dotnet') return file.endsWith('.cs');
+      return file.endsWith('.yaml') || file.endsWith('.yml');
+    });
+
+    console.log(`   📄 Program files: ${programFiles.join(', ')}`);
+
+    // Analyze YAML resources if present
+    if (projectConfig.resources) {
+      totalResources = Object.keys(projectConfig.resources).length;
+      console.log(`   📄 YAML Resources: ${totalResources}`);
+
+      // Analyze resource types
+      const resourceTypes = Object.values(projectConfig.resources).map((r: any) => r.type);
+      const uniqueTypes = [...new Set(resourceTypes)];
+      console.log(`   📄 Resource Types: ${uniqueTypes.join(', ')}`);
+    } else {
+      // Try to analyze program files for resource count estimation
+      console.log(`   📄 Analyzing program files for resource estimation...`);
+
+      for (const file of programFiles) {
+        if (file.endsWith('.yaml') || file.endsWith('.yml')) {
+          try {
+            const content = fs.readFileSync(path.join(sourcePath, file), 'utf8');
+            const yamlData = yaml.load(content);
+            if (yamlData?.resources) {
+              totalResources += Object.keys(yamlData.resources).length;
+            }
+          } catch (error) {
+            // Skip unparseable files
+          }
+        }
+      }
+    }
+
+    // Check for Pulumi state files
+    const stateFiles = fs.readdirSync(sourcePath).filter(file =>
+      file.startsWith('.pulumi/stacks/') || file.includes('stacks')
+    );
+
+    if (stateFiles.length > 0) {
+      console.log(`   📄 State files detected: ${stateFiles.length}`);
+      stateCorruptionIssues.push('Pulumi state files present - state management still applies');
+    }
+
+    // Check for sensitive data in YAML
+    const sensitivePatterns = [
+      /password/i,
+      /secret/i,
+      /api[_-]?key/i,
+      /token/i,
+      /certificate/i,
+      /private[_-]?key/i,
+      /access[_-]?key/i,
+      /connection[_-]?string/i
+    ];
+
+    sensitivePatterns.forEach(pattern => {
+      if (pattern.test(yamlContent)) {
+        securityRisks.push(`Sensitive data pattern detected in Pulumi.yaml: ${pattern.source}`);
+      }
+    });
+
+    // Complexity analysis
+    if (programFiles.length > 5) {
+      complexityIssues.push('Large number of program files suggests complex setup');
+    }
+
+    if (totalResources > 50) {
+      complexityIssues.push('High resource count may indicate complex migration');
+    }
+
+  } catch (error) {
+    console.log(`   ❌ Unable to parse Pulumi.yaml: ${error instanceof Error ? error.message : String(error)}`);
+    return;
+  }
+
+  console.log(`\n📊 Analysis Results:`);
+  console.log(`   Total Resources: ${totalResources}`);
+  console.log(`   Language: ${language}`);
+  console.log(`   Backend Type: ${backendType}`);
+  console.log(`   Provider: ${provider}`);
+
+  // Risk assessment for Pulumi
+  console.log(`\n⚠️  Risk Assessment:`);
+
+  // State management risks (Pulumi also has state!)
+  if (stateCorruptionIssues.length > 0) {
+    console.log(`   🔴 STATE MANAGEMENT ISSUES DETECTED:`);
+    stateCorruptionIssues.forEach(issue => console.log(`     • ${issue}`));
+  }
+
+  console.log(`   🟡 MEDIUM RISK: Pulumi state management (similar to Terraform)`);
+  console.log(`   🟡 MEDIUM RISK: Backend dependency for state storage`);
+
+  if (backendType === 'local') {
+    console.log(`   🔴 HIGH RISK: Local backend is single point of failure`);
+  }
+
+  if (totalResources > 100) {
+    console.log(`   🔴 HIGH RISK: Large resource count increases complexity`);
+  }
+
+  // Security risks
+  if (securityRisks.length > 0) {
+    console.log(`   🔴 SECURITY RISKS DETECTED:`);
+    securityRisks.forEach(risk => console.log(`     • ${risk}`));
+  }
+
+  // Complexity issues
+  if (complexityIssues.length > 0) {
+    console.log(`   🟡 COMPLEXITY CONCERNS:`);
+    complexityIssues.forEach(issue => console.log(`     • ${issue}`));
+  }
+
+  // Migration recommendations
+  console.log(`\n🚀 Migration Recommendations:`);
+  if (stateCorruptionIssues.length === 0) {
+    console.log(`   ✅ No immediate state corruption detected`);
+  } else {
+    console.log(`   ⚠️  Pulumi state management applies - consider state migration strategy`);
+  }
+
+  if (securityRisks.length === 0) {
+    console.log(`   ✅ No immediate security risks detected in config`);
+  } else {
+    console.log(`   ⚠️  Clean sensitive data from Pulumi configuration`);
+  }
+
+  console.log(`   💡 Use 'chiral migrate --source ${sourcePath} --provider ${provider} --iac-tool pulumi' to begin migration`);
+
+  // Cost analysis
+  if (detailedCosts) {
+    console.log(`\n💰 Cost Analysis:`);
+    // Pulumi doesn't have the same premium pricing as Terraform, but there are operational costs
+    const operationalCost = totalResources * 0.50; // Estimated operational overhead
+    const annualOperationalCost = operationalCost * 12;
+
+    console.log(`   Pulumi Operational Cost: $${operationalCost.toFixed(2)}/month (estimated)`);
+    console.log(`   Annual Operational Cost: $${annualOperationalCost.toFixed(2)}`);
+    console.log(`   Chiral Cost: $0/month (no state management fees)`);
+    console.log(`   Annual Savings: $${annualOperationalCost.toFixed(2)}`);
+  }
+}
+
 // Advanced state file analysis helper
 function analyzeStateFile(state: any, stateContent: string, filePath: string): {
   corruptionIssues: string[];
@@ -1793,6 +2062,6 @@ async function generateMigrationPlan(sourcePath: string, provider: string, strat
 }
 
 // Export helper functions for testing
-export { analyzeTerraformSetup, compareApproaches, getMigrationStrategyInfo, generateMigrationPlan };
+export { analyzeTerraformSetup, analyzePulumiSetup, compareApproaches, getMigrationStrategyInfo, generateMigrationPlan };
 
 program.parse();

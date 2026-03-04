@@ -22,7 +22,7 @@ export interface TerraformResource {
 }
 
 export class TerraformAdapter {
-  static generate(config: ChiralSystem, options: TerraformConfig = {}): string {
+  static generate(config: ChiralSystem, options: Partial<TerraformConfig> = {}): string {
     const provider = options.provider || 'aws';
     const regionalHardware = getRegionalHardwareMap(provider, config.region?.[provider] || 'us-east-1');
     
@@ -121,7 +121,7 @@ output "config" {
     `.trim();
   }
 
-  static generateResources(config: ChiralSystem, options: TerraformConfig = {}): TerraformResource[] {
+  static generateResources(config: ChiralSystem, options: Partial<TerraformConfig> = {}): TerraformResource[] {
     const provider = options.provider || 'aws';
     const resources: TerraformResource[] = [];
     
