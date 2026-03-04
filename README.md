@@ -138,6 +138,27 @@ chiral cost-estimate --config chiral.config.ts --detailed --provider azure
 - **Budget alerts**: Set cost thresholds and receive warnings
 - **Resource breakdown**: Detailed cost analysis by resource type
 
+### Prerequisites
+- **Node.js**: 18+ required
+- **Cloud CLIs**: Optional but recommended for validation and deployment
+- For AWS deployment: AWS CLI (`aws`)
+- For Azure deployment: Azure CLI (`az`)
+- For GCP deployment: Google Cloud CLI (`gcloud`)
+- For cost analysis (Azure): azure-cost-cli (optional, for enhanced cost estimation)
+- For cost analysis (AWS/GCP): infracost (optional, for enhanced cost estimation)
+
+### Deployment
+
+The `compile` command generates artifacts for all configured clouds. Deploy using native tools:
+
+**AWS**: Use CloudFormation CLI or CDK CLI
+**Azure**: Use Azure CLI with Bicep or deployment stacks for production
+**GCP**: Use Terraform CLI or Infrastructure Manager
+
+```bash
+npx ts-node src/main.ts import -s path/to/your/infrastructure.tf -p aws -o chiral.config.ts
+```
+
 ### Importing Existing IaC
 
 If you have existing infrastructure defined in Terraform, CloudFormation, or Bicep, you can import it into a Chiral config to get started:

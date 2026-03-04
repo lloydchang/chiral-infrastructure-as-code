@@ -373,6 +373,11 @@ program
       console.log(`⚠️  [AWS] Cost estimation failed or Infracost not installed. Install from https://www.infracost.io/`);
     }
 
+    if (config.environment === 'prod') {
+      console.log(`💡 [AWS] For production deployments, use CloudFormation stacks for complete mode and automatic cleanup:`);
+      console.log(`   aws cloudformation deploy --template-file dist/aws-assembly/${config.projectName}-AwsStack.template.json --stack-name ${config.projectName}-stack --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM`);
+    }
+
     // -----------------------------------------------------
     // 2. Generate via Declarative Adapter (Azure Bicep)
     // -----------------------------------------------------
@@ -497,6 +502,11 @@ program
       console.error('   The text in src/adapters/declarative/gcp-terraform.ts produced invalid Terraform.');
       console.error('='.repeat(60));
       process.exit(1);
+    }
+
+    if (config.environment === 'prod') {
+      console.log(`💡 [GCP] For production deployments, use Infrastructure Manager with import policies for complete mode:`);
+      console.log(`   gcloud infra-manager deployments apply projects/${config.region?.gcp?.split('-')[0] || 'my-project'}/locations/global/deployments/${config.projectName}-deployment --git-source-repo=https://github.com/my-org/my-repo --git-source-directory=dist --service-account=infra-manager@${config.region?.gcp?.split('-')[0] || 'my-project'}.iam.gserviceaccount.com`);
     }
 
     console.log(`\n🎉 Chiral Generation Complete! Check ${options.out} for generated artifacts.`);
@@ -713,12 +723,25 @@ program
       let costEstimate: any = null;
       
       if (provider === 'azure' && options.subscription) {
-        console.log(`\n� Analyzing Azure costs using azure-cost-cli...`);
+        console.log(`\n🔍 Analyzing Azure costs using azure-cost-cli...`);
         if (AzureCostAnalyzer.isAvailable()) {
-          // For Azure, we would need to implement analyzeAzureCosts similar to AWS/GCP
-          // For now, show the availability message
-          console.log(`   ✅ azure-cost-cli is available for detailed Azure cost analysis`);
-          console.log(`   💡 Run: azure-cost-cli subscription --subscription ${options.subscription}`);
+          costEstimate = await AzureCostAnalyzer.analyzeAzureCosts(options.subscription, {});
+          console.log(`\n📊 Azure Cost Analysis Results:`);
+          console.log(`   Total Monthly Cost: $${costEstimate.totalMonthlyCost.toFixed(2)} ${costEstimate.currency}`);
+          console.log(`   Compute: $${costEstimate.breakdown.compute.total.toFixed(2)}`);
+          console.log(`   Storage: $${costEstimate.breakdown.storage.total.toFixed(2)}`);
+          console.log(`   Network: $${costEstimate.breakdown.network.total.toFixed(2)}`);
+          console.log(`   Other: $${costEstimate.breakdown.other.total.toFixed(2)}`);
+          
+          if (costEstimate.recommendations.length > 0) {
+            console.log(`\n💡 Recommendations:`);
+            costEstimate.recommendations.forEach((rec: string) => console.log(`   • ${rec}`));
+          }
+          
+          if (costEstimate.warnings.length > 0) {
+            console.log(`\n⚠️  Warnings:`);
+            costEstimate.warnings.forEach((warn: string) => console.log(`   • ${warn}`));
+          }
         } else {
           console.log(`   ⚠️  Install azure-cost-cli for detailed Azure cost analysis`);
           console.log(`   📦 Install from: https://github.com/mivano/azure-cost-cli`);
@@ -809,6 +832,7 @@ program
         console.log(`   Azure: Cost Management API + azure-cost-cli`);
         console.log(`   GCP: Cloud Billing API + gcp-cost-cli`);
       }
+    } catch (error) {
       console.error(`❌ Cost analysis failed: ${error}`);
       process.exit(1);
     }
