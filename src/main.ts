@@ -865,78 +865,17 @@ program
   .requiredOption('-s, --source <path>', 'Path to IaC source file (.tf, .tfstate, .yaml, .json, .bicep)')
   .requiredOption('-p, --provider <provider>', 'Cloud provider: aws, azure, gcp')
   .option('-o, --output <path>', 'Output path for chiral config', 'chiral.config.ts')
-  .option('--terraform-bridge', 'Generate Terraform with cloud-native state delegation', false)
   .action(async (options) => {
     const sourcePath = path.resolve(options.source);
     const provider = options.provider as 'aws' | 'azure' | 'gcp';
     const outputPath = path.resolve(options.output);
 
     console.log(`\n🧪 Importing IaC from [${sourcePath}] for [${provider}]`);
-    if (options.terraformBridge) {
-      console.log(`🌉 Terraform bridge mode enabled - will delegate state to cloud provider`);
-    }
 
     try {
       const config = await importIaC(sourcePath, provider, path.basename(sourcePath, path.extname(sourcePath)));
-
-      if (options.terraformBridge) {
-        // Add Terraform bridge configuration
-        config.terraformBridge = {
-          enabled: true,
-          provider,
-          delegateState: true,
-          sourcePath
-        };
-      }
-
-      // Generate Terraform bridge if requested
-      if (config.terraformBridge?.enabled) {
-        console.log(`\n🌉 Generating Terraform bridge for ${config.terraformBridge.provider}...`);
-        const { TerraformAdapter } = await import('./adapters/declarative/terraform-adapter');
-        const { generateTerraformHcl } = await import('./utils/terraform-hcl');
-        
-        const terraformConfig = TerraformAdapter.generate(config, {
-          delegateState: config.terraformBridge.delegateState ?? true
-        });
-
-        // Write Terraform configuration
-        const terraformOutput = path.join(options.out, `${config.projectName}-terraform.tf`);
-        const terraformContent = generateTerraformHcl(terraformConfig);
-        fs.writeFileSync(terraformOutput, terraformContent);
-
-        // Write CloudFormation templates for delegation
-        const templateDir = path.join(options.out, 'terraform-templates');
-        if (!fs.existsSync(templateDir)) {
-          fs.mkdirSync(templateDir, { recursive: true });
-        }
-
-        // Copy template files
-        const templates = ['eks-template.json', 'rds-template.json', 'vpc-template.json', 'adfs-template.json'];
-        for (const template of templates) {
-          const templatePath = path.join(__dirname, 'adapters/declarative/terraform-templates', template);
-          if (fs.existsSync(templatePath)) {
-            const destPath = path.join(templateDir, template);
-            fs.copyFileSync(templatePath, destPath);
-          }
-        }
-
-        console.log(`✅ Terraform bridge generated: ${terraformOutput}`);
-        console.log(`📄 CloudFormation templates: ${templateDir}`);
-        console.log(`\n🌉 Terraform Bridge Mode:`);
-        console.log(`   State management delegated to ${config.terraformBridge.provider.toUpperCase()} native services`);
-        console.log(`   Use for gradual migration from Terraform to Chiral pattern`);
-        console.log(`   Deploy with: terraform apply terraform.tf`);
-      }
-
       writeChiralConfig(config, outputPath);
       console.log(`✅ Import completed. Config written to: ${outputPath}`);
-
-      if (options.terraformBridge) {
-        console.log(`\n🌉 Terraform Bridge Configuration:`);
-        console.log(`   State management delegated to ${provider.toUpperCase()} native services`);
-        console.log(`   Traditional Terraform state issues will be handled by cloud provider`);
-        console.log(`   Use this for gradual migration from Terraform to Chiral pattern`);
-      }
     } catch (error) {
       console.error(`❌ Import failed: ${error}`);
       process.exit(1);
