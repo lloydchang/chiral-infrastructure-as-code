@@ -28,21 +28,21 @@ export const config: ChiralSystem = {
   networkCidr: '10.0.0.0/16',
   
   k8s: {
-    version: '1.28',
+    version: '1.35',
     minNodes: 1,
     maxNodes: 3,
     size: 'small' // Resolves to t3.medium (AWS) / Standard_D2s_v3 (Azure) / e2-medium (GCP)
   },
   
   postgres: {
-    engineVersion: '15',
+    engineVersion: '18.3',
     size: 'small', // Resolves to db.t3.medium (AWS) / Standard_B2s (Azure) / db-f1-micro (GCP)
     storageGb: 20
   },
   
   adfs: {
     size: 'small', // Resolves to t3.large (AWS) / Standard_D2s_v3 (Azure) / e2-medium (GCP)
-    windowsVersion: '2022'
+    windowsVersion: '11 26H2 Build 26300.7877'
   }
 };
 ```
@@ -79,7 +79,7 @@ export const config: ChiralSystem = {
   },
 
   k8s: {
-    version: '1.29',
+    version: '1.35',
     minNodes: 2,
     maxNodes: 5,
     size: 'large' // Resolves to m5.large (AWS) / Standard_D4s_v3 (Azure) / n1-standard-2 (GCP)
