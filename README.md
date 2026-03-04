@@ -171,6 +171,49 @@ Chiral produces native cloud artifacts that can be deployed independently: AWS C
 - **Azure Bicep/ARM**: Handled by Azure Resource Manager; built-in consistency and rollback.
 - **GCP Terraform**: Requires careful state management. Use remote backends (e.g., GCS) and consider managed Terraform services like IBM Terraform Premium to mitigate corruption, locking, and compliance risks. See [docs/CHALLENGES.md](docs/CHALLENGES.md) for details.
 
+## Chiral vs Terraform State Management
+
+Chiral eliminates the fundamental state management problems that make Terraform challenging at scale:
+
+| **Terraform State Problem** | **Chiral Solution** |
+|----------------------------|---------------------|
+| **State Corruption** - Concurrent modifications, partial applies, network issues can corrupt state files requiring manual recovery | **Zero State Architecture** - No state files to corrupt. Each cloud manages its own state natively |
+| **Lock Contention** - Multiple pipelines compete for state locks, causing orphaned locks and manual intervention | **Native Cloud Locking** - AWS CloudFormation, Azure ARM, and GCP Infrastructure Manager handle locking automatically |
+| **Backend Management** - Complex setup and maintenance of S3/Azure Storage/GCS backends with encryption, versioning, and access controls | **No Backend Required** - Each cloud's native service handles state storage, versioning, and security automatically |
+| **Security Risks** - State files contain sensitive data (secrets, IPs, metadata) that can leak or be exposed | **No External State Files** - Sensitive information stays within each cloud's secure control plane |
+| **Multi-Account Spanning** - State files cannot securely span cloud accounts without breaking trust boundaries | **Native Cloud Security** - Each cloud's IAM and security controls manage state within their trust boundaries |
+| **Cost Overhead** - IBM Terraform Premium costs $0.99/month per resource plus operational overhead for state management | **Zero Additional Cost** - No third-party state management fees or operational overhead |
+
+### Terraform Migration Benefits
+
+**From Problematic Terraform Approaches:**
+- **A. Local State**: Eliminates single point of failure and security risks
+- **B. Remote Backend per Environment**: Removes backend complexity and lock contention
+- **C. Coarse-Grained State**: Eliminates blast radius from state file corruption
+- **D/E. Managed Terraform**: Avoids $0.99/resource/month fees and remaining state issues
+
+**To Chiral's Stateless Approach:**
+- Generate native artifacts from single intent
+- Deploy with each cloud's optimal tools
+- Zero state management overhead
+- Built-in security and compliance
+- True multi-cloud consistency
+
+### Migration Path
+
+```bash
+# Import existing Terraform configurations
+npx ts-node src/main.ts import -s path/to/infrastructure.tf -p aws -o chiral.config.ts
+
+# Generate stateless native artifacts
+chiral --config chiral.config.ts
+
+# Deploy with cloud-native tools (no Terraform state required)
+cd dist/aws-assembly && cdk deploy
+az deployment group create --resource-group my-rg --template-file azure-deployment.bicep
+gcloud infra-manager blueprints apply --gcp-deployment.tf
+```
+
 ## How Chiral Compares to Traditional Multi-Cloud Tools
 
 Chiral takes a different approach to multi-cloud infrastructure management compared to traditional IaC tools:

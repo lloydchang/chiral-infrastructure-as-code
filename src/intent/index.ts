@@ -6,6 +6,8 @@
 
 export type EnvironmentTier = 'dev' | 'prod';
 export type WorkloadSize = 'small' | 'large';
+export type ComplianceFramework = 'none' | 'soc2' | 'iso27001' | 'hipaa' | 'fedramp';
+export type DeploymentStrategy = 'greenfield' | 'progressive' | 'parallel';
 
 export interface KubernetesIntent {
   version: string;
@@ -46,6 +48,25 @@ export interface ChiralSystem {
       bucket: string;
       prefix?: string; // Optional path prefix within bucket
     };
+  };
+  
+  // State management and migration settings
+  migration?: {
+    strategy?: DeploymentStrategy; // How to migrate from existing infrastructure
+    sourceState?: string; // Path to existing Terraform state file for migration
+    validateCompliance?: boolean; // Check compliance during migration
+  };
+  
+  // Compliance and data sovereignty settings
+  compliance?: {
+    framework?: ComplianceFramework; // Compliance framework requirements
+    dataResidency?: {
+      aws?: string; // AWS region for data residency
+      azure?: string; // Azure region for data residency
+      gcp?: string; // GCP region for data residency
+    };
+    encryptionAtRest?: boolean; // Require encryption at rest
+    auditLogging?: boolean; // Enable comprehensive audit logging
   };
   
   // The Three Pillars
