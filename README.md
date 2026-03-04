@@ -14,30 +14,93 @@ npm install -g chiral-infrastructure-as-code
 
 ## Usage
 
-Create a config file (e.g., `config.js` or `config.ts`):
+Create a config file (e.g., `chiral.config.ts`):
 
-```javascript
-module.exports = {
+> 💡 **Tip**: The reference configuration is available in `./chiral.config.ts` (the source of truth). Copy and modify as needed for your environment.
+
+**For development (minimal example):**
+```typescript
+import { ChiralSystem } from './src/intent';
+
+export const config: ChiralSystem = {
   projectName: 'myproject',
   environment: 'dev',
   networkCidr: '10.0.0.0/16',
+  
   k8s: {
     version: '1.28',
     minNodes: 1,
     maxNodes: 3,
-    size: 'small'
+    size: 'small' // Resolves to t3.medium (AWS) / Standard_D2s_v3 (Azure) / e2-medium (GCP)
   },
+  
   postgres: {
     engineVersion: '15',
-    storageGb: 20,
-    size: 'small'
+    size: 'small', // Resolves to db.t3.medium (AWS) / Standard_B2s (Azure) / db-f1-micro (GCP)
+    storageGb: 20
   },
+  
   adfs: {
-    size: 'small',
+    size: 'small', // Resolves to t3.large (AWS) / Standard_D2s_v3 (Azure) / e2-medium (GCP)
     windowsVersion: '2022'
   }
 };
 ```
+
+**Complete reference configuration:**
+
+<details>
+<summary>📄 View full chiral.config.ts</summary>
+
+```typescript
+// File: chiral.config.ts
+
+// 4. The DNA (Configuration)
+
+// The Single Source of Truth for the deployment.
+
+import { ChiralSystem } from './src/intent';
+
+export const config: ChiralSystem = {
+  projectName: 'identity-platform',
+  environment: 'prod',
+  networkCidr: '10.0.0.0/16',
+
+  // Optional: Configure regions for each cloud (defaults will be used if not specified)
+  region: {
+    aws: 'us-east-1',      // Default: from CDK env vars
+    azure: 'East US',      // Default: resourceGroup().location
+    gcp: 'us-central1'     // Default: us-central1
+  },
+
+  // Optional: Configure network settings (defaults will be calculated if not specified)
+  network: {
+    subnetCidr: '10.0.1.0/24'  // Default: calculated from networkCidr (/16 -> /24)
+  },
+
+  k8s: {
+    version: '1.29',
+    minNodes: 2,
+    maxNodes: 5,
+    size: 'large' // Resolves to m5.large (AWS) / Standard_D4s_v3 (Azure) / n1-standard-2 (GCP)
+  },
+
+  postgres: {
+    engineVersion: '15',
+    size: 'large', // Resolves to db.m5.large (AWS) / Standard_D4s_v3 (Azure) / db-custom-2-4096 (GCP)
+    storageGb: 100
+  },
+
+  adfs: {
+    size: 'large', // Resolves to m5.xlarge (AWS) / Standard_D4s_v3 (Azure) / n1-standard-2 (GCP)
+    windowsVersion: '2022'
+  }
+};
+```
+
+</details>
+
+**Alternative:** [Open full configuration file](./chiral.config.ts)
 
 **Key Features:**
 - **minNodes/maxNodes**: Controls Kubernetes cluster sizing and autoscaling bounds
