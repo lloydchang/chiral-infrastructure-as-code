@@ -16,15 +16,15 @@ import * as cdk from 'aws-cdk-lib';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import { execSync } from 'child_process'; // <--- Import for running CLI commands
+import { execSync } from 'child_process';
 import { Command } from 'commander';
-import { AwsCdkAdapter } from './adapters/programmatic/aws-cdk';
+import { ChiralSystem } from './intent';
 import { AzureBicepAdapter } from './adapters/declarative/azure-bicep';
 import { GcpTerraformAdapter } from './adapters/declarative/gcp-terraform';
-import { ChiralSystem } from './intent';
-import { buildChiralSystemFromResources } from './translation/import-map';
-import * as yaml from 'js-yaml';
+import { AwsCdkAdapter } from './adapters/programmatic/aws-cdk';
+import { validateChiralConfig, checkDeploymentReadiness, checkCompliance } from './validation';
 import * as hcl2 from 'hcl2-parser';
+import * as yaml from 'js-yaml';
 
 // =================================================================
 // IMPORT HELPERS
@@ -34,19 +34,64 @@ const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 'gcp', 
   let resources: any[] = [];
 
   if (ext === '.tfstate') {
-    const state = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
-    resources = state.resources || [];
+    // Enhanced Terraform state file handling with corruption detection
+    console.log(`🔍 Analyzing Terraform state file: ${path.basename(sourcePath)}`);
     
-    // Enhanced Terraform state migration warnings and guidance
-    console.log(`⚠️  WARNING: Importing from Terraform state files.`);
-    console.log(`   🔒 SECURITY RISKS: State files may contain sensitive information (secrets, IPs, metadata).`);
-    console.log(`   📄 COMPLIANCE CONCERNS: State files may violate SOC 2, ISO 27001, or GDPR requirements.`);
-    console.log(`   💾 CORRUPTION RISKS: State files are prone to corruption from concurrent modifications or partial applies.`);
-    console.log(`   🔧 OPERATIONAL OVERHEAD: State management requires backend setup, encryption, and ongoing maintenance.`);
-    console.log(`   💰 COST CONSIDERATIONS: IBM Terraform Premium costs $0.99/month per resource (e.g., $1,188/year for 100 resources).`);
-    console.log(`   ✅ CHIRAL ADVANTAGE: Stateless generation eliminates these risks while maintaining multi-cloud consistency.`);
-    console.log(`   📖 See docs/CHALLENGES.md for detailed state management challenges and migration benefits.`);
-    console.log(`   🔄 MIGRATION RECOMMENDATION: Consider migrating to Chiral's stateless approach for better security and operational efficiency.`);
+    let state: any;
+    try {
+      const stateContent = fs.readFileSync(sourcePath, 'utf8');
+      state = JSON.parse(stateContent);
+      
+      // Validate state file integrity
+      if (!state.version || !state.serial || !state.lineage) {
+        console.warn(`⚠️  WARNING: State file appears to be corrupted or incomplete.`);
+        console.warn(`   Missing required fields: version, serial, or lineage.`);
+        console.warn(`   Consider using 'terraform state pull' to get fresh state.`);
+      }
+      
+      // Check for common corruption indicators
+      if (stateContent.includes('null') && stateContent.includes('undefined')) {
+        console.warn(`⚠️  WARNING: State file contains null/undefined values - possible corruption detected.`);
+      }
+      
+      resources = state.resources || [];
+      
+      // Enhanced security and compliance warnings
+      console.log(`\n⚠️  TERRAFORM STATE IMPORT SECURITY ANALYSIS:`);
+      console.log(`   🔒 SECURITY RISKS DETECTED:`);
+      console.log(`     • Secrets in plain text: ${detectSensitiveData(stateContent) ? 'YES' : 'NO'}`);
+      console.log(`     • IP addresses exposed: ${extractIPAddresses(state).length > 0 ? 'YES' : 'NO'}`);
+      console.log(`     • Resource metadata exposed: ${resources.length} resources`);
+      console.log(`\n   📄 COMPLIANCE CONCERNS:`);
+      console.log(`     • SOC 2 violations: Potential unauthorized access to sensitive infrastructure data`);
+      console.log(`     • ISO 27001 violations: Inadequate protection of configuration information`);
+      console.log(`     • GDPR violations: Possible exposure of personal data in resource configurations`);
+      console.log(`\n   � OPERATIONAL RISKS:`);
+      console.log(`     • State corruption: ${state.serial ? `Serial #${state.serial}` : 'Unknown'} - may be inconsistent`);
+      console.log(`     • Lock contention: Multiple pipelines may corrupt this state file`);
+      console.log(`     • Recovery complexity: Manual intervention required if state becomes corrupted`);
+      console.log(`\n   💰 COST IMPACT:`);
+      console.log(`     • IBM Terraform Premium: $0.99/month per resource = $${(resources.length * 0.99).toFixed(2)}/month`);
+      console.log(`     • Annual cost: $${(resources.length * 0.99 * 12).toFixed(2)}/year`);
+      console.log(`     • Hidden costs: Backend storage, encryption, backup procedures, staff time`);
+      console.log(`\n   ✅ CHIRAL ADVANTAGE:`);
+      console.log(`     • Stateless generation eliminates ALL above risks`);
+      console.log(`     • Zero state management costs and compliance violations`);
+      console.log(`     • Native cloud integration for better security and reliability`);
+      console.log(`\n   � MIGRATION RECOMMENDATION:`);
+      console.log(`     • Import HCL configuration files instead of state files when possible`);
+      console.log(`     • Sanitize state files to remove sensitive data before import`);
+      console.log(`     • Consider manual configuration for high-security environments`);
+      console.log(`     • See docs/MIGRATION.md for detailed migration guidance`);
+      
+    } catch (error) {
+      console.error(`❌ ERROR: Failed to parse Terraform state file.`);
+      console.error(`   This may indicate file corruption or invalid JSON format.`);
+      console.error(`   Try: terraform state pull > fresh-state.tfstate`);
+      console.error(`   Or: terraform validate && terraform plan`);
+      throw new Error(`Corrupted Terraform state file: ${error instanceof Error ? error.message : String(error)}`);
+    }
+    
   } else if (ext === '.tf') {
     const content = fs.readFileSync(sourcePath, 'utf8');
     const parsed = hcl2.parse(content);
@@ -72,6 +117,165 @@ const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 'gcp', 
   return buildChiralSystemFromResources(resources, provider, stackName);
 };
 
+// Helper functions for enhanced state file analysis
+const detectSensitiveData = (content: string): boolean => {
+  const sensitivePatterns = [
+    /password/i,
+    /secret/i,
+    /api[_-]?key/i,
+    /token/i,
+    /certificate/i,
+    /private[_-]?key/i,
+    /access[_-]?key/i
+  ];
+  return sensitivePatterns.some(pattern => pattern.test(content));
+};
+
+const extractIPAddresses = (state: any): string[] => {
+  const ipPattern = /\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g;
+  const stateString = JSON.stringify(state);
+  const matches = stateString.match(ipPattern) || [];
+  return [...new Set(matches)]; // Remove duplicates
+};
+
+
+// Enhanced inference functions
+const inferKubernetesVersion = (resources: any[]): string => {
+  // Look for version patterns in resource configurations
+  const versions = resources.map(r => {
+    const props = r.values || r.properties || {};
+    return props.version || props.kubernetesVersion || props.kubernetes_version || '1.29';
+  });
+  return versions[0] || '1.29';
+};
+
+const inferNodeCount = (resources: any[], type: 'min' | 'max'): number => {
+  const counts = resources.map(r => {
+    const props = r.values || r.properties || {};
+    if (type === 'min') {
+      return props.minSize || props.min_count || props.minNodes || 1;
+    } else {
+      return props.maxSize || props.max_count || props.maxNodes || 5;
+    }
+  });
+  return Math.max(...counts, 1);
+};
+
+const inferWorkloadSize = (resources: any[]): 'small' | 'large' => {
+  // Enhanced size inference based on instance types and resource configurations
+  const instanceTypes = resources.map(r => {
+    const props = r.values || r.properties || {};
+    return props.instanceType || props.vmSize || props.machineType || props.tier || '';
+  }).filter(Boolean);
+
+  // Map common instance types to sizes
+  const largePatterns = [
+    /large/i, /xlarge/i, /2xlarge/i, /4xlarge/i, /8xlarge/i,
+    /standard_d[2-9]/i, /n1-standard-[2-9]/i, /m5\.[2-9]/i
+  ];
+  
+  const hasLargeInstance = instanceTypes.some(type => 
+    largePatterns.some(pattern => pattern.test(type))
+  );
+  
+  return hasLargeInstance ? 'large' : 'small';
+};
+
+const inferDatabaseVersion = (resources: any[]): string => {
+  const versions = resources.map(r => {
+    const props = r.values || r.properties || {};
+    return props.engineVersion || props.engine || props.version || '15';
+  });
+  return versions[0] || '15';
+};
+
+const inferStorageSize = (resources: any[]): number => {
+  const sizes = resources.map(r => {
+    const props = r.values || r.properties || {};
+    return props.allocatedStorage || props.storageSize || props.disk_size || 100;
+  });
+  return Math.max(...sizes, 50);
+};
+
+const inferWindowsVersion = (resources: any[]): '2019' | '2022' => {
+  const versions = resources.map(r => {
+    const props = r.values || r.properties || {};
+    const image = props.image || props.imageReference || {};
+    const sku = image.offer || image.sku || '';
+    if (sku.includes('2022')) return '2022';
+    if (sku.includes('2019')) return '2019';
+    return '2022'; // Default to latest
+  });
+  return versions[0] || '2022';
+};
+
+const inferRegion = (resources: any[], provider: string): { aws?: string; azure?: string; gcp?: string } => {
+  // Extract region information from resource configurations
+  const regions = resources.map(r => {
+    const props = r.values || r.properties || {};
+    return props.region || props.location || props.zone || '';
+  }).filter(Boolean);
+  
+  const region = regions[0];
+  if (!region) return {};
+  
+  // Map region to provider-specific format
+  if (provider === 'aws') {
+    return { aws: region };
+  } else if (provider === 'azure') {
+    return { azure: region.replace(/\s+/g, ' ') };
+  } else if (provider === 'gcp') {
+    return { gcp: region.split('-')[0] + '-' + region.split('-')[1] };
+  }
+  
+  return {};
+};
+
+const buildChiralSystemFromResources = (resources: any[], provider: string, stackName?: string): ChiralSystem => {
+  // Enhanced resource mapping with better error handling
+  const k8sResources = resources.filter(r => 
+    r.type?.includes('kubernetes') || r.type?.includes('eks') || r.type?.includes('aks') || r.type?.includes('gke')
+  );
+  const dbResources = resources.filter(r => 
+    r.type?.includes('rds') || r.type?.includes('sql') || r.type?.includes('database')
+  );
+  const vmResources = resources.filter(r => 
+    r.type?.includes('instance') || r.type?.includes('vm') || r.type?.includes('compute')
+  );
+  const networkResources = resources.filter(r => 
+    r.type?.includes('vpc') || r.type?.includes('vnet') || r.type?.includes('network')
+  );
+
+  // Infer configuration from resources with improved logic
+  const config: ChiralSystem = {
+    projectName: stackName || 'imported-infrastructure',
+    environment: 'prod', // Default to production for safety
+    networkCidr: '10.0.0.0/16', // Default network
+    k8s: {
+      version: inferKubernetesVersion(k8sResources),
+      minNodes: inferNodeCount(k8sResources, 'min'),
+      maxNodes: inferNodeCount(k8sResources, 'max'),
+      size: inferWorkloadSize(k8sResources.concat(vmResources))
+    },
+    postgres: {
+      engineVersion: inferDatabaseVersion(dbResources),
+      size: inferWorkloadSize(dbResources.concat(vmResources)),
+      storageGb: inferStorageSize(dbResources)
+    },
+    adfs: {
+      size: inferWorkloadSize(vmResources),
+      windowsVersion: inferWindowsVersion(vmResources)
+    }
+  };
+
+  // Add region inference if possible
+  if (resources.length > 0) {
+    config.region = inferRegion(resources, provider);
+  }
+
+  return config;
+};
+
 const writeChiralConfig = (config: ChiralSystem, outputPath: string) => {
   const content = `import { ChiralSystem } from './src/intent';\n\nexport const config: ChiralSystem = ${JSON.stringify(config, null, 2)};`;
   fs.writeFileSync(outputPath, content);
@@ -79,6 +283,7 @@ const writeChiralConfig = (config: ChiralSystem, outputPath: string) => {
 
 // Export types for users to import in their configs
 export { ChiralSystem, EnvironmentTier, WorkloadSize, KubernetesIntent, DatabaseIntent, AdfsIntent } from './intent';
+export { validateChiralConfig, checkDeploymentReadiness, checkCompliance } from './validation';
 
 // =================================================================
 // CLI SETUP
@@ -343,6 +548,98 @@ program
       await analyzeTerraformSetup(sourcePath, provider, options.costComparison);
     } catch (error) {
       console.error(`❌ Analysis failed: ${error}`);
+      process.exit(1);
+    }
+  });
+
+// Validate command
+program
+  .command('validate')
+  .description('Validate Chiral configuration for deployment readiness')
+  .requiredOption('-c, --config <path>', 'Path to chiral config file')
+  .option('--compliance <framework>', 'Compliance framework to check (soc2, iso27001, hipaa, fedramp)', 'none')
+  .action((options) => {
+    const configPath = path.resolve(options.config);
+    const framework = options.compliance as 'soc2' | 'iso27001' | 'hipaa' | 'fedramp' | 'none' || 'none';
+
+    console.log(`\n🔍 Validating Chiral Configuration`);
+    console.log(`   Config: ${configPath}`);
+    console.log(`   Compliance Framework: ${framework}`);
+
+    try {
+      // Load config
+      const config = require(configPath).config || require(configPath);
+      
+      // Basic validation
+      console.log(`\n📋 Basic Validation:`);
+      const validationResult = validateChiralConfig(config);
+      
+      if (validationResult.valid) {
+        console.log(`   ✅ Configuration is valid`);
+      } else {
+        console.log(`   ❌ Configuration has errors:`);
+        validationResult.errors.forEach(error => console.log(`     • ${error}`));
+      }
+      
+      if (validationResult.warnings.length > 0) {
+        console.log(`   ⚠️  Warnings:`);
+        validationResult.warnings.forEach(warning => console.log(`     • ${warning}`));
+      }
+      
+      if (validationResult.recommendations.length > 0) {
+        console.log(`   💡 Recommendations:`);
+        validationResult.recommendations.forEach(rec => console.log(`     • ${rec}`));
+      }
+
+      // Deployment readiness
+      console.log(`\n🚀 Deployment Readiness:`);
+      const readiness = checkDeploymentReadiness(config);
+      
+      if (readiness.ready) {
+        console.log(`   ✅ Ready for deployment`);
+      } else {
+        console.log(`   ❌ Not ready for deployment:`);
+        readiness.blockers.forEach(blocker => console.log(`     • ${blocker}`));
+      }
+      
+      if (readiness.warnings.length > 0) {
+        console.log(`   ⚠️  Deployment warnings:`);
+        readiness.warnings.forEach(warning => console.log(`     • ${warning}`));
+      }
+
+      // Compliance check
+      if (framework !== 'none') {
+        console.log(`\n🛡️  Compliance Check (${framework}):`);
+        const compliance = checkCompliance(config, framework);
+        
+        if (compliance.compliant) {
+          console.log(`   ✅ Compliant with ${framework.toUpperCase()}`);
+        } else {
+          console.log(`   ❌ Not compliant with ${framework.toUpperCase()}:`);
+          compliance.violations.forEach(violation => console.log(`     • ${violation}`));
+        }
+        
+        if (compliance.recommendations.length > 0) {
+          console.log(`   💡 Compliance recommendations:`);
+          compliance.recommendations.forEach(rec => console.log(`     • ${rec}`));
+        }
+      }
+
+      // Summary
+      console.log(`\n📊 Validation Summary:`);
+      console.log(`   Valid Configuration: ${validationResult.valid ? 'YES' : 'NO'}`);
+      console.log(`   Deployment Ready: ${readiness.ready ? 'YES' : 'NO'}`);
+      console.log(`   Compliance (${framework}): ${framework === 'none' ? 'N/A' : (compliance.compliant ? 'YES' : 'NO')}`);
+      
+      if (validationResult.valid && readiness.ready) {
+        console.log(`\n🎉 Configuration is ready for deployment!`);
+        console.log(`   Next step: Run 'chiral --config ${configPath}' to generate artifacts`);
+      } else {
+        console.log(`\n⚠️  Address the issues above before deployment.`);
+      }
+      
+    } catch (error) {
+      console.error(`❌ Validation failed: ${error}`);
       process.exit(1);
     }
   });

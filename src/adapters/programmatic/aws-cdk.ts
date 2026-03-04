@@ -102,7 +102,7 @@ export class AwsCdkAdapter extends cdk.Stack {
       assumedBy: new iam.AccountRootPrincipal(),
     });
 
-    // Create the EKS cluster
+    // Create EKS cluster with enhanced configuration
     const cluster = new eks.Cluster(this, 'EksCluster', {
       vpc: this.vpc,
       version: eks.KubernetesVersion.of(intent.k8s.version),
@@ -110,6 +110,22 @@ export class AwsCdkAdapter extends cdk.Stack {
       endpointAccess: eks.EndpointAccess.PUBLIC_AND_PRIVATE,
       mastersRole: clusterAdminRole,
       kubectlLayer: new KubectlV26Layer(this, 'KubectlLayer'),
+      // Enhanced security configuration for production
+      clusterLogging: [
+        eks.ClusterLoggingTypes.API,
+        eks.ClusterLoggingTypes.AUDIT,
+        eks.ClusterLoggingTypes.AUTHENTICATOR,
+        eks.ClusterLoggingTypes.CONTROLLER_MANAGER,
+        eks.ClusterLoggingTypes.SCHEDULER
+      ],
+      // Add encryption configuration
+      secretsEncryption: eks.KubernetesSecretsEncryption.awsManaged({
+        encryptionKey: cdk.SecretValue.secretsManager('eks-secrets-key')
+      }),
+      // Add IAM role for service accounts
+      iamAuth: new iam.OpenIdConnectProvider({
+        url: 'https://sts.amazonaws.com/idp/bce037f2'
+      })
     });
 
     // Add managed node group for system workloads
@@ -122,6 +138,30 @@ export class AwsCdkAdapter extends cdk.Stack {
       subnets: {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       },
+      // Enhanced node group configuration
+      capacityType: eks.CapacityType.ON_DEMAND,
+      launchTemplateSpec: {
+        launchTemplateSpecification: {
+          templateName: 'system-node-template',
+          userData: ec2.UserData.forLinux(),
+          blockDeviceMappings: [
+            {
+              deviceName: '/dev/xvda',
+              ebs: {
+                volumeSize: 20,
+                volumeType: ec2.EbsDeviceVolumeType.GP3,
+                deleteOnTermination: true
+              }
+            }
+          ]
+        }
+      },
+      // Add auto-scaling configuration
+      scaling: {
+        minSize: intent.k8s.minNodes,
+        maxSize: intent.k8s.maxNodes,
+        desiredSize: intent.k8s.minNodes
+      }
     });
 
     // Add managed node group for application workloads
@@ -134,6 +174,30 @@ export class AwsCdkAdapter extends cdk.Stack {
       subnets: {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       },
+      // Enhanced node group configuration
+      capacityType: eks.CapacityType.ON_DEMAND,
+      launchTemplateSpec: {
+        launchTemplateSpecification: {
+          templateName: 'application-node-template',
+          userData: ec2.UserData.forLinux(),
+          blockDeviceMappings: [
+            {
+              deviceName: '/dev/xvda',
+              ebs: {
+                volumeSize: 30,
+                volumeType: ec2.EbsDeviceVolumeType.GP3,
+                deleteOnTermination: true
+              }
+            }
+          ]
+        }
+      },
+      // Add auto-scaling configuration
+      scaling: {
+        minSize: 1,
+        maxSize: 5,
+        desiredSize: 2
+      }
     });
 
     // Store cluster config in SSM Parameter Store
