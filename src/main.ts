@@ -36,6 +36,7 @@ const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 'gcp', 
   if (ext === '.tfstate') {
     const state = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
     resources = state.resources || [];
+    console.log(`⚠️  Warning: Importing from Terraform state files. State files may contain sensitive information. Ensure proper access controls and encryption.`);
   } else if (ext === '.tf') {
     const content = fs.readFileSync(sourcePath, 'utf8');
     const parsed = hcl2.parse(content);
@@ -207,6 +208,12 @@ program
       // B. Write to Disk
       fs.writeFileSync(tfPath, tfContent);
       console.log(`✅ [GCP]   Terraform blueprint generated at: ${path.relative(process.cwd(), tfPath)}`);
+
+      // D. Suggest backend if not configured
+      if (!config.terraform?.backend) {
+        console.log(`⚠️  [GCP] No remote backend configured. Consider setting terraform.backend in your config to use GCS for state management.`);
+        console.log(`   This reduces risks of state corruption and improves team collaboration.`);
+      }
 
       // C. Validate Syntax (Optional: Use terraform validate if available)
       console.log(`🔍 [GCP] Validating Terraform syntax...`);

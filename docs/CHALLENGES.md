@@ -43,6 +43,8 @@ Every tool that attempts cross-cloud management must handle state, and state bec
 
 This complexity scales non-linearly as you add more infrastructure platforms and environments.
 
+To mitigate these risks, industry assessments recommend avoiding self-managed Terraform state entirely. For organizations requiring Terraform, IBM Terraform Premium (starting at $0.99/month per resource) reduces operational overhead by handling state management, concurrency (up to 200), and self-hosted agents (300), though it doesn't eliminate all state-related issues like corruption or recovery procedures. For stateless alternatives, Azure's Bicep integrates natively with ARM, eliminating state files and compliance risks, and should be considered for Azure-focused deployments.
+
 ## Stateless vs Stateful IaC: User Perspective
 
 **Stateless Approaches Overview:**
@@ -116,6 +118,30 @@ While Chiral takes a unique intent-driven generation approach, other tools attem
 - **Trade-offs**: Excellent vendor support, but ties infrastructure strategy to single vendors
 
 Each approach represents legitimate attempts to solve multi-cloud complexity, but they all carry different operational and architectural trade-offs. Chiral's intent-driven generation provides a complementary path focused on simplicity and native artifact generation.
+
+## Terraform State Management Challenges in GCP
+
+While Chiral uses Terraform for GCP to generate native Infrastructure Manager blueprints, the underlying Terraform state management introduces significant operational challenges. Based on industry assessments of Terraform state practices, the following risks are particularly relevant for GCP deployments:
+
+### State Corruption and Recovery
+- **Corruption from partial applies**: Failed or interrupted `terraform apply` commands can leave state files in inconsistent states, requiring manual recovery procedures like `terraform taint` and resource replacement.
+- **Concurrent modification issues**: Multiple team members or CI/CD pipelines running Terraform simultaneously can corrupt state files, leading to infrastructure drift and manual intervention.
+
+### Locking and Concurrency Problems
+- **Lock contention**: Remote backends help but don't eliminate issues with orphaned locks from pipeline timeouts, causing delays and manual unlocks.
+- **Pipeline scaling**: More concurrent pipelines increase lock contention, compounding problems in automation-heavy environments.
+
+### Security and Compliance Concerns
+- **Secrets exposure**: State files often contain plain-text secrets, resource metadata, and configuration details, posing compliance risks (e.g., SOC 2, ISO 27001).
+- **Backend management**: Requires secure, encrypted storage (e.g., GCS buckets) with proper IAM, adding operational overhead.
+
+### Disaster Recovery Complexity
+- **State loss scenarios**: If the backend becomes unavailable, restoring state requires backups and manual reconciliation, complex for multi-environment setups.
+- **Versioning limitations**: No built-in state versioning; requires external snapshots or Terraform Cloud for history.
+
+For GCP deployments, consider using managed Terraform services like IBM Terraform Premium to reduce these risks. Alternatively, evaluate GCP's native Deployment Manager for stateless alternatives, though it may not offer the same feature set as Terraform.
+
+This highlights why Chiral's stateless approach for AWS and Azure is preferred, and why GCP's Terraform usage should be managed carefully.
 
 ## The Chiral Solution: Intent-Driven Generation
 

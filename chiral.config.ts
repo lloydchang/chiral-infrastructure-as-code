@@ -23,6 +23,15 @@ export const config: ChiralSystem = {
     subnetCidr: '10.0.1.0/24'  // Default: calculated from networkCidr (/16 -> /24)
   },
 
+  // Optional: Configure Terraform backend for GCP (recommended for state management)
+  // terraform: {
+  //   backend: {
+  //     type: 'gcs',
+  //     bucket: 'my-terraform-state-bucket',
+  //     prefix: 'chiral-state'  // Optional
+  //   }
+  // },
+
   k8s: {
     version: '1.29',
     minNodes: 2,

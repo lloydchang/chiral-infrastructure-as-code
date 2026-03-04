@@ -54,7 +54,25 @@ terraform {
       version = "~> 4.0"
     }
   }
+${intent.terraform?.backend ? `
+  backend "gcs" {
+    bucket = "${intent.terraform.backend.bucket}"
+    prefix = "${intent.terraform.backend.prefix || `${intent.projectName}-terraform-state`}"
+  }
+` : ''}
 }
+
+# =================================================================
+# IMPORTANT: Terraform State Management Warnings
+# =================================================================
+# WARNING: Terraform state files can contain sensitive information (secrets, IPs, metadata).
+# - Always use remote backends (e.g., GCS) to avoid local state files.
+# - Encrypt backend storage and restrict access via IAM.
+# - Be aware of state corruption risks from concurrent modifications or partial applies.
+# - Consider managed Terraform services (e.g., IBM Terraform Premium) for enterprise deployments.
+# - Deploy via GCP Infrastructure Manager to leverage GCP's native state management and avoid self-hosted Terraform issues.
+# - See docs/CHALLENGES.md for detailed state management challenges.
+# =================================================================
 
 # =================================================================
 # 1. NETWORKING

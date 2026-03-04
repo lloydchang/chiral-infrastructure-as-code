@@ -40,6 +40,13 @@ export interface ChiralSystem {
   network?: {
     subnetCidr?: string; // Default subnet within networkCidr
   };
+  terraform?: { // GCP-specific Terraform backend settings
+    backend?: {
+      type: 'gcs'; // Currently only GCS supported for GCP
+      bucket: string;
+      prefix?: string; // Optional path prefix within bucket
+    };
+  };
   
   // The Three Pillars
   k8s: KubernetesIntent;

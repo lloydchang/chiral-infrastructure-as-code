@@ -159,12 +159,17 @@ For a deeper dive into **why multi-cloud infrastructure management is fundamenta
 
 ### Native Artifacts
 
-Chiral produces native cloud artifacts that can be deployed independently: AWS CDK and CloudFormation for AWS, Azure Bicep for Azure, and GCP Infrastructure Manager (Terraform Blueprint) for GCP. These are standard cloud templates that work with native cloud tooling.
+Chiral produces native cloud artifacts that can be deployed independently: AWS CDK and CloudFormation for AWS, Azure Bicep for Azure, and GCP Infrastructure Manager (Terraform Blueprint) for GCP. These are standard cloud templates that work with native cloud tooling, with GCP's Terraform Blueprint leveraging Infrastructure Manager for state-managed deployment, avoiding traditional Terraform state issues.
 
 **Autoscaling Support:**
 - **AWS EKS**: Auto-scaling node groups with `minSize`/`maxSize` from intent
 - **Azure AKS**: Auto-scaling agent pools with `minCount`/`maxCount` from intent  
 - **GCP GKE**: Auto-scaling node pools with `min_node_count`/`max_node_count` from intent
+
+**State Management Considerations:**
+- **AWS CDK/CloudFormation**: Managed natively by AWS; no external state files required.
+- **Azure Bicep/ARM**: Handled by Azure Resource Manager; built-in consistency and rollback.
+- **GCP Terraform**: Requires careful state management. Use remote backends (e.g., GCS) and consider managed Terraform services like IBM Terraform Premium to mitigate corruption, locking, and compliance risks. See [docs/CHALLENGES.md](docs/CHALLENGES.md) for details.
 
 ## How Chiral Compares to Traditional Multi-Cloud Tools
 

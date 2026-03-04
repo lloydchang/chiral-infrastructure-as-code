@@ -55,6 +55,40 @@ describe('ChiralSystem Intent Schema', () => {
       expect(config.environment).toBe('dev');
       expect(config.k8s.size).toBe('small');
     });
+
+    it('should accept config with Terraform backend', () => {
+      const config: ChiralSystem = {
+        projectName: 'test-project',
+        environment: 'prod',
+        networkCidr: '10.0.0.0/16',
+        terraform: {
+          backend: {
+            type: 'gcs',
+            bucket: 'my-state-bucket',
+            prefix: 'terraform-state'
+          }
+        },
+        k8s: {
+          version: '1.29',
+          minNodes: 2,
+          maxNodes: 5,
+          size: 'large'
+        },
+        postgres: {
+          engineVersion: '15',
+          size: 'large',
+          storageGb: 100
+        },
+        adfs: {
+          size: 'large',
+          windowsVersion: '2022'
+        }
+      };
+
+      expect(config).toBeDefined();
+      expect(config.terraform?.backend?.type).toBe('gcs');
+      expect(config.terraform?.backend?.bucket).toBe('my-state-bucket');
+    });
   });
 
   describe('type validation', () => {
