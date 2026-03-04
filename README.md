@@ -86,14 +86,14 @@ export const config: ChiralSystem = {
   },
 
   postgres: {
-    engineVersion: '15',
+    engineVersion: '18.3',
     size: 'large', // Resolves to db.m5.large (AWS) / Standard_D4s_v3 (Azure) / db-custom-2-4096 (GCP)
     storageGb: 100
   },
 
   adfs: {
     size: 'large', // Resolves to m5.xlarge (AWS) / Standard_D4s_v3 (Azure) / n1-standard-2 (GCP)
-    windowsVersion: '2022'
+    windowsVersion: '11 26H2 Build 26300.7877'
   }
 };
 ```
