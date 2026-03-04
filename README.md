@@ -350,6 +350,11 @@ Chiral takes a different approach to multi-cloud infrastructure management compa
 - Azure Bicep (modern declarative DSL)
 - GCP Terraform Blueprint (Infrastructure Manager)
 
+**Azure Enhancements**:
+- Uses Azure Verified Modules (AVM) for standardized, production-ready deployments
+- Integrates azure-cost-cli for real-time cost estimation during generation
+- Supports deployment stacks for complete mode in production environments
+
 **Ideal**: Each cloud's best native IaC format (Bicep for Azure, Terraform for GCP)
 
 ### Selection Criteria

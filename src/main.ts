@@ -319,6 +319,11 @@ program
       process.exit(1);
     }
 
+    // Warning for complex infra
+    if (config.k8s && config.k8s.maxNodes > 10) {
+      console.log(`⚠️  [Azure] Warning: Large cluster (${config.k8s.maxNodes} nodes) detected. Bicep may have performance issues with complex deployments. Consider using Terraform for Azure if you encounter issues.`);
+    }
+
     // =================================================================
     // THE CHIRAL ENGINE (Orchestrator)
     // 1. Reads chiral config
@@ -365,6 +370,15 @@ program
       fs.writeFileSync(bicepPath, bicepContent);
       console.log(`✅ [Azure] Bicep template generated at:   ${path.relative(process.cwd(), bicepPath)}`);
 
+      // Estimate costs
+      console.log(`🔍 [Azure] Estimating costs with azure-cost-cli...`);
+      try {
+        execSync(`azure-cost-cli bicep --file ${bicepPath} --location ${config.region?.azure || 'eastus'}`, { stdio: 'inherit' });
+        console.log(`✅ [Azure] Cost estimation completed.`);
+      } catch (error) {
+        console.log(`⚠️  [Azure] Cost estimation failed or azure-cost-cli not installed. Install from https://github.com/mivano/azure-cost-cli`);
+      }
+
       // C. Validate Syntax (The Validation Step)
       // We use the 'az' CLI to ensure the generated text is valid Bicep.
       // This catches typos inside the template string in azure-right.ts.
@@ -387,6 +401,11 @@ program
         console.log(`✅ [Azure] Validation Passed: Syntax is correct.`);
       } else {
         console.log(`⚠️  [Azure] Validation Skipped: Azure CLI not available.`);
+      }
+
+      if (config.environment === 'prod') {
+        console.log(`💡 [Azure] For production deployments, use deployment stacks for complete mode and automatic cleanup:`);
+        console.log(`   az stack group create --name ${config.projectName}-stack --resource-group <rg> --template-file ${path.relative(process.cwd(), bicepPath)} --action-on-unmanage deleteAll=resources`);
       }
 
     } catch (error) {
@@ -552,13 +571,145 @@ program
     }
   });
 
+// Cost Estimate command
+program
+  .command('cost-estimate')
+  .description('Estimate infrastructure costs for all cloud providers')
+  .requiredOption('-c, --config <path>', 'Path to chiral config file')
+  .option('-p, --provider <provider>', 'Specific provider to analyze (aws, azure, gcp)')
+  .option('--detailed', 'Show detailed cost breakdown', false)
+  .option('--region <region>', 'Target region for pricing')
+  .action(async (options) => {
+    const configPath = path.resolve(options.config);
+    const provider = options.provider as 'aws' | 'azure' | 'gcp' | undefined;
+
+    console.log(`\n💰 Cost Estimation Analysis`);
+    console.log(`   Config: ${configPath}`);
+    if (provider) console.log(`   Provider: ${provider.toUpperCase()}`);
+    if (options.region) console.log(`   Region: ${options.region}`);
+
+    try {
+      // Load config
+      const config = require(configPath).config || require(configPath);
+      
+      // Import cost analysis modules
+      const { CostAnalyzer, AzureCostAnalyzer } = await import('./cost-analysis');
+      
+      if (provider) {
+        // Single provider analysis
+        let estimate;
+        switch (provider) {
+          case 'azure':
+            estimate = await AzureCostAnalyzer.getAzurePricing(config, {
+              region: options.region,
+              detailed: options.detailed
+            });
+            break;
+          case 'aws':
+            estimate = await CostAnalyzer.getAWSEstimate(config, {
+              region: options.region,
+              detailed: options.detailed
+            });
+            break;
+          case 'gcp':
+            estimate = await CostAnalyzer.getGCPEstimate(config, {
+              region: options.region,
+              detailed: options.detailed
+            });
+            break;
+        }
+        
+        console.log(`\n📊 ${provider.toUpperCase()} Cost Estimate:`);
+        console.log(`   Monthly Cost: $${estimate.totalMonthlyCost.toFixed(2)} ${estimate.currency}`);
+        
+        if (options.detailed) {
+          console.log(`\n📈 Detailed Breakdown:`);
+          console.log(`   Compute: $${estimate.breakdown.compute.total.toFixed(2)}`);
+          console.log(`   Storage: $${estimate.breakdown.storage.total.toFixed(2)}`);
+          console.log(`   Network: $${estimate.breakdown.network.total.toFixed(2)}`);
+          console.log(`   Other: $${estimate.breakdown.other.total.toFixed(2)}`);
+        }
+        
+        if (estimate.recommendations.length > 0) {
+          console.log(`\n💡 Recommendations:`);
+          estimate.recommendations.forEach(rec => console.log(`   • ${rec}`));
+        }
+        
+        if (estimate.warnings.length > 0) {
+          console.log(`\n⚠️  Warnings:`);
+          estimate.warnings.forEach(warn => console.log(`   • ${warn}`));
+        }
+      } else {
+        // Multi-cloud comparison
+        const comparison = await CostAnalyzer.compareCosts(config, {
+          region: options.region,
+          detailed: options.detailed
+        });
+        
+        const report = CostAnalyzer.generateCostReport(comparison, { detailed: options.detailed });
+        console.log(report);
+      }
+      
+    } catch (error) {
+      console.error(`❌ Cost estimation failed: ${error}`);
+      process.exit(1);
+    }
+  });
+
+// Cost Analyze command
+program
+  .command('cost-analyze')
+  .description('Analyze existing infrastructure costs')
+  .option('-p, --provider <provider>', 'Cloud provider: aws, azure, gcp')
+  .option('--subscription <subscription>', 'Azure subscription ID')
+  .option('--project <project>', 'GCP project ID')
+  .option('--account <account>', 'AWS account ID')
+  .action(async (options) => {
+    const provider = options.provider as 'aws' | 'azure' | 'gcp';
+
+    console.log(`\n💰 Existing Infrastructure Cost Analysis`);
+    console.log(`   Provider: ${provider?.toUpperCase() || 'All providers'}`);
+    
+    if (options.subscription) console.log(`   Subscription: ${options.subscription}`);
+    if (options.project) console.log(`   Project: ${options.project}`);
+    if (options.account) console.log(`   Account: ${options.account}`);
+
+    try {
+      // Import cost analysis modules
+      const { AzureCostAnalyzer } = await import('./cost-analysis');
+      
+      // This would integrate with cloud provider cost APIs
+      // For now, show a placeholder implementation
+      
+      console.log(`\n📊 Cost Analysis Results:`);
+      console.log(`   Note: This feature requires integration with cloud provider billing APIs`);
+      
+      if (provider === 'azure' && AzureCostAnalyzer.isAvailable()) {
+        console.log(`   ✅ azure-cost-cli is available for detailed Azure cost analysis`);
+        console.log(`   💡 Run: azure-cost-cli subscription --subscription ${options.subscription || '<subscription-id>'}`);
+      } else if (provider === 'azure') {
+        console.log(`   ⚠️  Install azure-cost-cli for detailed Azure cost analysis`);
+        console.log(`   📦 Install from: https://github.com/mivano/azure-cost-cli`);
+      }
+      
+      console.log(`\n🔍 Integration Points:`);
+      console.log(`   AWS: Cost Explorer API`);
+      console.log(`   Azure: Cost Management API + azure-cost-cli`);
+      console.log(`   GCP: Cloud Billing API`);
+      
+    } catch (error) {
+      console.error(`❌ Cost analysis failed: ${error}`);
+      process.exit(1);
+    }
+  });
+
 // Validate command
 program
   .command('validate')
   .description('Validate Chiral configuration for deployment readiness')
   .requiredOption('-c, --config <path>', 'Path to chiral config file')
   .option('--compliance <framework>', 'Compliance framework to check (soc2, iso27001, hipaa, fedramp)', 'none')
-  .action((options) => {
+  .action(async (options) => {
     const configPath = path.resolve(options.config);
     const framework = options.compliance as 'soc2' | 'iso27001' | 'hipaa' | 'fedramp' | 'none' || 'none';
 
@@ -578,50 +729,51 @@ program
         console.log(`   ✅ Configuration is valid`);
       } else {
         console.log(`   ❌ Configuration has errors:`);
-        validationResult.errors.forEach(error => console.log(`     • ${error}`));
+        validationResult.errors.forEach((error: string) => console.log(`     • ${error}`));
       }
       
       if (validationResult.warnings.length > 0) {
         console.log(`   ⚠️  Warnings:`);
-        validationResult.warnings.forEach(warning => console.log(`     • ${warning}`));
+        validationResult.warnings.forEach((warning: string) => console.log(`     • ${warning}`));
       }
       
       if (validationResult.recommendations.length > 0) {
         console.log(`   💡 Recommendations:`);
-        validationResult.recommendations.forEach(rec => console.log(`     • ${rec}`));
+        validationResult.recommendations.forEach((rec: string) => console.log(`     • ${rec}`));
       }
 
       // Deployment readiness
       console.log(`\n🚀 Deployment Readiness:`);
-      const readiness = checkDeploymentReadiness(config);
+      const readiness = await checkDeploymentReadiness(config);
       
       if (readiness.ready) {
         console.log(`   ✅ Ready for deployment`);
       } else {
         console.log(`   ❌ Not ready for deployment:`);
-        readiness.blockers.forEach(blocker => console.log(`     • ${blocker}`));
+        readiness.blockers.forEach((blocker: string) => console.log(`     • ${blocker}`));
       }
       
       if (readiness.warnings.length > 0) {
         console.log(`   ⚠️  Deployment warnings:`);
-        readiness.warnings.forEach(warning => console.log(`     • ${warning}`));
+        readiness.warnings.forEach((warning: string) => console.log(`     • ${warning}`));
       }
 
       // Compliance check
+      let compliance: any = { compliant: true };
       if (framework !== 'none') {
         console.log(`\n🛡️  Compliance Check (${framework}):`);
-        const compliance = checkCompliance(config, framework);
+        compliance = checkCompliance(config, framework);
         
         if (compliance.compliant) {
           console.log(`   ✅ Compliant with ${framework.toUpperCase()}`);
         } else {
           console.log(`   ❌ Not compliant with ${framework.toUpperCase()}:`);
-          compliance.violations.forEach(violation => console.log(`     • ${violation}`));
+          compliance.violations.forEach((violation: string) => console.log(`     • ${violation}`));
         }
         
         if (compliance.recommendations.length > 0) {
           console.log(`   💡 Compliance recommendations:`);
-          compliance.recommendations.forEach(rec => console.log(`     • ${rec}`));
+          compliance.recommendations.forEach((rec: string) => console.log(`     • ${rec}`));
         }
       }
 

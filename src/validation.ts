@@ -5,6 +5,7 @@
 import { ChiralSystem } from './intent';
 import * as fs from 'fs';
 import * as path from 'path';
+import { CostAnalyzer, AzureCostAnalyzer, CostOptimizer, CostAnalysisOptions } from './cost-analysis';
 
 export interface ValidationResult {
   valid: boolean;
@@ -120,6 +121,10 @@ export function validateChiralConfig(config: ChiralSystem): ValidationResult {
   if (config.postgres && config.postgres.storageGb > 1000) {
     recommendations.push('Consider database sharding for very large storage requirements');
   }
+
+  // Add cost optimization recommendations
+  const costOptimizations = CostOptimizer.analyzeConfiguration(config);
+  recommendations.push(...costOptimizations);
 
   return {
     valid: errors.length === 0,
@@ -272,12 +277,12 @@ export function checkCompliance(
 // DEPLOYMENT READINESS CHECKS
 // =================================================================
 
-export function checkDeploymentReadiness(config: ChiralSystem): {
+export async function checkDeploymentReadiness(config: ChiralSystem): Promise<{
   ready: boolean;
   blockers: string[];
   warnings: string[];
   checklist: { [key: string]: boolean };
-} {
+}> {
   const blockers: string[] = [];
   const warnings: string[] = [];
   const checklist: { [key: string]: boolean } = {};
@@ -309,7 +314,7 @@ export function checkDeploymentReadiness(config: ChiralSystem): {
 
   // Cost estimation
   checklist.costEstimated = true;
-  const estimatedCost = estimateDeploymentCost(config);
+  const estimatedCost = await estimateDeploymentCost(config);
   if (estimatedCost > 10000) { // $10k/month threshold
     warnings.push(`High estimated monthly cost: $${estimatedCost.toFixed(2)}`);
   }
@@ -423,9 +428,25 @@ function isRegionServiceAvailable(provider: string, region: string, service: str
   return true;
 }
 
-function estimateDeploymentCost(config: ChiralSystem): number {
-  // Simplified cost estimation
-  // In real implementation, this would use cloud provider pricing APIs
+async function estimateDeploymentCost(config: ChiralSystem, provider?: 'aws' | 'azure' | 'gcp', options?: CostAnalysisOptions): Promise<number> {
+  // Use enhanced cost analysis with azure-cost-cli integration
+  if (provider === 'azure' || !provider) {
+    // Try to get accurate Azure pricing using azure-cost-cli
+    try {
+      const azureEstimate = await AzureCostAnalyzer.getAzurePricing(config, options);
+      return azureEstimate.totalMonthlyCost;
+    } catch (error) {
+      // Fallback to simplified estimation
+      return getFallbackCostEstimation(config);
+    }
+  }
+
+  // For other providers or fallback, use simplified estimation
+  return getFallbackCostEstimation(config);
+}
+
+function getFallbackCostEstimation(config: ChiralSystem): number {
+  // Simplified cost estimation (original fallback logic)
   let baseCost = 500; // Base infrastructure cost
   
   if (config.k8s) {
