@@ -2,7 +2,7 @@
 
 **One Intent, Many Clouds: Native IaC Generation**
 
-> **Solving [multi-cloud infrastructure's enterprise challenges](docs/CHALLENGES.md)**: Different native cloud IaCs, state management complexity, and third-party vendor lock-in make uniform deployments across AWS, Azure, and GCP challenging. **Chiral generates native cloud artifacts from a single intent schema**, ensuring consistency through optimal trade-offs.
+> **Solving [multi-cloud infrastructure's enterprise challenges](docs/CHALLENGES.md)**: Different native cloud IaCs, state management complexity, and third-party vendor lock-in make functionally uniform deployments across AWS, Azure, and GCP challenging. **Chiral generates native cloud artifacts from a single intent schema**, ensuring functional uniformity through optimal trade-offs.
 
 ---
 
@@ -70,7 +70,7 @@ This generates:
 
 ---
 
-### Elevator Pitch
+### How
 We use the Chiral Pattern to avoid vendor lock-ins to 3rd-party state managers. We use a centralized source (Intent Schema) and the Chiral Engine to generate 1st-party distributions (Native Cloud Artifacts) targeting AWS, Azure, GCP.
 
 
