@@ -36,7 +36,7 @@ const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 'gcp', 
   if (ext === '.tfstate') {
     const state = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
     resources = state.resources || [];
-    console.log(`⚠️  Warning: Importing from Terraform state files. State files may contain sensitive information. Ensure proper access controls and encryption.`);
+    console.log(`⚠️  Warning: Importing from Terraform state files. State files may contain sensitive information and are prone to corruption from concurrent modifications or partial applies. Ensure proper access controls, encryption, and consider migrating to native generation instead of relying on state files. See docs/CHALLENGES.md for state management risks.`);
   } else if (ext === '.tf') {
     const content = fs.readFileSync(sourcePath, 'utf8');
     const parsed = hcl2.parse(content);
@@ -77,7 +77,7 @@ const program = new Command();
 
 program
   .name('chiral')
-  .description('Chiral Pattern: Syncing K8s, Postgres, and AD FS across AWS, Azure, and GCP.')
+  .description('Chiral Pattern: Stateless generation of K8s, Postgres, and AD FS across AWS, Azure, and GCP.')
   .version('1.0.0');
 
 // Default compile command
