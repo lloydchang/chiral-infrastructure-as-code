@@ -708,46 +708,107 @@ program
 
     try {
       // Import cost analysis modules
-      const { AzureCostAnalyzer, AWSCostAnalyzer, GCPCostAnalyzer } = await import('./cost-analysis');
+      const { AzureCostAnalyzer, AWSCostAnalyzer, GCPCostAnalyzer, CostAnalyzer } = await import('./cost-analysis');
       
-      // This would integrate with cloud provider cost APIs
-      // For now, show a placeholder implementation
+      let costEstimate: any = null;
       
-      console.log(`\n📊 Cost Analysis Results:`);
-      console.log(`   Note: This feature requires integration with cloud provider billing APIs`);
-      
-      if (provider === 'azure' && AzureCostAnalyzer.isAvailable()) {
-        console.log(`   ✅ azure-cost-cli is available for detailed Azure cost analysis`);
-        console.log(`   💡 Run: azure-cost-cli subscription --subscription ${options.subscription || '<subscription-id>'}`);
-      } else if (provider === 'azure') {
-        console.log(`   ⚠️  Install azure-cost-cli for detailed Azure cost analysis`);
-        console.log(`   📦 Install from: https://github.com/mivano/azure-cost-cli`);
+      if (provider === 'azure' && options.subscription) {
+        console.log(`\n� Analyzing Azure costs using azure-cost-cli...`);
+        if (AzureCostAnalyzer.isAvailable()) {
+          // For Azure, we would need to implement analyzeAzureCosts similar to AWS/GCP
+          // For now, show the availability message
+          console.log(`   ✅ azure-cost-cli is available for detailed Azure cost analysis`);
+          console.log(`   💡 Run: azure-cost-cli subscription --subscription ${options.subscription}`);
+        } else {
+          console.log(`   ⚠️  Install azure-cost-cli for detailed Azure cost analysis`);
+          console.log(`   📦 Install from: https://github.com/mivano/azure-cost-cli`);
+        }
+      } else if (provider === 'aws' && options.account) {
+        console.log(`\n🔍 Analyzing AWS costs using aws-cost-cli...`);
+        if (AWSCostAnalyzer.isAWSCostCliAvailable()) {
+          costEstimate = await AWSCostAnalyzer.analyzeAWSCosts(options.account, {});
+          console.log(`\n📊 AWS Cost Analysis Results:`);
+          console.log(`   Total Monthly Cost: $${costEstimate.totalMonthlyCost.toFixed(2)} ${costEstimate.currency}`);
+          console.log(`   Compute: $${costEstimate.breakdown.compute.total.toFixed(2)}`);
+          console.log(`   Storage: $${costEstimate.breakdown.storage.total.toFixed(2)}`);
+          console.log(`   Network: $${costEstimate.breakdown.network.total.toFixed(2)}`);
+          console.log(`   Other: $${costEstimate.breakdown.other.total.toFixed(2)}`);
+          
+          if (costEstimate.recommendations.length > 0) {
+            console.log(`\n💡 Recommendations:`);
+            costEstimate.recommendations.forEach((rec: string) => console.log(`   • ${rec}`));
+          }
+          
+          if (costEstimate.warnings.length > 0) {
+            console.log(`\n⚠️  Warnings:`);
+            costEstimate.warnings.forEach((warn: string) => console.log(`   • ${warn}`));
+          }
+        } else {
+          console.log(`   ⚠️  Install aws-cost-cli for detailed AWS cost analysis`);
+          console.log(`   📦 Install from: npm install -g aws-cost-cli`);
+        }
+      } else if (provider === 'gcp' && options.project) {
+        console.log(`\n🔍 Analyzing GCP costs using gcp-cost-cli...`);
+        if (GCPCostAnalyzer.isGCPCostCliAvailable()) {
+          costEstimate = await GCPCostAnalyzer.analyzeGCPCosts(options.project, {});
+          console.log(`\n📊 GCP Cost Analysis Results:`);
+          console.log(`   Total Monthly Cost: $${costEstimate.totalMonthlyCost.toFixed(2)} ${costEstimate.currency}`);
+          console.log(`   Compute: $${costEstimate.breakdown.compute.total.toFixed(2)}`);
+          console.log(`   Storage: $${costEstimate.breakdown.storage.total.toFixed(2)}`);
+          console.log(`   Network: $${costEstimate.breakdown.network.total.toFixed(2)}`);
+          console.log(`   Other: $${costEstimate.breakdown.other.total.toFixed(2)}`);
+          
+          if (costEstimate.recommendations.length > 0) {
+            console.log(`\n💡 Recommendations:`);
+            costEstimate.recommendations.forEach((rec: string) => console.log(`   • ${rec}`));
+          }
+          
+          if (costEstimate.warnings.length > 0) {
+            console.log(`\n⚠️  Warnings:`);
+            costEstimate.warnings.forEach((warn: string) => console.log(`   • ${warn}`));
+          }
+        } else {
+          console.log(`   ⚠️  Install gcp-cost-cli for detailed GCP cost analysis`);
+          console.log(`   📦 Install from: npm install -g gcp-cost-cli`);
+        }
+      } else {
+        console.log(`\n📊 Cost Analysis Results:`);
+        console.log(`   Note: This feature requires integration with cloud provider billing APIs`);
+        
+        if (provider === 'azure' && !options.subscription) {
+          console.log(`   💡 For Azure, provide --subscription <subscription-id>`);
+        }
+        if (provider === 'aws' && !options.account) {
+          console.log(`   💡 For AWS, provide --account <account-id>`);
+        }
+        if (provider === 'gcp' && !options.project) {
+          console.log(`   💡 For GCP, provide --project <project-id>`);
+        }
+        
+        if (provider === 'azure' && AzureCostAnalyzer.isAvailable()) {
+          console.log(`   ✅ azure-cost-cli is available for detailed Azure cost analysis`);
+        } else if (provider === 'azure') {
+          console.log(`   ⚠️  Install azure-cost-cli for detailed Azure cost analysis`);
+          console.log(`   � Install from: https://github.com/mivano/azure-cost-cli`);
+        }
+        
+        if (provider === 'aws' && AWSCostAnalyzer.isAvailable()) {
+          console.log(`   ✅ AWS cost analysis tools available (infracost or AWS CLI)`);
+        } else if (provider === 'aws') {
+          console.log(`   ⚠️  Install infracost or AWS CLI for detailed AWS cost analysis`);
+        }
+        
+        if (provider === 'gcp' && GCPCostAnalyzer.isAvailable()) {
+          console.log(`   ✅ GCP cost analysis tools available (infracost or gcloud CLI)`);
+        } else if (provider === 'gcp') {
+          console.log(`   ⚠️  Install infracost or gcloud CLI for detailed GCP cost analysis`);
+        }
+        
+        console.log(`\n🔍 Integration Points:`);
+        console.log(`   AWS: Cost Explorer API + aws-cost-cli`);
+        console.log(`   Azure: Cost Management API + azure-cost-cli`);
+        console.log(`   GCP: Cloud Billing API + gcp-cost-cli`);
       }
-      
-      if (provider === 'aws' && AWSCostAnalyzer.isAvailable()) {
-        console.log(`   ✅ AWS cost analysis tools available (infracost or AWS CLI)`);
-        console.log(`   💡 Run: infracost breakdown --path <terraform-files> or use AWS Cost Explorer`);
-      } else if (provider === 'aws') {
-        console.log(`   ⚠️  Install infracost or AWS CLI for detailed AWS cost analysis`);
-        console.log(`   📦 Install infracost: https://www.infracost.io/`);
-        console.log(`   📦 Install AWS CLI: https://aws.amazon.com/cli/`);
-      }
-      
-      if (provider === 'gcp' && GCPCostAnalyzer.isAvailable()) {
-        console.log(`   ✅ GCP cost analysis tools available (infracost or gcloud CLI)`);
-        console.log(`   💡 Run: infracost breakdown --path <terraform-files> or use gcloud billing commands`);
-      } else if (provider === 'gcp') {
-        console.log(`   ⚠️  Install infracost or gcloud CLI for detailed GCP cost analysis`);
-        console.log(`   📦 Install infracost: https://www.infracost.io/`);
-        console.log(`   📦 Install gcloud CLI: https://cloud.google.com/sdk/docs/install`);
-      }
-      
-      console.log(`\n🔍 Integration Points:`);
-      console.log(`   AWS: Cost Explorer API + infracost`);
-      console.log(`   Azure: Cost Management API + azure-cost-cli`);
-      console.log(`   GCP: Cloud Billing API + infracost`);
-      
-    } catch (error) {
       console.error(`❌ Cost analysis failed: ${error}`);
       process.exit(1);
     }
