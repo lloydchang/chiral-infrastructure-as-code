@@ -207,6 +207,24 @@ For Terraform deployments in GCP, consider using GCP Terraform Blueprints deploy
 
 This is why Chiral's stateless approach is preferred for AWS and Azure.
 
+## Further Reading
+
+1. **Recover Terraform State From Failed Apply Run** - Jen Johnston, Senior Support Engineer II at IBM: https://support.hashicorp.com/hc/en-us/articles/18613385759891-Recover-Terraform-State-From-Failed-Apply-Run
+
+2. **Terraform State Refresh Error with Azurerm Storage** - Ceci Ivanov: https://discuss.hashicorp.com/t/terraform-state-refresh-error-with-azurerm-storage-account-with-private-endpoint/67629
+
+3. **Terraform State File Corruption in Azure** - Kasi Suresh: https://kasdevtech.com/terraform/statefile-corrupted/
+
+4. **Our Terraform State Got Corrupted in AWS** - Devrim Ozcay: https://aws.plainenglish.io/our-terraform-state-got-corrupted-infrastructure-was-unmanageable-ce0ea6fbef41
+
+5. **Azure Bicep Documentation**: https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/
+
+6. **Microsoft Graph Bicep Extension**: https://learn.microsoft.com/en-us/community/content/microsoft-graph-bicep-extension
+
+7. **AWS CDK Documentation**: https://docs.aws.amazon.com/cdk/v2/guide/home.html
+
+8. **Google Cloud Infrastructure Manager Documentation**: https://docs.cloud.google.com/infrastructure-manager/docs
+
 ## The Chiral Solution: Intent-Driven Stateless Generation
 
 ### Directly Addressing State Management Challenges
