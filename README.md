@@ -336,7 +336,7 @@ chiral-infrastructure-as-code
 │   │       └── gcp-terraform.ts      # [GCP] Terraform Blueprint generation
 │   ├── intent/                       # [TYPES] Abstract business requirements.
 │   │   └── index.ts                  # Defines KubernetesIntent, DatabaseIntent, etc.
-│   ├── rosetta/                      # [TRANSLATION] Hardware mapping between clouds.
+│   ├── translation/                   # [TRANSLATION] Hardware mapping between clouds.
 │   │   └── hardware-map.ts           # Maps abstract sizes to cloud-specific SKUs
 │   └── main.ts                       # [ENGINE] Orchestrates synthesis from intent to artifacts.
 ├── package.json                      # Dependencies and Scripts.
@@ -405,7 +405,7 @@ flowchart TD
     subgraph ENGINE[Chiral Engine]
         EH[src/main.ts<br/>────────────────────────────────────────────────────────────<br/>Zero-State Orchestrator]:::header
         INTENT[Intent Schema<br/>────────────────────────────────────────────────────────────<br/>src/intent/index.ts<br/>Abstracts business needs<br/>into cloud-agnostic types]:::engine
-        ROSETTA[Translation Layer<br/>────────────────────────────────────────────────────────────<br/>src/translation/<br/>hardware-map.ts & regional-metadata.ts<br/>Translates & validates regional specs<br/>e.g. m5.xlarge to D4s_v3]:::engine
+        TRANSLATION[Translation Layer<br/>────────────────────────────────────────────────────────────<br/>src/translation/<br/>hardware-map.ts & regional-metadata.ts<br/>Translates & validates regional specs<br/>e.g. m5.xlarge to D4s_v3]:::engine
     end
 
     subgraph ADAPTERS[Implementation Approaches]
@@ -428,13 +428,13 @@ flowchart TD
 
     CONFIG --> ENGINE
     EH --> INTENT
-    EH --> ROSETTA
+    EH --> TRANSLATION
     INTENT --> AWS_A
     INTENT --> AZURE_A
     INTENT --> GCP_A
-    ROSETTA --> AWS_A
-    ROSETTA --> AZURE_A
-    ROSETTA --> GCP_A
+    TRANSLATION --> AWS_A
+    TRANSLATION --> AZURE_A
+    TRANSLATION --> GCP_A
     AWS_A --> AWS_D
     AZURE_A --> AZURE_D
     GCP_A --> GCP_D
