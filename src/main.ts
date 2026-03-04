@@ -1616,7 +1616,7 @@ async function analyzePulumiSetup(sourcePath: string, provider: string, detailed
           try {
             const content = fs.readFileSync(path.join(sourcePath, file), 'utf8');
             const yamlData = yaml.load(content);
-            if (yamlData?.resources) {
+            if (yamlData && typeof yamlData === 'object' && 'resources' in yamlData && yamlData.resources && typeof yamlData.resources === 'object') {
               totalResources += Object.keys(yamlData.resources).length;
             }
           } catch (error) {
