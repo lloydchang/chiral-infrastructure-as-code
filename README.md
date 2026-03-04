@@ -187,10 +187,11 @@ Chiral eliminates the fundamental state management problems that make Terraform 
 ### Terraform Migration Benefits
 
 **From Problematic Terraform Approaches:**
-- **A. Local State**: Eliminates single point of failure and security risks
-- **B. Remote Backend per Environment**: Removes backend complexity and lock contention
-- **C. Coarse-Grained State**: Eliminates blast radius from state file corruption
-- **D/E. Managed Terraform**: Avoids $0.99/resource/month fees and remaining state issues
+- **A. Local State**: Single point of failure and security risks
+- **B. Remote Backend per Environment**: Backend complexity and lock contention
+- **C. Coarse-Grained State**: Blast radius from state file corruption
+- **D. Self-Managed Terraform**: [Manage and Secure the Underlying Network and Infrastructure](https://developer.hashicorp.com/terraform/enterprise/deploy/reference/application-security)
+- **E. Managed Terraform**: [$0.99/resource/month fees](https://www.hashicorp.com/en/pricing) and [remaining state issues]()
 
 **To Chiral's Stateless Approach:**
 - Generate native artifacts from single intent
