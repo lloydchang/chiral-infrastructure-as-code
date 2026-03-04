@@ -882,6 +882,82 @@ program
     }
   });
 
+// Terraform provider command
+program
+  .command('terraform-provider')
+  .description('Generate and build Terraform provider for Chiral')
+  .option('--build', 'Build the Go Terraform provider', false)
+  .option('--example', 'Generate example Terraform configuration', false)
+  .action(async (options) => {
+    if (options.build) {
+      console.log('🔨 Building Chiral Terraform Provider...');
+      
+      try {
+        const { execSync } = require('child_process');
+        execSync('cd src/adapters/terraform-provider && go build -o terraform-provider-chiral', { stdio: 'inherit' });
+        console.log('✅ Terraform provider built successfully!');
+        console.log('📁 Binary: src/adapters/terraform-provider/terraform-provider-chiral');
+        console.log('💡 Install with: cp terraform-provider-chiral ~/.terraform.d/plugins/');
+      } catch (error) {
+        console.error('❌ Build failed:', error);
+        process.exit(1);
+      }
+    }
+    
+    if (options.example) {
+      console.log('📝 Generating example Terraform configuration...');
+      
+      const exampleConfig = `
+# Chiral Terraform Provider Example
+terraform {
+  required_providers {
+    chiral = {
+      source = "chiral-io/chiral"
+      version = "~> 1.0"
+    }
+  }
+}
+
+resource "chiral_kubernetes_cluster" "main" {
+  config = {
+    project_name = "my-app"
+    environment = "dev"
+    k8s = {
+      version = "1.35"
+      min_nodes = 1
+      max_nodes = 3
+      size = "small"
+    }
+    postgres = {
+      engine_version = "18.3"
+      size = "small"
+      storage_gb = 20
+    }
+    adfs = {
+      size = "small"
+      windows_version = "11 26H2 Build 26300.7877"
+    }
+  }
+}
+      `.trim();
+      
+      console.log(exampleConfig);
+      console.log('\n💡 Save this as main.tf and run: terraform init && terraform apply');
+    }
+    
+    if (!options.build && !options.example) {
+      console.log('📚 Chiral Terraform Provider Usage:');
+      console.log('');
+      console.log('Build provider:');
+      console.log('  chiral terraform-provider --build');
+      console.log('');
+      console.log('Generate example:');
+      console.log('  chiral terraform-provider --example');
+      console.log('');
+      console.log('📖 See examples/terraform-provider-example/ for complete examples');
+    }
+  });
+
 // Migrate command
 program
   .command('migrate')
