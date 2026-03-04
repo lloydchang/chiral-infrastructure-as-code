@@ -290,6 +290,8 @@ The key is maintaining the intent-driven approach while letting each cloud use i
 
 ---
 
+## Project Structure
+
 ```text
 chiral-infrastructure-as-code
 ├── chiral.config.ts                  # [DATA] The "DNA". Single Source of Truth.
@@ -303,9 +305,9 @@ chiral-infrastructure-as-code
 │   └── gcp-deployment.tf             # [NATIVE] The deployable GCP Infrastructure Manager (Terraform Blueprint).
 ├── docs/                             # Documentation and Synchronization research.
 │   └── ideas/
-│       ├── AWS_CDK_To_Azure_Bicep_Guide.txt
-│       ├── Multi-Cloud_IaC_Synchronization_Challenges.txt
-│       └── Syncing_AWS_CDK_and_Bicep.txt
+│       ├── AWS_CDK_To_Azure_Bicep_Guide.md
+│       ├── Multi-Cloud_IaC_Synchronization_Challenges.md
+│       └── Syncing_AWS_CDK_and_Bicep.md
 ├── examples/                         # [EXAMPLES] Comprehensive guides for different IaC approaches.
 │   ├── basic-setup/
 │   │   └── README.md
@@ -442,6 +444,113 @@ flowchart TD
     AZURE_D --> AZURE_C
     GCP_D --> GCP_C
 ```
+
+---
+
+## Project Structure
+
+```text
+chiral-infrastructure-as-code
+├── chiral.config.ts                  # [DATA] The "DNA". Single Source of Truth.
+├── dist/                             # [ARTIFACTS] The "Racemic Mixture" (Output Folder).
+│   ├── chiral.config.js
+│   ├── examples/
+│   │   └── cdk-to-chiral/
+│   │       ├── app.js
+│   │       └── cdk-stack.js
+│   └── src/
+│       ├── __tests__/
+│       │   ├── azure-adapter.test.js
+│       │   ├── gcp-adapter.test.js
+│       │   ├── hardware-map.test.js
+│       │   ├── intent.test.js
+│       │   └── synthesis-integration.test.js
+│       ├── adapters/                 # [LOGIC] Implementation approaches.
+│       │   ├── aws-left.js
+│       │   ├── azure-right.js
+│       │   ├── declarative/
+│       │   │   ├── azure-bicep.js
+│       │   │   └── gcp-terraform.js
+│       │   ├── gcp-right.js
+│       │   └── programmatic/
+│       │       └── aws-cdk.js
+│       ├── intent/
+│       │   └── index.js
+│       ├── main.js
+│       ├── rosetta/
+│       │   └── hardware-map.js
+│       └── translation/
+│           ├── hardware-map.js
+│           ├── import-map.js
+│           └── regional-metadata.js
+├── docs/                             # Documentation and Synchronization research.
+│   ├── CHALLENGES.md
+│   ├── MIGRATION.md
+│   └── ideas/
+│       ├── AWS_CDK_To_Azure_Bicep_Guide.md
+│       ├── Multi-Cloud_IaC_Synchronization_Challenges.md
+│       └── Syncing_AWS_CDK_and_Bicep.md
+├── examples/                         # [EXAMPLES] Comprehensive guides for different IaC approaches.
+│   ├── README.md
+│   ├── azure-migration-example/
+│   │   └── chiral.config.ts
+│   ├── basic-setup/
+│   │   └── README.md
+│   ├── bicep-to-chiral/
+│   │   └── README.md
+│   ├── cdk-to-chiral/
+│   │   ├── README.md
+│   │   ├── app.ts
+│   │   ├── cdk-stack.ts
+│   │   └── cdk.json
+│   ├── gcp-terraform-deployment.sh
+│   ├── gcp-to-chiral/
+│   │   ├── README.md
+│   │   └── comparison.md
+│   ├── greenfield-development-example/
+│   │   └── chiral.config.ts
+│   ├── multi-cloud-migration-example/
+│   │   └── chiral.config.ts
+│   ├── pulumi-to-chiral/
+│   │   └── README.md
+│   ├── state-corruption-scenario/
+│   │   └── README.md
+│   ├── terraform-to-chiral/
+│   │   └── README.md
+│   └── tofu-to-chiral/
+│       └── README.md
+├── jest.config.js
+├── jest.setup.js
+├── LICENSE
+├── package.json                      # Dependencies and Scripts.
+├── package-lock.json                 # Lock file for exact dependency versions.
+├── src/
+│   ├── __tests__/                    # [TESTS] Unit and integration tests for adapters and synthesis.
+│   │   ├── azure-adapter.test.ts
+│   │   ├── gcp-adapter.test.ts
+│   │   ├── generation-integration.test.ts
+│   │   ├── hardware-map.test.ts
+│   │   ├── import.test.ts
+│   │   ├── intent.test.ts
+│   │   └── migration.test.ts
+│   ├── adapters/                     # [LOGIC] Implementation approaches.
+│   │   ├── declarative/              # [DECLARATIVE] DSL/template-based approaches
+│   │   │   ├── azure-bicep.ts        # [AZURE] Bicep template generation
+│   │   │   └── gcp-terraform.ts      # [GCP] Terraform Blueprint generation
+│   │   └── programmatic/             # [PROGRAMMATIC] CDK-based imperative approach
+│   │       └── aws-cdk.ts            # [AWS] CDK constructs and classes
+│   ├── intent/                       # [TYPES] Abstract business requirements.
+│   │   └── index.ts                  # Defines KubernetesIntent, DatabaseIntent, etc.
+│   ├── main.ts                       # [ENGINE] Orchestrates synthesis from intent to artifacts.
+│   ├── translation/                   # [TRANSLATION] Hardware mapping between clouds.
+│   │   ├── hardware-map.ts           # Maps abstract sizes to cloud-specific SKUs
+│   │   ├── import-map.ts
+│   │   └── regional-metadata.ts
+│   └── validation.ts
+├── tsconfig.json                     # TypeScript configuration.
+└── README.md                         # Project documentation and Chiral Pattern definition.
+```
+
 ---
 
 ## Open-source software
