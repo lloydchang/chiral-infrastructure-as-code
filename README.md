@@ -106,14 +106,14 @@ We use the Chiral Pattern to avoid vendor lock-ins to 3rd-party state managers. 
 ### Description
 The Chiral Pattern is a software design approach for multi-cloud infrastructure management where an intent schema is used to generate native, 1st-party artifacts for each target cloud. 
 
-The pattern produces mirror-image outputs (for example, AWS CloudFormation via CDK and Azure Bicep) to ensure that both deployments share the same functional intent while remaining fully compatible with their respective cloud-native constructs. The Chiral Pattern allows cloud independence, auditability, and synchronization, enabling teams to change intent without relying on 3rd-party state managers to avoid vendor lock-ins.
+The pattern produces mirror-image outputs (for example, AWS CloudFormation via CDK and Azure Bicep / Google Infrastructure Manager Terraform Blueprint) to ensure that both deployments share the same functional intent while remaining fully compatible with their respective cloud-native constructs. The Chiral Pattern allows cloud independence, auditability, and synchronization, enabling teams to change intent without relying on 3rd-party state managers to avoid vendor lock-ins.
 
 Its metaphorical name emphasizes that the outputs are structurally identical in purpose but inherently distinct in implementation, like left and right hands.
 
 
 ---
 
-> We define our infrastructure in the **Chiral Config**. The **Chiral Engine** generates the native **Enantiomers** (for example, CloudFormation and Bicep), which are then deployed to their respective clouds.
+> We define our infrastructure in the **Chiral Config**. The **Chiral Engine** generates the native **Enantiomers** (for example, AWS CDK, AWS CloudFormation, Azure Bicep, Azure Resource Manager, Google Infrastructure Manager Terraform Blueprints), which are then deployed to their respective clouds.
 
 ---
 
@@ -179,7 +179,7 @@ Chiral eliminates the fundamental state management problems that make Terraform 
 |----------------------------|---------------------|
 | **State Corruption** - Concurrent modifications, partial applies, network issues can corrupt state files requiring manual recovery | **Zero State Architecture** - No state files to corrupt. Each cloud manages its own state natively |
 | **Lock Contention** - Multiple pipelines compete for state locks, causing orphaned locks and manual intervention | **Native Cloud Locking** - AWS CloudFormation, Azure ARM, and GCP Infrastructure Manager handle locking automatically |
-| **Backend Management** - Complex setup and maintenance of S3/Azure Storage/GCS backends with encryption, versioning, and access controls | **No Backend Required** - Each cloud's native service handles state storage, versioning, and security automatically |
+| **Backend Management** - Complex setup and maintenance of Amazon S3, Azure Storage, Google Cloud Storage backends with encryption, versioning, and access controls | **No Backend Required** - Each cloud's native service handles state storage, versioning, and security automatically |
 | **Security Risks** - State files contain sensitive data (secrets, IPs, metadata) that can leak or be exposed | **No External State Files** - Sensitive information stays within each cloud's secure control plane |
 | **Multi-Account Spanning** - State files cannot securely span cloud accounts without breaking trust boundaries | **Native Cloud Security** - Each cloud's IAM and security controls manage state within their trust boundaries |
 | **Cost Overhead** - Google Infrastructure Manager costs $0.99/month per resource plus operational overhead for state management | **Zero Additional Cost** - No third-party state management fees or operational overhead |
@@ -187,10 +187,11 @@ Chiral eliminates the fundamental state management problems that make Terraform 
 ### Terraform Migration Benefits
 
 **From Problematic Terraform Approaches:**
-- **A. Local State**: Eliminates single point of failure and security risks
-- **B. Remote Backend per Environment**: Removes backend complexity and lock contention
-- **C. Coarse-Grained State**: Eliminates blast radius from state file corruption
-- **D/E. Managed Terraform**: Avoids $0.99/resource/month fees and remaining state issues
+- **A. Local State**: Single point of failure and security risks
+- **B. Remote Backend per Environment**: Backend complexity and lock contention
+- **C. Coarse-Grained State**: Blast radius from state file corruption
+- **D. Self-Managed Terraform**: [Manage and Secure the Underlying Network and Infrastructure](https://developer.hashicorp.com/terraform/enterprise/deploy/reference/application-security)
+- **E. Managed Terraform**: [$0.99/resource/month fees](https://www.hashicorp.com/en/pricing) and [remaining state issues]()
 
 **To Chiral's Stateless Approach:**
 - Generate native artifacts from single intent
