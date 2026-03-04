@@ -106,14 +106,14 @@ We use the Chiral Pattern to avoid vendor lock-ins to 3rd-party state managers. 
 ### Description
 The Chiral Pattern is a software design approach for multi-cloud infrastructure management where an intent schema is used to generate native, 1st-party artifacts for each target cloud. 
 
-The pattern produces mirror-image outputs (for example, AWS CloudFormation via CDK and Azure Bicep / Google Infrastructure Manager Terraform Blueprint) to ensure that both deployments share the same functional intent while remaining fully compatible with their respective cloud-native constructs. The Chiral Pattern allows cloud independence, auditability, and synchronization, enabling teams to change intent without relying on 3rd-party state managers to avoid vendor lock-ins.
+The pattern produces mirror-image outputs (for example, AWS CloudFormation via CDK and Azure Bicep / Google Cloud Infrastructure Manager Terraform Blueprint) to ensure that both deployments share the same functional intent while remaining fully compatible with their respective cloud-native constructs. The Chiral Pattern allows cloud independence, auditability, and synchronization, enabling teams to change intent without relying on 3rd-party state managers to avoid vendor lock-ins.
 
 Its metaphorical name emphasizes that the outputs are structurally identical in purpose but inherently distinct in implementation, like left and right hands.
 
 
 ---
 
-> We define our infrastructure in the **Chiral Config**. The **Chiral Engine** generates the native **Enantiomers** (for example, AWS CDK, AWS CloudFormation, Azure Bicep, Azure Resource Manager, Google Infrastructure Manager Terraform Blueprints), which are then deployed to their respective clouds.
+> We define our infrastructure in the **Chiral Config**. The **Chiral Engine** generates the native **Enantiomers** (for example, AWS CDK, AWS CloudFormation, Azure Bicep, Azure Resource Manager, Google Cloud Infrastructure Manager Terraform Blueprints), which are then deployed to their respective clouds.
 
 ---
 
@@ -169,7 +169,7 @@ Chiral produces native cloud artifacts that can be deployed independently: AWS C
 **State Management Considerations:**
 - **AWS CDK/CloudFormation**: Managed natively by AWS; no external state files required.
 - **Azure Bicep/ARM**: Handled by Azure Resource Manager; built-in consistency and rollback.
-- **GCP Infrastructure Manager**: Google Infrastructure Manager runs Terraform as a managed service. Users deploy via Terraform configurations or Blueprints without directly handling state. The service handles state storage, locking, and policy enforcement, reducing operational and compliance overhead. Core Terraform risks, such as shared mutable state and partial apply failures, remain but are managed by Google rather than by individual teams. See [docs/CHALLENGES.md](docs/CHALLENGES.md) for details on these structural risks.
+- **GCP Infrastructure Manager**: Google Cloud Infrastructure Manager runs Terraform as a managed service. Users deploy via Terraform configurations or Blueprints without directly handling state. The service handles state storage, locking, and policy enforcement, reducing operational and compliance overhead. Core Terraform risks, such as shared mutable state and partial apply failures, remain but are managed by Google rather than by individual teams. See [docs/CHALLENGES.md](docs/CHALLENGES.md) for details on these structural risks.
 
 ## Chiral vs Terraform State Management
 
@@ -182,7 +182,7 @@ Chiral eliminates the fundamental state management problems that make Terraform 
 | **Backend Management** - Complex setup and maintenance of Amazon S3, Azure Storage, Google Cloud Storage backends with encryption, versioning, and access controls | **No Backend Required** - Each cloud's native service handles state storage, versioning, and security automatically |
 | **Security Risks** - State files contain sensitive data (secrets, IPs, metadata) that can leak or be exposed | **No External State Files** - Sensitive information stays within each cloud's secure control plane |
 | **Multi-Account Spanning** - State files cannot securely span cloud accounts without breaking trust boundaries | **Native Cloud Security** - Each cloud's IAM and security controls manage state within their trust boundaries |
-| **Cost Overhead** - Google Infrastructure Manager costs $0.99/month per resource plus operational overhead for state management | **Zero Additional Cost** - No third-party state management fees or operational overhead |
+| **Cost Overhead** - Google Cloud Infrastructure Manager costs $0.99/month per resource plus operational overhead for state management | **Zero Additional Cost** - No third-party state management fees or operational overhead |
 
 ### Terraform Migration Benefits
 
