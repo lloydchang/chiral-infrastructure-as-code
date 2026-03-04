@@ -301,7 +301,7 @@ program
   .description('Compile Chiral config into cloud artifacts')
   .requiredOption('-c, --config <path>', 'Path to the chiral config file (JS or TS)')
   .option('-o, --out <dir>', 'Output directory for generated files', 'dist')
-  .action((options) => {
+  .action(async (options) => {
     const configPath = path.resolve(options.config);
     const DIST_DIR = path.resolve(options.out);
 
@@ -356,6 +356,22 @@ program
 
     app.synth(); // This writes the CloudFormation template natively.
     console.log(`✅ [AWS]   CloudFormation synthesized to: ${path.relative(process.cwd(), path.join(DIST_DIR, 'aws-assembly'))}/`);
+
+    // Estimate costs with Infracost
+    console.log(`🔍 [AWS] Estimating costs with Infracost...`);
+    try {
+      const { AWSCostAnalyzer } = await import('./cost-analysis');
+      const awsEstimate = await AWSCostAnalyzer.getAWSPricing(config, {
+        region: config.region?.aws || 'us-east-1',
+        detailed: true
+      });
+      console.log(`✅ [AWS] Cost estimation completed: $${awsEstimate.totalMonthlyCost.toFixed(2)}/month`);
+      if (awsEstimate.warnings.length > 0) {
+        console.log(`⚠️  [AWS] Warnings: ${awsEstimate.warnings.join(', ')}`);
+      }
+    } catch (error) {
+      console.log(`⚠️  [AWS] Cost estimation failed or Infracost not installed. Install from https://www.infracost.io/`);
+    }
 
     // -----------------------------------------------------
     // 2. Generate via Declarative Adapter (Azure Bicep)
@@ -458,6 +474,22 @@ program
       } catch {
         console.log(`⚠️  [GCP] Terraform CLI not found or validation failed. Skipping validation.`);
         console.log(`   Install Terraform CLI or validate manually.`);
+      }
+
+      // Estimate costs with Infracost
+      console.log(`🔍 [GCP] Estimating costs with Infracost...`);
+      try {
+        const { GCPCostAnalyzer } = await import('./cost-analysis');
+        const gcpEstimate = await GCPCostAnalyzer.getGCPPricing(config, {
+          region: config.region?.gcp || 'us-central1',
+          detailed: true
+        });
+        console.log(`✅ [GCP] Cost estimation completed: $${gcpEstimate.totalMonthlyCost.toFixed(2)}/month`);
+        if (gcpEstimate.warnings.length > 0) {
+          console.log(`⚠️  [GCP] Warnings: ${gcpEstimate.warnings.join(', ')}`);
+        }
+      } catch (error) {
+        console.log(`⚠️  [GCP] Cost estimation failed or Infracost not installed. Install from https://www.infracost.io/`);
       }
     } catch (error) {
       console.error('\n' + '='.repeat(60));
@@ -593,7 +625,7 @@ program
       const config = require(configPath).config || require(configPath);
       
       // Import cost analysis modules
-      const { CostAnalyzer, AzureCostAnalyzer } = await import('./cost-analysis');
+      const { CostAnalyzer, AzureCostAnalyzer, AWSCostAnalyzer, GCPCostAnalyzer } = await import('./cost-analysis');
       
       if (provider) {
         // Single provider analysis
@@ -606,13 +638,13 @@ program
             });
             break;
           case 'aws':
-            estimate = await CostAnalyzer.getAWSEstimate(config, {
+            estimate = await AWSCostAnalyzer.getAWSPricing(config, {
               region: options.region,
               detailed: options.detailed
             });
             break;
           case 'gcp':
-            estimate = await CostAnalyzer.getGCPEstimate(config, {
+            estimate = await GCPCostAnalyzer.getGCPPricing(config, {
               region: options.region,
               detailed: options.detailed
             });
@@ -676,7 +708,7 @@ program
 
     try {
       // Import cost analysis modules
-      const { AzureCostAnalyzer } = await import('./cost-analysis');
+      const { AzureCostAnalyzer, AWSCostAnalyzer, GCPCostAnalyzer } = await import('./cost-analysis');
       
       // This would integrate with cloud provider cost APIs
       // For now, show a placeholder implementation
@@ -692,10 +724,28 @@ program
         console.log(`   📦 Install from: https://github.com/mivano/azure-cost-cli`);
       }
       
+      if (provider === 'aws' && AWSCostAnalyzer.isAvailable()) {
+        console.log(`   ✅ AWS cost analysis tools available (infracost or AWS CLI)`);
+        console.log(`   💡 Run: infracost breakdown --path <terraform-files> or use AWS Cost Explorer`);
+      } else if (provider === 'aws') {
+        console.log(`   ⚠️  Install infracost or AWS CLI for detailed AWS cost analysis`);
+        console.log(`   📦 Install infracost: https://www.infracost.io/`);
+        console.log(`   📦 Install AWS CLI: https://aws.amazon.com/cli/`);
+      }
+      
+      if (provider === 'gcp' && GCPCostAnalyzer.isAvailable()) {
+        console.log(`   ✅ GCP cost analysis tools available (infracost or gcloud CLI)`);
+        console.log(`   💡 Run: infracost breakdown --path <terraform-files> or use gcloud billing commands`);
+      } else if (provider === 'gcp') {
+        console.log(`   ⚠️  Install infracost or gcloud CLI for detailed GCP cost analysis`);
+        console.log(`   📦 Install infracost: https://www.infracost.io/`);
+        console.log(`   📦 Install gcloud CLI: https://cloud.google.com/sdk/docs/install`);
+      }
+      
       console.log(`\n🔍 Integration Points:`);
-      console.log(`   AWS: Cost Explorer API`);
+      console.log(`   AWS: Cost Explorer API + infracost`);
       console.log(`   Azure: Cost Management API + azure-cost-cli`);
-      console.log(`   GCP: Cloud Billing API`);
+      console.log(`   GCP: Cloud Billing API + infracost`);
       
     } catch (error) {
       console.error(`❌ Cost analysis failed: ${error}`);

@@ -2,7 +2,7 @@
 
 // Tests for cost analysis functionality
 
-import { AzureCostAnalyzer, CostAnalyzer, CostOptimizer } from '../cost-analysis';
+import { AzureCostAnalyzer, AWSCostAnalyzer, GCPCostAnalyzer, CostAnalyzer, CostOptimizer } from '../cost-analysis';
 import { ChiralSystem } from '../intent';
 
 describe('Cost Analysis', () => {
@@ -64,6 +64,92 @@ describe('Cost Analysis', () => {
         };
         
         const estimate = await AzureCostAnalyzer.getAzurePricing(testConfig, options);
+        
+        expect(estimate.currency).toBe('EUR');
+      });
+    });
+  });
+
+  describe('AWSCostAnalyzer', () => {
+    describe('isAvailable', () => {
+      it('should return boolean indicating AWS cost analysis tools availability', () => {
+        const result = AWSCostAnalyzer.isAvailable();
+        expect(typeof result).toBe('boolean');
+      });
+    });
+
+    describe('getAWSPricing', () => {
+      it('should return cost estimate for AWS', async () => {
+        const estimate = await AWSCostAnalyzer.getAWSPricing(testConfig);
+        
+        expect(estimate.provider).toBe('aws');
+        expect(estimate.totalMonthlyCost).toBeGreaterThan(0);
+        expect(estimate.currency).toBe('USD');
+        expect(estimate.breakdown).toBeDefined();
+        expect(estimate.breakdown.compute.total).toBeGreaterThan(0);
+        expect(estimate.breakdown.storage.total).toBeGreaterThan(0);
+        expect(estimate.breakdown.network.total).toBeGreaterThanOrEqual(0);
+        expect(estimate.breakdown.other.total).toBeGreaterThanOrEqual(0);
+      });
+
+      it('should include recommendations and warnings', async () => {
+        const estimate = await AWSCostAnalyzer.getAWSPricing(testConfig);
+        
+        expect(Array.isArray(estimate.recommendations)).toBe(true);
+        expect(Array.isArray(estimate.warnings)).toBe(true);
+      });
+
+      it('should handle custom options', async () => {
+        const options = {
+          region: 'us-west-2',
+          currency: 'USD',
+          detailed: true
+        };
+        
+        const estimate = await AWSCostAnalyzer.getAWSPricing(testConfig, options);
+        
+        expect(estimate.currency).toBe('USD');
+      });
+    });
+  });
+
+  describe('GCPCostAnalyzer', () => {
+    describe('isAvailable', () => {
+      it('should return boolean indicating GCP cost analysis tools availability', () => {
+        const result = GCPCostAnalyzer.isAvailable();
+        expect(typeof result).toBe('boolean');
+      });
+    });
+
+    describe('getGCPPricing', () => {
+      it('should return cost estimate for GCP', async () => {
+        const estimate = await GCPCostAnalyzer.getGCPPricing(testConfig);
+        
+        expect(estimate.provider).toBe('gcp');
+        expect(estimate.totalMonthlyCost).toBeGreaterThan(0);
+        expect(estimate.currency).toBe('USD');
+        expect(estimate.breakdown).toBeDefined();
+        expect(estimate.breakdown.compute.total).toBeGreaterThan(0);
+        expect(estimate.breakdown.storage.total).toBeGreaterThan(0);
+        expect(estimate.breakdown.network.total).toBeGreaterThanOrEqual(0);
+        expect(estimate.breakdown.other.total).toBeGreaterThanOrEqual(0);
+      });
+
+      it('should include recommendations and warnings', async () => {
+        const estimate = await GCPCostAnalyzer.getGCPPricing(testConfig);
+        
+        expect(Array.isArray(estimate.recommendations)).toBe(true);
+        expect(Array.isArray(estimate.warnings)).toBe(true);
+      });
+
+      it('should handle custom options', async () => {
+        const options = {
+          region: 'europe-west1',
+          currency: 'EUR',
+          detailed: true
+        };
+        
+        const estimate = await GCPCostAnalyzer.getGCPPricing(testConfig, options);
         
         expect(estimate.currency).toBe('EUR');
       });

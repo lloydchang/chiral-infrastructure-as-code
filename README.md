@@ -132,7 +132,7 @@ chiral cost-estimate --config chiral.config.ts --detailed --provider azure
 ```
 
 **Cost Analysis Features:**
-- **Real-time pricing**: Uses azure-cost-cli for accurate Azure pricing data
+- **Real-time pricing**: Uses azure-cost-cli for Azure, infracost for AWS/GCP, and cloud provider APIs
 - **Multi-cloud comparison**: Compare costs across AWS, Azure, and GCP
 - **Cost optimization**: Get recommendations for cost-effective configurations
 - **Budget alerts**: Set cost thresholds and receive warnings
@@ -162,6 +162,7 @@ The import command attempts to map existing resources to Chiral intent, generati
 - For Azure deployment: Azure CLI (`az`)
 - For GCP deployment: Google Cloud CLI (`gcloud`)
 - For cost analysis (Azure): azure-cost-cli (optional, for enhanced cost estimation)
+- For cost analysis (AWS/GCP): infracost (optional, for enhanced cost estimation)
 
 ### Deployment
 
