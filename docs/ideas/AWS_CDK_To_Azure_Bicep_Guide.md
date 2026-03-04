@@ -2464,12 +2464,12 @@ export const config: ChiralSystem = {
 
   postgres: {
     engineVersion: '15',
-    size: 'large', // Resolves to m5.large (AWS) / D4s_v3 (Azure)
+    size: 'large', // Resolves to m5.large (AWS) / D4s_v3 (Azure) / n1-standard-2 (GCP)
     storageGb: 100
   },
 
   adfs: {
-    size: 'large', // Resolves to m5.xlarge (AWS) / D4s_v3 (Azure)
+    size: 'large', // Resolves to m5.xlarge (AWS) / D4s_v3 (Azure) / n1-standard-2 (GCP)
     windowsVersion: '2022'
   }
 };

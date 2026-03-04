@@ -23,30 +23,21 @@ export const config: ChiralSystem = {
     subnetCidr: '10.0.1.0/24'  // Default: calculated from networkCidr (/16 -> /24)
   },
 
-  // Optional: Configure Terraform backend for GCP (recommended for state management)
-  // terraform: {
-  //   backend: {
-  //     type: 'gcs',
-  //     bucket: 'my-terraform-state-bucket',
-  //     prefix: 'chiral-state'  // Optional
-  //   }
-  // },
-
   k8s: {
     version: '1.29',
     minNodes: 2,
     maxNodes: 5,
-    size: 'large' // Resolves to m5.large (AWS) / Standard_D4s_v3 (Azure)
+    size: 'large' // Resolves to m5.large (AWS) / Standard_D4s_v3 (Azure) / n1-standard-2 (GCP)
   },
 
   postgres: {
     engineVersion: '15',
-    size: 'large', // Resolves to m5.large (AWS) / Standard_D4s_v3 (Azure)
+    size: 'large', // Resolves to db.m5.large (AWS) / Standard_D4s_v3 (Azure) / db-custom-2-4096 (GCP)
     storageGb: 100
   },
 
   adfs: {
-    size: 'large', // Resolves to m5.xlarge (AWS) / Standard_D4s_v3 (Azure)
+    size: 'large', // Resolves to m5.xlarge (AWS) / Standard_D4s_v3 (Azure) / n1-standard-2 (GCP)
     windowsVersion: '2022'
   }
 };
