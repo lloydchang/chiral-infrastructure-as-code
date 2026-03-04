@@ -919,6 +919,7 @@ resource "aws_instance" "adfs" {
       warnings
     };
   }
+}
 
 // =================================================================
 // GCP COST ANALYSIS EQUIVALENTS
@@ -1158,7 +1159,7 @@ resource "google_compute_instance" "adfs" {
       breakdown.compute.vm = computePricing.hourly * 730; // Monthly approximation
 
       // Get Cloud SQL pricing
-      const sqlPricing = await this.getCloudSQLPricing(this.getGCPDatabaseTier(config.postgres.size), region);
+      const sqlPricing = await this.getCloudSQLPricingData(this.getGCPDatabaseTier(config.postgres.size), region);
       breakdown.storage.database = sqlPricing.compute + (config.postgres.storageGb * sqlPricing.storagePerGb);
 
       // Get networking costs
@@ -1229,6 +1230,15 @@ resource "google_compute_instance" "adfs" {
 
   private static async getGKEPricing(region: string): Promise<{ managementFee: number; nodeCost: number }> {
     return { managementFee: 74, nodeCost: 66 }; // Simplified GKE pricing
+  }
+
+  private static async getCloudSQLPricingData(tier: string, region: string): Promise<{ compute: number; storagePerGb: number }> {
+    const pricingMap: { [key: string]: { compute: number; storagePerGb: number } } = {
+      'db-n1-standard-1': { compute: 25, storagePerGb: 0.17 },
+      'db-n1-standard-2': { compute: 50, storagePerGb: 0.17 },
+      'db-n1-standard-4': { compute: 100, storagePerGb: 0.17 }
+    };
+    return pricingMap[tier] || { compute: 50, storagePerGb: 0.17 };
   }
 
   private static async getComputePricing(machineType: string, region: string): Promise<{ hourly: number }> {
@@ -1375,6 +1385,7 @@ resource "google_compute_instance" "adfs" {
       warnings
     };
   }
+}
 
 // =================================================================
 // AZURE COST CLI INTEGRATION
@@ -1739,9 +1750,9 @@ export class AzureCostAnalyzer {
 export class CostAnalyzer {
   static async compareCosts(config: ChiralSystem, options: CostAnalysisOptions = {}): Promise<CostComparison> {
     const [awsEstimate, azureEstimate, gcpEstimate] = await Promise.all([
-      InfracostAnalyzer.getAWSPricing(config, options),
+      AWSCostAnalyzer.getAWSPricing(config, options),
       AzureCostAnalyzer.getAzurePricing(config, options),
-      InfracostAnalyzer.getGCPPricing(config, options)
+      GCPCostAnalyzer.getGCPPricing(config, options)
     ]);
 
     const estimates = { aws: awsEstimate, azure: azureEstimate, gcp: gcpEstimate };
@@ -1771,11 +1782,11 @@ export class CostAnalyzer {
   }
 
   static async getAWSEstimate(config: ChiralSystem, options: CostAnalysisOptions = {}): Promise<CostEstimate> {
-    return InfracostAnalyzer.getAWSPricing(config, options);
+    return AWSCostAnalyzer.getAWSPricing(config, options);
   }
 
   static async getGCPEstimate(config: ChiralSystem, options: CostAnalysisOptions = {}): Promise<CostEstimate> {
-    return InfracostAnalyzer.getGCPPricing(config, options);
+    return GCPCostAnalyzer.getGCPPricing(config, options);
   }
 
   static generateCostReport(comparison: CostComparison, options: CostAnalysisOptions = {}): string {

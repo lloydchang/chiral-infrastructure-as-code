@@ -119,11 +119,9 @@ export class AwsCdkAdapter extends cdk.Stack {
         eks.ClusterLoggingTypes.SCHEDULER
       ],
       // Add encryption configuration
-      secretsEncryption: eks.KubernetesSecretsEncryption.awsManaged({
-        encryptionKey: cdk.SecretValue.secretsManager('eks-secrets-key')
-      }),
+      secretsEncryptionKey: cdk.SecretValue.secretsManager(this, 'eks-secrets-key'),
       // Add IAM role for service accounts
-      iamAuth: new iam.OpenIdConnectProvider({
+      iamAuth: new iam.OpenIdConnectProvider(this, 'eks-oidc', {
         url: 'https://sts.amazonaws.com/idp/bce037f2'
       })
     });
@@ -139,29 +137,8 @@ export class AwsCdkAdapter extends cdk.Stack {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       },
       // Enhanced node group configuration
-      capacityType: eks.CapacityType.ON_DEMAND,
-      launchTemplateSpec: {
-        launchTemplateSpecification: {
-          templateName: 'system-node-template',
-          userData: ec2.UserData.forLinux(),
-          blockDeviceMappings: [
-            {
-              deviceName: '/dev/xvda',
-              ebs: {
-                volumeSize: 20,
-                volumeType: ec2.EbsDeviceVolumeType.GP3,
-                deleteOnTermination: true
-              }
-            }
-          ]
-        }
-      },
-      // Add auto-scaling configuration
-      scaling: {
-        minSize: intent.k8s.minNodes,
-        maxSize: intent.k8s.maxNodes,
-        desiredSize: intent.k8s.minNodes
-      }
+      capacityType: eks.CapacityType.ON_DEMAND
+      // Auto-scaling already configured at top level with minSize/maxSize/desiredSize
     });
 
     // Add managed node group for application workloads
@@ -177,27 +154,10 @@ export class AwsCdkAdapter extends cdk.Stack {
       // Enhanced node group configuration
       capacityType: eks.CapacityType.ON_DEMAND,
       launchTemplateSpec: {
-        launchTemplateSpecification: {
-          templateName: 'application-node-template',
-          userData: ec2.UserData.forLinux(),
-          blockDeviceMappings: [
-            {
-              deviceName: '/dev/xvda',
-              ebs: {
-                volumeSize: 30,
-                volumeType: ec2.EbsDeviceVolumeType.GP3,
-                deleteOnTermination: true
-              }
-            }
-          ]
-        }
-      },
-      // Add auto-scaling configuration
-      scaling: {
-        minSize: 1,
-        maxSize: 5,
-        desiredSize: 2
+        id: 'lt-application-template', // Use launch template ID instead of specification
+        version: '$Latest'
       }
+      // Auto-scaling already configured at top level with minSize/maxSize/desiredSize
     });
 
     // Store cluster config in SSM Parameter Store

@@ -93,14 +93,110 @@ const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 'gcp', 
     }
     
   } else if (ext === '.tf') {
-    const content = fs.readFileSync(sourcePath, 'utf8');
-    const parsed = hcl2.parse(content);
-    // Simplified: extract resources (actual HCL structure is complex)
-    resources = parsed.resource ? Object.values(parsed.resource).flat() : [];
+    console.log(`🔍 Parsing Terraform HCL file: ${path.basename(sourcePath)}`);
+
+    try {
+      const content = fs.readFileSync(sourcePath, 'utf8');
+      const parsed = hcl2.parse(content);
+
+      // Enhanced HCL resource extraction with module support
+      const extractResources = (hclData: any, modulePath: string[] = []): any[] => {
+        const resources: any[] = [];
+
+        // Extract resources from current scope
+        if (hclData.resource) {
+          Object.entries(hclData.resource).forEach(([resourceType, resourceBlocks]: [string, any]) => {
+            Object.entries(resourceBlocks).forEach(([resourceName, resourceConfig]: [string, any]) => {
+              resources.push({
+                type: resourceType,
+                name: resourceName,
+                values: resourceConfig,
+                modulePath: modulePath.join('.')
+              });
+            });
+          });
+        }
+
+        // Extract resources from modules (recursive)
+        if (hclData.module) {
+          Object.entries(hclData.module).forEach(([moduleName, moduleConfig]: [string, any]) => {
+            const moduleResources = extractResources(moduleConfig, [...modulePath, moduleName]);
+            resources.push(...moduleResources);
+          });
+        }
+
+        return resources;
+      };
+
+      resources = extractResources(parsed);
+
+      // Enhanced variable resolution
+      const resolveVariables = (config: any, variables: any = {}): any => {
+        if (typeof config === 'string' && config.startsWith('var.')) {
+          const varName = config.slice(4);
+          return variables[varName] || config;
+        }
+        if (Array.isArray(config)) {
+          return config.map(item => resolveVariables(item, variables));
+        }
+        if (typeof config === 'object' && config !== null) {
+          const resolved: any = {};
+          for (const [key, value] of Object.entries(config)) {
+            resolved[key] = resolveVariables(value, variables);
+          }
+          return resolved;
+        }
+        return config;
+      };
+
+      // Apply variable resolution if variables.tf exists
+      const varFile = path.join(path.dirname(sourcePath), 'variables.tf');
+      let variables = {};
+      if (fs.existsSync(varFile)) {
+        try {
+          const varContent = fs.readFileSync(varFile, 'utf8');
+          const varParsed = hcl2.parse(varContent);
+          if (varParsed.variable) {
+            variables = varParsed.variable;
+          }
+        } catch (error) {
+          console.warn(`⚠️  Could not parse variables.tf: ${error}`);
+        }
+      }
+
+      // Resolve variables in resources
+      resources = resources.map(resource => ({
+        ...resource,
+        values: resolveVariables(resource.values, variables)
+      }));
+
+      console.log(`✅ Extracted ${resources.length} resources from HCL`);
+
+    } catch (error) {
+      console.error(`❌ Failed to parse Terraform HCL file: ${error}`);
+      console.error(`   Try: terraform validate && terraform fmt`);
+      throw new Error(`Invalid Terraform HCL syntax: ${error instanceof Error ? error.message : String(error)}`);
+    }
   } else if (ext === '.yaml' || ext === '.yml' || ext === '.json') {
     const content = fs.readFileSync(sourcePath, 'utf8');
     const template = ext === '.json' ? JSON.parse(content) : yaml.load(content);
-    resources = Object.keys(template.Resources || {}).map(key => ({ type: template.Resources[key].Type, properties: template.Resources[key].Properties }));
+
+    // Handle Pulumi YAML format
+    if (template.resources) {
+      // This looks like a Pulumi YAML file
+      console.log(`🔍 Detected Pulumi YAML format`);
+      resources = Object.keys(template.resources).map(key => ({
+        type: template.resources[key].type,
+        name: key,
+        values: template.resources[key].properties || {}
+      }));
+    } else {
+      // Standard CloudFormation/ARM template
+      resources = Object.keys(template.Resources || {}).map(key => ({
+        type: template.Resources[key].Type,
+        properties: template.Resources[key].Properties
+      }));
+    }
   } else if (ext === '.bicep') {
     const tempJson = path.join(os.tmpdir(), `bicep-${Date.now()}.json`);
     try {
@@ -232,19 +328,238 @@ const inferRegion = (resources: any[], provider: string): { aws?: string; azure?
 };
 
 const buildChiralSystemFromResources = (resources: any[], provider: string, stackName?: string): ChiralSystem => {
-  // Enhanced resource mapping with better error handling
-  const k8sResources = resources.filter(r => 
+  // Enhanced resource mapping with better error handling and comprehensive type support
+  const warnings: string[] = [];
+  const unmappableResources: string[] = [];
+
+  // Define resource type mappings per provider
+  const resourceMappings = {
+    aws: {
+      k8s: ['aws_eks_cluster', 'aws_eks_node_group'],
+      db: ['aws_db_instance', 'aws_rds_cluster'],
+      vm: ['aws_instance'],
+      network: ['aws_vpc', 'aws_subnet', 'aws_security_group']
+    },
+    azure: {
+      k8s: ['azurerm_kubernetes_cluster', 'azurerm_kubernetes_cluster_node_pool'],
+      db: ['azurerm_postgresql_flexible_server', 'azurerm_postgresql_server'],
+      vm: ['azurerm_virtual_machine', 'azurerm_windows_virtual_machine'],
+      network: ['azurerm_virtual_network', 'azurerm_subnet']
+    },
+    gcp: {
+      k8s: ['google_container_cluster', 'google_container_node_pool'],
+      db: ['google_sql_database_instance'],
+      vm: ['google_compute_instance'],
+      network: ['google_compute_network', 'google_compute_subnetwork']
+    }
+  };
+
+  const providerMappings = resourceMappings[provider as keyof typeof resourceMappings] || resourceMappings.aws;
+
+  // Enhanced filtering with specific resource types
+  const k8sResources = resources.filter(r =>
+    providerMappings.k8s.some(type => r.type === type) ||
     r.type?.includes('kubernetes') || r.type?.includes('eks') || r.type?.includes('aks') || r.type?.includes('gke')
   );
-  const dbResources = resources.filter(r => 
+  const dbResources = resources.filter(r =>
+    providerMappings.db.some(type => r.type === type) ||
     r.type?.includes('rds') || r.type?.includes('sql') || r.type?.includes('database')
   );
-  const vmResources = resources.filter(r => 
+  const vmResources = resources.filter(r =>
+    providerMappings.vm.some(type => r.type === type) ||
     r.type?.includes('instance') || r.type?.includes('vm') || r.type?.includes('compute')
   );
-  const networkResources = resources.filter(r => 
-    r.type?.includes('vpc') || r.type?.includes('vnet') || r.type?.includes('network')
+  const networkResources = resources.filter(r =>
+    providerMappings.network.some(type => r.type === type) ||
+    r.type?.includes('vpc') || r.type?.includes('vnet') || r.type?.includes('network') ||
+    r.type?.includes('subnet') || r.type?.includes('security_group')
   );
+
+  // Check for unmappable resources
+  const allMappedTypes = Object.values(providerMappings).flat();
+  resources.forEach(r => {
+    if (!allMappedTypes.some(type => r.type === type) &&
+        !r.type?.includes('kubernetes') && !r.type?.includes('eks') &&
+        !r.type?.includes('aks') && !r.type?.includes('gke') &&
+        !r.type?.includes('rds') && !r.type?.includes('sql') &&
+        !r.type?.includes('database') && !r.type?.includes('instance') &&
+        !r.type?.includes('vm') && !r.type?.includes('compute') &&
+        !r.type?.includes('vpc') && !r.type?.includes('vnet') &&
+        !r.type?.includes('network') && !r.type?.includes('subnet') &&
+        !r.type?.includes('security_group')) {
+      unmappableResources.push(r.type);
+    }
+  });
+
+  if (unmappableResources.length > 0) {
+    warnings.push(`Found ${unmappableResources.length} unmappable resource types: ${unmappableResources.slice(0, 5).join(', ')}${unmappableResources.length > 5 ? '...' : ''}. These will need manual migration.`);
+  }
+
+  // Migration analytics
+  const migrationAnalytics = {
+    totalResources: resources.length,
+    mappableResources: resources.length - unmappableResources.length,
+    unmappableResources: unmappableResources.length,
+    resourceBreakdown: {
+      k8s: k8sResources.length,
+      database: dbResources.length,
+      compute: vmResources.length,
+      network: networkResources.length,
+      other: resources.length - k8sResources.length - dbResources.length - vmResources.length - networkResources.length
+    },
+    confidence: calculateMigrationConfidence(resources, unmappableResources),
+    estimatedEffort: estimateMigrationEffort(resources, unmappableResources)
+  };
+
+  // Display migration analytics
+  console.log(`\n📊 Migration Analytics:`);
+  console.log(`   Total Resources: ${migrationAnalytics.totalResources}`);
+  console.log(`   Auto-mappable: ${migrationAnalytics.mappableResources} (${((migrationAnalytics.mappableResources / migrationAnalytics.totalResources) * 100).toFixed(1)}%)`);
+  console.log(`   Manual Migration: ${migrationAnalytics.unmappableResources} (${((migrationAnalytics.unmappableResources / migrationAnalytics.totalResources) * 100).toFixed(1)}%)`);
+  console.log(`   Confidence Level: ${migrationAnalytics.confidence}`);
+  console.log(`   Estimated Effort: ${migrationAnalytics.estimatedEffort}`);
+
+  console.log(`\n📋 Resource Breakdown:`);
+  console.log(`   Kubernetes: ${migrationAnalytics.resourceBreakdown.k8s}`);
+  console.log(`   Database: ${migrationAnalytics.resourceBreakdown.database}`);
+  console.log(`   Compute: ${migrationAnalytics.resourceBreakdown.compute}`);
+  console.log(`   Network: ${migrationAnalytics.resourceBreakdown.network}`);
+  console.log(`   Other: ${migrationAnalytics.resourceBreakdown.other}`);
+
+  if (migrationAnalytics.confidence === 'Low') {
+    warnings.push('Low migration confidence detected. Consider breaking down your infrastructure into smaller, more manageable components.');
+  }
+
+  // Enhanced inference with better property extraction
+  const inferKubernetesVersion = (resources: any[]): string => {
+    for (const r of resources) {
+      const props = r.values || r.properties || {};
+      // Provider-specific version fields
+      if (provider === 'aws' && props.version) return props.version;
+      if (provider === 'azure' && props.kubernetes_version) return props.kubernetes_version;
+      if (provider === 'gcp' && props.min_master_version) return props.min_master_version;
+      // Generic fallbacks
+      if (props.version || props.kubernetesVersion || props.kubernetes_version) {
+        return props.version || props.kubernetesVersion || props.kubernetes_version;
+      }
+    }
+    return '1.29'; // Latest stable
+  };
+
+  const inferNodeCount = (resources: any[], type: 'min' | 'max'): number => {
+    let counts: number[] = [];
+
+    for (const r of resources) {
+      const props = r.values || r.properties || {};
+
+      if (provider === 'aws') {
+        if (r.type === 'aws_eks_node_group') {
+          if (type === 'min' && props.scaling_config?.min_size) counts.push(props.scaling_config.min_size);
+          if (type === 'max' && props.scaling_config?.max_size) counts.push(props.scaling_config.max_size);
+        }
+      } else if (provider === 'azure') {
+        if (r.type === 'azurerm_kubernetes_cluster_node_pool') {
+          if (type === 'min' && props.min_count) counts.push(props.min_count);
+          if (type === 'max' && props.max_count) counts.push(props.max_count);
+        }
+      } else if (provider === 'gcp') {
+        if (r.type === 'google_container_node_pool') {
+          if (type === 'min' && props.autoscaling?.min_node_count) counts.push(props.autoscaling.min_node_count);
+          if (type === 'max' && props.autoscaling?.max_node_count) counts.push(props.autoscaling.max_node_count);
+        }
+      }
+
+      // Generic fallbacks
+      const fallbackProps = [props.minSize, props.min_count, props.minNodes, props.minNodeCount];
+      if (type === 'min' && fallbackProps.some(p => p !== undefined)) {
+        counts.push(...fallbackProps.filter(p => p !== undefined));
+      }
+      const maxFallbackProps = [props.maxSize, props.max_count, props.maxNodes, props.maxNodeCount];
+      if (type === 'max' && maxFallbackProps.some(p => p !== undefined)) {
+        counts.push(...maxFallbackProps.filter(p => p !== undefined));
+      }
+    }
+
+    return counts.length > 0 ? Math.max(...counts, 1) : (type === 'min' ? 1 : 5);
+  };
+
+  const inferWorkloadSize = (resources: any[]): 'small' | 'large' => {
+    const instanceTypes: string[] = [];
+
+    for (const r of resources) {
+      const props = r.values || r.properties || {};
+
+      // Extract instance types from different providers
+      if (provider === 'aws') {
+        if (r.type === 'aws_instance' && props.instance_type) instanceTypes.push(props.instance_type);
+        if (r.type === 'aws_eks_node_group' && props.instance_types?.[0]) instanceTypes.push(props.instance_types[0]);
+        if (r.type === 'aws_db_instance' && props.instance_class) instanceTypes.push(props.instance_class);
+      } else if (provider === 'azure') {
+        if (props.vm_size) instanceTypes.push(props.vm_size);
+        if (props.sku_name) instanceTypes.push(props.sku_name);
+      } else if (provider === 'gcp') {
+        if (props.machine_type) instanceTypes.push(props.machine_type);
+        if (props.tier) instanceTypes.push(props.tier);
+      }
+
+      // Generic fallbacks
+      const fallbackTypes = [props.instanceType, props.vmSize, props.machineType, props.tier, props.sku];
+      instanceTypes.push(...fallbackTypes.filter(t => t));
+    }
+
+    // Map to workload sizes
+    const largePatterns = [
+      /large/i, /xlarge/i, /2xlarge/i, /4xlarge/i, /8xlarge/i,
+      /standard_d[4-9]/i, /n1-standard-[4-9]/i, /m5\./i, /db\..*\.large/i
+    ];
+
+    const hasLargeInstance = instanceTypes.some(type =>
+      largePatterns.some(pattern => pattern.test(type))
+    );
+
+    return hasLargeInstance ? 'large' : 'small';
+  };
+
+  const inferDatabaseVersion = (resources: any[]): string => {
+    for (const r of resources) {
+      const props = r.values || r.properties || {};
+      if (provider === 'aws' && props.engine_version) return props.engine_version;
+      if (provider === 'azure' && props.version) return props.version;
+      if (provider === 'gcp' && props.database_version) return props.database_version;
+      // Generic fallbacks
+      if (props.engineVersion || props.engine || props.version) {
+        return props.engineVersion || props.engine || props.version;
+      }
+    }
+    return '15'; // PostgreSQL 15
+  };
+
+  const inferStorageSize = (resources: any[]): number => {
+    for (const r of resources) {
+      const props = r.values || r.properties || {};
+      if (provider === 'aws' && props.allocated_storage) return props.allocated_storage;
+      if (provider === 'azure' && props.storage_mb) return Math.ceil(props.storage_mb / 1024);
+      if (provider === 'gcp' && props.settings?.disk_size) return props.settings.disk_size;
+      // Generic fallbacks
+      const storageProps = [props.allocatedStorage, props.storageSize, props.disk_size, props.storage_mb];
+      const storage = storageProps.find(s => s !== undefined);
+      if (storage) return typeof storage === 'string' ? parseInt(storage) : storage;
+    }
+    return 100; // 100GB default
+  };
+
+  const inferWindowsVersion = (resources: any[]): '2019' | '2022' => {
+    for (const r of resources) {
+      const props = r.values || r.properties || {};
+      if (provider === 'aws' && props.ami && props.ami.includes('2019')) return '2019';
+      if (provider === 'aws' && props.ami && props.ami.includes('2022')) return '2022';
+      if (provider === 'azure' && props.source_image_reference?.offer?.includes('2019')) return '2019';
+      if (provider === 'azure' && props.source_image_reference?.offer?.includes('2022')) return '2022';
+      if (provider === 'gcp' && props.boot_disk?.initialize_params?.image?.includes('2019')) return '2019';
+      if (provider === 'gcp' && props.boot_disk?.initialize_params?.image?.includes('2022')) return '2022';
+    }
+    return '2022'; // Default to latest
+  };
 
   // Infer configuration from resources with improved logic
   const config: ChiralSystem = {
@@ -273,6 +588,12 @@ const buildChiralSystemFromResources = (resources: any[], provider: string, stac
     config.region = inferRegion(resources, provider);
   }
 
+  // Add warnings to config if any
+  if (warnings.length > 0) {
+    console.log(`\n⚠️  Migration Warnings:`);
+    warnings.forEach(w => console.log(`   • ${w}`));
+  }
+
   return config;
 };
 
@@ -285,9 +606,34 @@ const writeChiralConfig = (config: ChiralSystem, outputPath: string) => {
 export { ChiralSystem, EnvironmentTier, WorkloadSize, KubernetesIntent, DatabaseIntent, AdfsIntent } from './intent';
 export { validateChiralConfig, checkDeploymentReadiness, checkCompliance } from './validation';
 
-// =================================================================
-// CLI SETUP
-// =================================================================
+const calculateMigrationConfidence = (resources: any[], unmappableResources: string[]): 'High' | 'Medium' | 'Low' => {
+  const totalResources = resources.length;
+  const unmappableCount = unmappableResources.length;
+  const unmappableRatio = unmappableCount / totalResources;
+
+  if (unmappableRatio < 0.1) return 'High'; // <10% unmappable
+  if (unmappableRatio < 0.3) return 'Medium'; // 10-30% unmappable
+  return 'Low'; // >30% unmappable
+};
+
+const estimateMigrationEffort = (resources: any[], unmappableResources: string[]): string => {
+  const totalResources = resources.length;
+  const unmappableCount = unmappableResources.length;
+
+  // Base effort calculation
+  let effortDays = totalResources * 0.5; // 0.5 days per resource for auto-migration
+
+  // Add effort for unmappable resources (manual migration)
+  effortDays += unmappableCount * 2; // 2 days per unmappable resource
+
+  // Add complexity factors
+  if (totalResources > 50) effortDays *= 1.5; // Large infrastructure penalty
+  if (unmappableResources.length > 10) effortDays *= 1.3; // Many unmappable resources penalty
+
+  if (effortDays < 7) return `${Math.ceil(effortDays)} days`;
+  if (effortDays < 30) return `${Math.ceil(effortDays / 7)} weeks`;
+  return `${Math.ceil(effortDays / 30)} months`;
+};
 const program = new Command();
 
 program
@@ -519,17 +865,78 @@ program
   .requiredOption('-s, --source <path>', 'Path to IaC source file (.tf, .tfstate, .yaml, .json, .bicep)')
   .requiredOption('-p, --provider <provider>', 'Cloud provider: aws, azure, gcp')
   .option('-o, --output <path>', 'Output path for chiral config', 'chiral.config.ts')
+  .option('--terraform-bridge', 'Generate Terraform with cloud-native state delegation', false)
   .action(async (options) => {
     const sourcePath = path.resolve(options.source);
     const provider = options.provider as 'aws' | 'azure' | 'gcp';
     const outputPath = path.resolve(options.output);
 
     console.log(`\n🧪 Importing IaC from [${sourcePath}] for [${provider}]`);
+    if (options.terraformBridge) {
+      console.log(`🌉 Terraform bridge mode enabled - will delegate state to cloud provider`);
+    }
 
     try {
       const config = await importIaC(sourcePath, provider, path.basename(sourcePath, path.extname(sourcePath)));
+
+      if (options.terraformBridge) {
+        // Add Terraform bridge configuration
+        config.terraformBridge = {
+          enabled: true,
+          provider,
+          delegateState: true,
+          sourcePath
+        };
+      }
+
+      // Generate Terraform bridge if requested
+      if (config.terraformBridge?.enabled) {
+        console.log(`\n🌉 Generating Terraform bridge for ${config.terraformBridge.provider}...`);
+        const { TerraformAdapter } = await import('./adapters/declarative/terraform-adapter');
+        const { generateTerraformHcl } = await import('./utils/terraform-hcl');
+        
+        const terraformConfig = TerraformAdapter.generate(config, {
+          delegateState: config.terraformBridge.delegateState ?? true
+        });
+
+        // Write Terraform configuration
+        const terraformOutput = path.join(options.out, `${config.projectName}-terraform.tf`);
+        const terraformContent = generateTerraformHcl(terraformConfig);
+        fs.writeFileSync(terraformOutput, terraformContent);
+
+        // Write CloudFormation templates for delegation
+        const templateDir = path.join(options.out, 'terraform-templates');
+        if (!fs.existsSync(templateDir)) {
+          fs.mkdirSync(templateDir, { recursive: true });
+        }
+
+        // Copy template files
+        const templates = ['eks-template.json', 'rds-template.json', 'vpc-template.json', 'adfs-template.json'];
+        for (const template of templates) {
+          const templatePath = path.join(__dirname, 'adapters/declarative/terraform-templates', template);
+          if (fs.existsSync(templatePath)) {
+            const destPath = path.join(templateDir, template);
+            fs.copyFileSync(templatePath, destPath);
+          }
+        }
+
+        console.log(`✅ Terraform bridge generated: ${terraformOutput}`);
+        console.log(`📄 CloudFormation templates: ${templateDir}`);
+        console.log(`\n🌉 Terraform Bridge Mode:`);
+        console.log(`   State management delegated to ${config.terraformBridge.provider.toUpperCase()} native services`);
+        console.log(`   Use for gradual migration from Terraform to Chiral pattern`);
+        console.log(`   Deploy with: terraform apply terraform.tf`);
+      }
+
       writeChiralConfig(config, outputPath);
       console.log(`✅ Import completed. Config written to: ${outputPath}`);
+
+      if (options.terraformBridge) {
+        console.log(`\n🌉 Terraform Bridge Configuration:`);
+        console.log(`   State management delegated to ${provider.toUpperCase()} native services`);
+        console.log(`   Traditional Terraform state issues will be handled by cloud provider`);
+        console.log(`   Use this for gradual migration from Terraform to Chiral pattern`);
+      }
     } catch (error) {
       console.error(`❌ Import failed: ${error}`);
       process.exit(1);
@@ -557,35 +964,72 @@ program
     console.log(`   Strategy: ${strategy}`);
 
     try {
-      // Analyze Terraform setup
-      await analyzeTerraformSetup(sourcePath, provider);
+      // Analyze Terraform setup first
+      await analyzeTerraformSetup(sourcePath, provider, true);
 
       if (options.analyzeOnly) {
         console.log(`\n📊 Analysis complete. Use --no-analyze-only to proceed with migration.`);
+        console.log(`\n📋 Migration Strategy Overview:`);
+        console.log(getMigrationStrategyInfo(strategy));
         return;
       }
 
+      // Generate migration plan
+      console.log(`\n📋 Generating Migration Plan...`);
+      const migrationPlan = await generateMigrationPlan(sourcePath, provider, strategy);
+
+      console.log(`\n📝 Migration Plan:`);
+      console.log(`   Estimated Duration: ${migrationPlan.estimatedDuration}`);
+      console.log(`   Risk Level: ${migrationPlan.riskLevel}`);
+      console.log(`   Steps Required: ${migrationPlan.steps.length}`);
+
+      if (migrationPlan.preRequisites.length > 0) {
+        console.log(`\n⚠️  Prerequisites:`);
+        migrationPlan.preRequisites.forEach(prereq => console.log(`   • ${prereq}`));
+      }
+
+      console.log(`\n📋 Migration Steps:`);
+      migrationPlan.steps.forEach((step, index) => {
+        console.log(`   ${index + 1}. ${step.description}`);
+        if (step.notes) console.log(`      Note: ${step.notes}`);
+      });
+
+      // Confirm before proceeding
+      console.log(`\n🚨 This will generate a Chiral configuration from your Terraform state.`);
+      console.log(`   Ensure you have backups and understand the migration process.`);
+
       // Import and migrate
       const config = await importIaC(sourcePath, provider, 'migrated-infrastructure');
-      
+
       // Add migration settings
       config.migration = {
         strategy: strategy,
         sourceState: sourcePath,
-        validateCompliance: true
+        validateCompliance: true,
+        rollbackPlan: migrationPlan.rollbackSteps
       };
 
       writeChiralConfig(config, outputPath);
-      
+
       console.log(`\n✅ Migration completed!`);
       console.log(`   Config written to: ${outputPath}`);
       console.log(`   Next steps:`);
-      console.log(`   1. Review the generated config`);
-      console.log(`   2. Run 'chiral --config ${outputPath}' to generate artifacts`);
-      console.log(`   3. Deploy with cloud-native tools (no Terraform state required)`);
-      
+      console.log(`   1. Review the generated config for accuracy`);
+      console.log(`   2. Test with 'chiral validate --config ${outputPath}'`);
+      console.log(`   3. Generate artifacts with 'chiral --config ${outputPath}'`);
+      console.log(`   4. Deploy using cloud-native tools (no Terraform state required)`);
+
+      if (migrationPlan.postMigration.length > 0) {
+        console.log(`\n📋 Post-Migration Tasks:`);
+        migrationPlan.postMigration.forEach(task => console.log(`   • ${task}`));
+      }
+
     } catch (error) {
       console.error(`❌ Migration failed: ${error}`);
+      console.error(`\n💡 Troubleshooting:`);
+      console.error(`   1. Check that your Terraform state files are not corrupted`);
+      console.error(`   2. Ensure you have the correct provider specified`);
+      console.error(`   3. Try running 'chiral analyze --source ${sourcePath} --provider ${provider}' first`);
       process.exit(1);
     }
   });
@@ -959,11 +1403,11 @@ program
 // Helper functions for new commands
 async function analyzeTerraformSetup(sourcePath: string, provider: string, detailedCosts: boolean = false) {
   console.log(`\n📋 Terraform Setup Analysis`);
-  
+
   // Check if it's a directory or file
   const stats = fs.statSync(sourcePath);
   let stateFiles: string[] = [];
-  
+
   if (stats.isDirectory()) {
     // Find all .tfstate files in directory
     stateFiles = fs.readdirSync(sourcePath)
@@ -981,21 +1425,32 @@ async function analyzeTerraformSetup(sourcePath: string, provider: string, detai
   let totalResources = 0;
   let hasBackend = false;
   let backendType = 'local';
+  let corruptionIssues: string[] = [];
+  let securityRisks: string[] = [];
+  let dependencyIssues: string[] = [];
 
   for (const stateFile of stateFiles) {
     try {
-      const state = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+      const stateContent = fs.readFileSync(stateFile, 'utf8');
+      const state = JSON.parse(stateContent);
       const resourceCount = state.resources?.length || 0;
       totalResources += resourceCount;
-      
+
       console.log(`   📄 ${path.basename(stateFile)}: ${resourceCount} resources`);
-      
+
+      // Advanced state file analysis
+      const analysis = analyzeStateFile(state, stateContent, stateFile);
+      corruptionIssues.push(...analysis.corruptionIssues);
+      securityRisks.push(...analysis.securityRisks);
+      dependencyIssues.push(...analysis.dependencyIssues);
+
       // Check for backend configuration
       if (state.terraform) {
         hasBackend = true;
         backendType = state.terraform.backend?.type || 'unknown';
       }
     } catch (error) {
+      corruptionIssues.push(`${path.basename(stateFile)}: Unable to parse state file - ${error instanceof Error ? error.message : String(error)}`);
       console.log(`   ❌ ${path.basename(stateFile)}: Unable to parse state file`);
     }
   }
@@ -1006,8 +1461,16 @@ async function analyzeTerraformSetup(sourcePath: string, provider: string, detai
   console.log(`   Backend Type: ${backendType}`);
   console.log(`   Provider: ${provider}`);
 
-  // Risk assessment
+  // Enhanced risk assessment
   console.log(`\n⚠️  Risk Assessment:`);
+
+  // Corruption risks
+  if (corruptionIssues.length > 0) {
+    console.log(`   🔴 CRITICAL ISSUES DETECTED:`);
+    corruptionIssues.forEach(issue => console.log(`     • ${issue}`));
+  }
+
+  // Backend risks
   if (backendType === 'local') {
     console.log(`   🔴 HIGH RISK: Local state files are single points of failure`);
   } else if (backendType === 'unknown') {
@@ -1024,17 +1487,147 @@ async function analyzeTerraformSetup(sourcePath: string, provider: string, detai
     console.log(`   🟡 MEDIUM RISK: Multiple state files increase coordination overhead`);
   }
 
+  // Security risks
+  if (securityRisks.length > 0) {
+    console.log(`   🔴 SECURITY RISKS DETECTED:`);
+    securityRisks.forEach(risk => console.log(`     • ${risk}`));
+  }
+
+  // Dependency issues
+  if (dependencyIssues.length > 0) {
+    console.log(`   🟡 DEPENDENCY CONCERNS:`);
+    dependencyIssues.forEach(issue => console.log(`     • ${issue}`));
+  }
+
+  // Migration recommendations
+  console.log(`\n🚀 Migration Recommendations:`);
+  if (corruptionIssues.length === 0) {
+    console.log(`   ✅ State files appear healthy - safe to proceed with migration`);
+  } else {
+    console.log(`   ⚠️  Address corruption issues before migration`);
+  }
+
+  if (securityRisks.length === 0) {
+    console.log(`   ✅ No immediate security risks detected in state files`);
+  } else {
+    console.log(`   ⚠️  Clean sensitive data from state files before migration`);
+  }
+
+  console.log(`   💡 Use 'chiral migrate --source ${sourcePath} --provider ${provider}' to begin migration`);
+
   // Cost analysis
   if (detailedCosts) {
     console.log(`\n💰 Cost Analysis:`);
     const terraformCost = totalResources * 0.99; // $0.99 per resource per month
     const annualTerraformCost = terraformCost * 12;
-    
+
     console.log(`   Terraform Premium: $${terraformCost.toFixed(2)}/month`);
     console.log(`   Annual Terraform Cost: $${annualTerraformCost.toFixed(2)}`);
     console.log(`   Chiral Cost: $0/month (no state management fees)`);
     console.log(`   Annual Savings: $${annualTerraformCost.toFixed(2)}`);
   }
+}
+
+// Advanced state file analysis helper
+function analyzeStateFile(state: any, stateContent: string, filePath: string): {
+  corruptionIssues: string[];
+  securityRisks: string[];
+  dependencyIssues: string[];
+} {
+  const corruptionIssues: string[] = [];
+  const securityRisks: string[] = [];
+  const dependencyIssues: string[] = [];
+
+  const fileName = path.basename(filePath);
+
+  // Corruption detection
+  if (!state.version || !state.serial || !state.lineage) {
+    corruptionIssues.push(`${fileName}: Missing required fields (version, serial, lineage) - file may be corrupted`);
+  }
+
+  if (stateContent.includes('null') && stateContent.includes('undefined')) {
+    corruptionIssues.push(`${fileName}: Contains null/undefined values - possible corruption detected`);
+  }
+
+  // Security analysis
+  const sensitivePatterns = [
+    /password/i,
+    /secret/i,
+    /api[_-]?key/i,
+    /token/i,
+    /certificate/i,
+    /private[_-]?key/i,
+    /access[_-]?key/i,
+    /connection[_-]?string/i
+  ];
+
+  sensitivePatterns.forEach(pattern => {
+    if (pattern.test(stateContent)) {
+      securityRisks.push(`${fileName}: Contains sensitive data (${pattern.source}) - should be sanitized before migration`);
+    }
+  });
+
+  // IP address exposure check
+  const ipPattern = /\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g;
+  const ips = stateContent.match(ipPattern);
+  if (ips && ips.length > 0) {
+    securityRisks.push(`${fileName}: Contains ${ips.length} IP addresses - may expose internal network topology`);
+  }
+
+  // Dependency analysis
+  if (state.resources) {
+    const resources = state.resources;
+    const resourceMap = new Map<string, any>();
+
+    // Build resource map
+    resources.forEach((resource: any) => {
+      const key = `${resource.type}.${resource.name}`;
+      resourceMap.set(key, resource);
+    });
+
+    // Check for cross-references
+    resources.forEach((resource: any) => {
+      const resourceKey = `${resource.type}.${resource.name}`;
+
+      // Check instances for references
+      if (resource.instances) {
+        resource.instances.forEach((instance: any) => {
+          if (instance.attributes) {
+            Object.values(instance.attributes).forEach((attr: any) => {
+              if (typeof attr === 'string') {
+                // Look for references to other resources
+                resourceMap.forEach((otherResource, otherKey) => {
+                  if (otherKey !== resourceKey && attr.includes(otherResource.name)) {
+                    dependencyIssues.push(`${resourceKey} references ${otherKey} - ensure dependencies are maintained in migration`);
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+
+    // Check for complex dependencies
+    const complexResources = resources.filter((r: any) =>
+      r.type.includes('kubernetes') || r.type.includes('network') || r.type.includes('security')
+    );
+    if (complexResources.length > resources.length * 0.3) {
+      dependencyIssues.push(`High number of complex resources (${complexResources.length}) - migration may require careful dependency ordering`);
+    }
+  }
+
+  // State size analysis
+  const fileSizeMB = Buffer.byteLength(stateContent, 'utf8') / (1024 * 1024);
+  if (fileSizeMB > 50) {
+    corruptionIssues.push(`${fileName}: State file is very large (${fileSizeMB.toFixed(1)}MB) - may indicate excessive state or corruption`);
+  }
+
+  return {
+    corruptionIssues,
+    securityRisks,
+    dependencyIssues
+  };
 }
 
 async function compareApproaches(resourceCount: number, teamSize: number, complexity: 'simple' | 'medium' | 'complex') {
@@ -1088,7 +1681,179 @@ async function compareApproaches(resourceCount: number, teamSize: number, comple
   console.log(`   ✅ Automatic rollback and recovery`);
 }
 
+// Migration helper functions
+function getMigrationStrategyInfo(strategy: 'greenfield' | 'progressive' | 'parallel'): string {
+  switch (strategy) {
+    case 'greenfield':
+      return `
+Greenfield Migration:
+- Complete migration in one go
+- Lowest risk for new projects
+- Requires full infrastructure recreation
+- Best for simple setups or new environments`;
+
+    case 'progressive':
+      return `
+Progressive Migration:
+- Migrate resources incrementally
+- Can run Terraform and Chiral in parallel during transition
+- Higher complexity but lower risk
+- Best for production environments with uptime requirements`;
+
+    case 'parallel':
+      return `
+Parallel Migration:
+- Deploy Chiral infrastructure alongside existing Terraform
+- Use load balancer or DNS to switch traffic
+- Highest safety but most complex
+- Best for mission-critical systems`;
+  }
+}
+
+async function generateMigrationPlan(sourcePath: string, provider: string, strategy: 'greenfield' | 'progressive' | 'parallel'): Promise<{
+  estimatedDuration: string;
+  riskLevel: string;
+  preRequisites: string[];
+  steps: Array<{ description: string; notes?: string }>;
+  rollbackSteps: Array<{ description: string; notes?: string }>;
+  postMigration: string[];
+}> {
+  // Analyze the source to determine complexity
+  let resourceCount = 0;
+  let hasComplexResources = false;
+
+  try {
+    const stats = fs.statSync(sourcePath);
+    let stateFiles: string[] = [];
+
+    if (stats.isDirectory()) {
+      stateFiles = fs.readdirSync(sourcePath).filter(file => file.endsWith('.tfstate'));
+    } else if (sourcePath.endsWith('.tfstate')) {
+      stateFiles = [sourcePath];
+    }
+
+    for (const stateFile of stateFiles) {
+      try {
+        const state = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+        resourceCount += state.resources?.length || 0;
+
+        // Check for complex resources
+        if (state.resources?.some((r: any) =>
+          r.type.includes('kubernetes') || r.type.includes('database') || r.type.includes('network')
+        )) {
+          hasComplexResources = true;
+        }
+      } catch (error) {
+        // Skip corrupted files
+      }
+    }
+  } catch (error) {
+    // Default values if analysis fails
+    resourceCount = 50;
+    hasComplexResources = true;
+  }
+
+  // Generate plan based on strategy and complexity
+  const basePlan = {
+    estimatedDuration: resourceCount < 20 ? '1-2 days' : resourceCount < 100 ? '1-2 weeks' : '2-4 weeks',
+    riskLevel: resourceCount < 20 ? 'Low' : resourceCount < 100 ? 'Medium' : 'High',
+    preRequisites: [
+      'Backup all Terraform state files',
+      'Document critical resource dependencies',
+      'Test Chiral configuration generation',
+      'Set up monitoring for migration period',
+      'Ensure team has Chiral training'
+    ],
+    postMigration: [
+      'Monitor system for 24-48 hours',
+      'Update CI/CD pipelines to use Chiral',
+      'Archive Terraform configuration (do not delete)',
+      'Update documentation and runbooks',
+      'Conduct post-mortem review'
+    ]
+  };
+
+  let steps: Array<{ description: string; notes?: string }> = [];
+  let rollbackSteps: Array<{ description: string; notes?: string }> = [];
+
+  switch (strategy) {
+    case 'greenfield':
+      steps = [
+        { description: 'Generate Chiral configuration from Terraform state' },
+        { description: 'Review and validate generated configuration' },
+        { description: 'Create backup of current infrastructure state' },
+        { description: 'Deploy Chiral infrastructure to new environment' },
+        { description: 'Test functionality in new environment' },
+        { description: 'Switch traffic to new infrastructure' },
+        { description: 'Decommission old Terraform-managed resources' }
+      ];
+      rollbackSteps = [
+        { description: 'Switch traffic back to original infrastructure' },
+        { description: 'Destroy Chiral-deployed resources if needed' },
+        { description: 'Restore from backups if necessary' }
+      ];
+      break;
+
+    case 'progressive':
+      steps = [
+        { description: 'Analyze resource dependencies and create migration groups' },
+        { description: 'Start with least critical resources (monitoring, logging)' },
+        { description: 'Migrate network resources (VPC, subnets, security groups)' },
+        { description: 'Migrate storage resources (databases, file systems)' },
+        { description: 'Migrate compute resources (VMs, containers)' },
+        { description: 'Update DNS and load balancer configurations' },
+        { description: 'Validate each migration step before proceeding' },
+        { description: 'Gradually increase traffic to migrated resources' }
+      ];
+      rollbackSteps = [
+        { description: 'Identify and isolate problematic resources' },
+        { description: 'Switch traffic back to Terraform-managed resources' },
+        { description: 'Re-import resources back into Terraform if needed' },
+        { description: 'Restore from backups for critical components' }
+      ];
+      break;
+
+    case 'parallel':
+      steps = [
+        { description: 'Deploy Chiral infrastructure alongside existing Terraform' },
+        { description: 'Configure load balancer for traffic splitting' },
+        { description: 'Start with read-only traffic to test Chiral deployment' },
+        { description: 'Gradually increase traffic percentage to Chiral (10%, 25%, 50%, 100%)' },
+        { description: 'Monitor performance and error rates throughout' },
+        { description: 'Complete full traffic switch when confident' },
+        { description: 'Monitor for extended period before decommissioning Terraform' }
+      ];
+      rollbackSteps = [
+        { description: 'Immediately switch all traffic back to Terraform infrastructure' },
+        { description: 'Scale down Chiral infrastructure but keep running' },
+        { description: 'Analyze root cause and fix issues' },
+        { description: 'Gradually reintroduce traffic to Chiral after fixes' }
+      ];
+      break;
+  }
+
+  // Add complexity-based notes
+  if (hasComplexResources) {
+    steps.forEach(step => {
+      if (step.description.includes('network') || step.description.includes('database')) {
+        step.notes = 'High complexity - plan extra time for testing';
+      }
+    });
+  }
+
+  if (resourceCount > 100) {
+    basePlan.preRequisites.push('Consider breaking migration into multiple phases');
+    basePlan.postMigration.push('Schedule extended monitoring period (1-2 weeks)');
+  }
+
+  return {
+    ...basePlan,
+    steps,
+    rollbackSteps
+  };
+}
+
 // Export helper functions for testing
-export { analyzeTerraformSetup, compareApproaches };
+export { analyzeTerraformSetup, compareApproaches, getMigrationStrategyInfo, generateMigrationPlan };
 
 program.parse();

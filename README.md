@@ -159,22 +159,115 @@ The `compile` command generates artifacts for all configured clouds. Deploy usin
 npx ts-node src/main.ts import -s path/to/your/infrastructure.tf -p aws -o chiral.config.ts
 ```
 
-### Importing Existing IaC
+### Terraform Migration Interface
 
-If you have existing infrastructure defined in Terraform, CloudFormation, or Bicep, you can import it into a Chiral config to get started:
+Chiral provides a comprehensive Terraform migration interface designed to help teams escape Terraform's state management issues and adopt Chiral's stateless, native cloud IaC approach.
+
+#### Migration Analysis & Planning
 
 ```bash
-npx ts-node src/main.ts import -s path/to/your/infrastructure.tf -p aws -o chiral.config.ts
+# Analyze your Terraform setup for risks and migration readiness
+chiral analyze --source terraform/ --provider aws
+
+# Get detailed migration strategy information
+chiral migrate --source terraform/ --provider aws --analyze-only
 ```
 
-Supported formats:
-- `.tf` (Terraform HCL)
-- `.tfstate` (Terraform state files)
-- `.yaml`/`.yml` (CloudFormation templates)
-- `.json` (CloudFormation templates)
-- `.bicep` (Azure Bicep templates)
+The analysis includes:
+- **State File Corruption Detection**: Identifies corrupted or incomplete state files
+- **Security Risk Assessment**: Detects sensitive data exposure in state files
+- **Dependency Analysis**: Maps resource relationships and dependencies
+- **Cost Comparison**: Compares Terraform Premium costs vs Chiral's zero-cost approach
+- **Migration Strategy Recommendations**: Suggests appropriate migration approaches
 
-The import command attempts to map existing resources to Chiral intent, generating a starting config that you can refine. See [docs/MIGRATION.md](docs/MIGRATION.md) for detailed usage and limitations.
+#### Migration Strategies
+
+Chiral supports three migration strategies:
+
+**Greenfield Migration** (Recommended for new environments):
+```bash
+chiral migrate --source terraform/ --provider aws --strategy greenfield
+```
+- Complete migration in one operation
+- Lowest risk for simple setups
+- Requires full infrastructure recreation
+
+**Progressive Migration** (Recommended for production):
+```bash
+chiral migrate --source terraform/ --provider aws --strategy progressive
+```
+- Migrate resources incrementally by type
+- Can run Terraform and Chiral in parallel
+- Higher safety but more complex coordination
+
+**Parallel Migration** (Recommended for mission-critical systems):
+```bash
+chiral migrate --source terraform/ --provider aws --strategy parallel
+```
+- Deploy Chiral infrastructure alongside existing Terraform
+- Use load balancers for traffic switching
+- Highest safety with extended testing periods
+
+#### Migration Workflow
+
+1. **Analysis Phase**:
+   ```bash
+   chiral analyze --source terraform/ --provider aws --cost-comparison
+   ```
+
+2. **Strategy Selection & Planning**:
+   ```bash
+   chiral migrate --source terraform/ --provider aws --strategy progressive --analyze-only
+   ```
+
+3. **Migration Execution**:
+   ```bash
+   chiral migrate --source terraform/ --provider aws --strategy progressive --output my-chiral-config.ts
+   ```
+
+4. **Validation & Deployment**:
+   ```bash
+   chiral validate --config my-chiral-config.ts
+   chiral --config my-chiral-config.ts
+   # Deploy using cloud-native tools
+   ```
+
+#### Key Benefits
+
+- **Zero State Management**: Eliminates all Terraform state corruption, locking, and security risks
+- **Native Cloud IaC**: Generates optimal IaC for each cloud using their preferred tools
+- **Cost Savings**: No Terraform Premium fees ($0.99/resource/month)
+- **Enhanced Security**: No sensitive data in external state files
+- **Compliance Ready**: Built-in compliance features without state complexity
+- **Multi-Cloud Consistency**: Single configuration drives all cloud deployments
+
+#### Migration Safety Features
+
+- **Rollback Planning**: Automatic generation of rollback procedures for each migration step
+- **Health Checks**: Continuous validation during migration process
+- **Dependency Mapping**: Intelligent ordering of resource migrations
+- **Parallel Safety**: Ability to run both systems during transition
+- **Gradual Rollout**: Traffic switching capabilities for zero-downtime migrations
+
+#### Before Migration Checklist
+
+- [ ] Backup all Terraform state files
+- [ ] Document critical resource dependencies and business requirements
+- [ ] Test Chiral configuration generation with sample resources
+- [ ] Set up monitoring and alerting for migration period
+- [ ] Ensure team training on Chiral concepts and workflows
+- [ ] Plan rollback procedures for each migration phase
+- [ ] Validate security and compliance requirements are met
+
+#### Post-Migration Benefits
+
+- **Operational Simplicity**: No state file management or lock coordination
+- **Developer Productivity**: Focus on business logic, not IaC complexity
+- **Cost Reduction**: Eliminate third-party state management fees
+- **Security Enhancement**: Infrastructure secrets stay within cloud boundaries
+- **Compliance Improvement**: Native cloud audit trails and compliance controls
+
+The Terraform migration interface transforms Chiral from an IaC generation tool into a **complete migration solution** for teams wanting to escape the complexity and risks of Terraform state management.
 
 ### Requirements
 

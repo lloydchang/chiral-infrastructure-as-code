@@ -42,12 +42,11 @@ export interface ChiralSystem {
   network?: {
     subnetCidr?: string; // Default subnet within networkCidr
   };
-  terraform?: { // GCP-specific Terraform backend settings
-    backend?: {
-      type: 'gcs'; // Currently only GCS supported for GCP
-      bucket: string;
-      prefix?: string; // Optional path prefix within bucket
-    };
+  terraformBridge?: {
+    enabled?: boolean;
+    provider?: 'aws' | 'azure' | 'gcp';
+    delegateState?: boolean;
+    sourcePath?: string;
   };
   
   // State management and migration settings
@@ -55,6 +54,7 @@ export interface ChiralSystem {
     strategy?: DeploymentStrategy; // How to migrate from existing infrastructure
     sourceState?: string; // Path to existing Terraform state file for migration
     validateCompliance?: boolean; // Check compliance during migration
+    rollbackPlan?: Array<{ description: string; notes?: string }>; // Rollback procedures
   };
   
   // Compliance and data sovereignty settings
