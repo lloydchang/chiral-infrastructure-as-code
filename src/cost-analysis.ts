@@ -775,7 +775,15 @@ resource "aws_instance" "adfs" {
     return { hourly: pricingMap[instanceType] || 0.0832 };
   }
 
-  // Helper methods for AWS instance mapping
+  private static async getRDSPricing(instanceClass: string, region: string): Promise<{ compute: number; storagePerGb: number }> {
+    const pricingMap: { [key: string]: { compute: number; storagePerGb: number } } = {
+      'db.t3.medium': { compute: 55, storagePerGb: 0.23 },
+      'db.t3.large': { compute: 110, storagePerGb: 0.23 },
+      'db.t3.xlarge': { compute: 220, storagePerGb: 0.23 }
+    };
+    return pricingMap[instanceClass] || { compute: 110, storagePerGb: 0.23 };
+  }
+
   private static getAWSInstanceType(size: string): string {
     const sizeMap: { [key: string]: string } = {
       'small': 't3.medium',
@@ -1232,7 +1240,6 @@ resource "google_compute_instance" "adfs" {
     return { hourly: pricingMap[machineType] || 0.133 };
   }
 
-  // Helper methods for GCP instance mapping
   private static getGCPMachineType(size: string): string {
     const sizeMap: { [key: string]: string } = {
       'small': 'e2-medium',
