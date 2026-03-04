@@ -100,8 +100,6 @@ export const config: ChiralSystem = {
 
 </details>
 
-**Alternative:** [Open full configuration file](./chiral.config.ts)
-
 **Key Features:**
 - **minNodes/maxNodes**: Controls Kubernetes cluster sizing and autoscaling bounds
 - **Autoscaling**: All clouds support automatic scaling within configured limits
