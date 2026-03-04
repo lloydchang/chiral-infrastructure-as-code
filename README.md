@@ -84,7 +84,7 @@ The import command attempts to map existing resources to Chiral intent, generati
 - For AWS authentication: AWS CLI (`aws`)
 - For Azure authentication: Azure CLI (`az`)
 - For GCP authentication: Google Cloud CLI (`gcloud`)
-* **Note:** You do not use terraform commands directly to deploy via the CLI for Google Infrastructure Manager. Instead, you use the gcloud CLI commands, and Infrastructure Manager runs the necessary Terraform operations (`init`, `plan`, `apply`) internally on your behalf in a managed Cloud Build environment. [The specific command to preview a deployment is](https://docs.cloud.google.com/infrastructure-manager/docs/preview-deployment) `gcloud infra-manager previews`.
+* **Note:** You do not use `terraform` commands directly to deploy via the CLI for Google Infrastructure Manager. Instead, you use the `gcloud` CLI commands, and Infrastructure Manager runs the necessary Terraform operations (`init`, `plan`, `apply`) internally on your behalf in a managed Cloud Build environment. [The specific command to preview a deployment is](https://docs.cloud.google.com/infrastructure-manager/docs/preview-deployment) `gcloud infra-manager previews`.
 
 ---
 
