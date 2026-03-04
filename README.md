@@ -169,7 +169,7 @@ Chiral produces native cloud artifacts that can be deployed independently: AWS C
 **State Management Considerations:**
 - **AWS CDK/CloudFormation**: Managed natively by AWS; no external state files required.
 - **Azure Bicep/ARM**: Handled by Azure Resource Manager; built-in consistency and rollback.
-- **GCP Terraform**: Requires careful state management. Use remote backends (e.g., GCS) and consider managed Terraform services like IBM Terraform Premium to mitigate corruption, locking, and compliance risks. See [docs/CHALLENGES.md](docs/CHALLENGES.md) for details.
+- **GCP Infrastructure Manager**: Google Infrastructure Manager runs Terraform as a managed service. Users deploy via Terraform configurations or Blueprints without directly handling state. The service handles state storage, locking, and policy enforcement, reducing operational and compliance overhead. Core Terraform risks, such as shared mutable state and partial apply failures, remain but are managed by Google rather than by individual teams. See [docs/CHALLENGES.md](docs/CHALLENGES.md) for details on these structural risks.
 
 ## Chiral vs Terraform State Management
 
@@ -182,7 +182,7 @@ Chiral eliminates the fundamental state management problems that make Terraform 
 | **Backend Management** - Complex setup and maintenance of S3/Azure Storage/GCS backends with encryption, versioning, and access controls | **No Backend Required** - Each cloud's native service handles state storage, versioning, and security automatically |
 | **Security Risks** - State files contain sensitive data (secrets, IPs, metadata) that can leak or be exposed | **No External State Files** - Sensitive information stays within each cloud's secure control plane |
 | **Multi-Account Spanning** - State files cannot securely span cloud accounts without breaking trust boundaries | **Native Cloud Security** - Each cloud's IAM and security controls manage state within their trust boundaries |
-| **Cost Overhead** - IBM Terraform Premium costs $0.99/month per resource plus operational overhead for state management | **Zero Additional Cost** - No third-party state management fees or operational overhead |
+| **Cost Overhead** - Google Infrastructure Manager costs $0.99/month per resource plus operational overhead for state management | **Zero Additional Cost** - No third-party state management fees or operational overhead |
 
 ### Terraform Migration Benefits
 

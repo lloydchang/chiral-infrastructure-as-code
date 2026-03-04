@@ -201,9 +201,11 @@ While Chiral uses Terraform for GCP to generate native Infrastructure Manager bl
 - **State loss scenarios**: If the backend becomes unavailable, restoring state requires backups and manual reconciliation, complex for multi-environment setups.
 - **Versioning limitations**: No built-in state versioning; requires external snapshots or Terraform Cloud for history.
 
-For GCP deployments, consider using managed Terraform services like IBM Terraform Premium to reduce these risks. Alternatively, evaluate GCP's native Deployment Manager for stateless alternatives, though it may not offer the same feature set as Terraform.
+### State Management as a Managed Service ###
 
-This highlights why Chiral's stateless approach for AWS and Azure is preferred, and why GCP's Terraform usage should be managed carefully.
+For Terraform deployments in GCP, consider using GCP Terraform Blueprints deployments, a managed service, instead of self-managed approaches for state management.
+
+This is why Chiral's stateless approach is preferred for AWS and Azure.
 
 ## The Chiral Solution: Intent-Driven Stateless Generation
 
