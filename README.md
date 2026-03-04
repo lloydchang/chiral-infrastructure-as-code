@@ -116,6 +116,28 @@ This generates:
 - `azure-deployment.bicep` (Azure Bicep Template)
 - `gcp-deployment.tf` (GCP Terraform Blueprint)
 
+### Cost Analysis
+
+Chiral provides built-in cost estimation capabilities to help you understand infrastructure costs before deployment:
+
+```bash
+# Estimate costs for all clouds
+chiral cost-estimate --config chiral.config.ts
+
+# Analyze existing infrastructure costs
+chiral cost-analyze --provider azure --subscription "my-subscription"
+
+# Detailed cost breakdown with azure-cost-cli integration
+chiral cost-estimate --config chiral.config.ts --detailed --provider azure
+```
+
+**Cost Analysis Features:**
+- **Real-time pricing**: Uses azure-cost-cli for accurate Azure pricing data
+- **Multi-cloud comparison**: Compare costs across AWS, Azure, and GCP
+- **Cost optimization**: Get recommendations for cost-effective configurations
+- **Budget alerts**: Set cost thresholds and receive warnings
+- **Resource breakdown**: Detailed cost analysis by resource type
+
 ### Importing Existing IaC
 
 If you have existing infrastructure defined in Terraform, CloudFormation, or Bicep, you can import it into a Chiral config to get started:
@@ -139,6 +161,7 @@ The import command attempts to map existing resources to Chiral intent, generati
 - For AWS deployment: AWS CDK CLI (`cdk`)
 - For Azure deployment: Azure CLI (`az`)
 - For GCP deployment: Google Cloud CLI (`gcloud`)
+- For cost analysis (Azure): azure-cost-cli (optional, for enhanced cost estimation)
 
 ### Deployment
 
