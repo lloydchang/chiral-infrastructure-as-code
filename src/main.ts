@@ -890,8 +890,10 @@ program
   .requiredOption('-p, --provider <provider>', 'Cloud provider: aws, azure, gcp')
   .option('-o, --output <path>', 'Output path for chiral config', 'chiral.config.ts')
   .option('--strategy <strategy>', 'Migration strategy: greenfield, progressive, parallel', 'progressive')
-  .option('--analyze-only', 'Only analyze setup without migration', false)
+  .option('--terraform-bridge', 'Generate Terraform with cloud-native state delegation', false)
+  .option('--pulumi-bridge', 'Generate Pulumi with cloud-native state delegation', false)
   .option('--iac-tool <tool>', 'IaC tool to migrate from: terraform, pulumi', 'terraform')
+  .option('--analyze-only', 'Only analyze setup without migration', false)
   .action(async (options) => {
     const sourcePath = path.resolve(options.source);
     const provider = options.provider as 'aws' | 'azure' | 'gcp';

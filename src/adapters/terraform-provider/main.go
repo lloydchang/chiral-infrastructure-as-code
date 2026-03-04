@@ -4,15 +4,11 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk/plugin"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk/provider"
 )
 
 func main() {
-	plugin.Serve(context.Background(), plugin.ServeOpts{
-		Name: "chiral",
-		ProviderAddr: "registry.terraform.io/chiral/chiral",
-	})
+	provider.Serve(context.Background())
 }
 
 type provider struct{}

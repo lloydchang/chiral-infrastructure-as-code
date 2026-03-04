@@ -48,6 +48,12 @@ export interface ChiralSystem {
     delegateState?: boolean;
     sourcePath?: string;
   };
+  pulumiBridge?: {
+    enabled?: boolean;
+    provider?: 'aws' | 'azure' | 'gcp';
+    delegateState?: boolean;
+    sourcePath?: string;
+  };
   
   // State management and migration settings
   migration?: {
