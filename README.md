@@ -50,7 +50,7 @@ export const config: ChiralSystem = {
 **Complete reference configuration:**
 
 <details>
-<summary>📄 View full chiral.config.ts</summary>
+<summary>📄 View full [chiral.config.ts](./chiral.config.ts)</summary>
 
 ```typescript
 // File: chiral.config.ts
