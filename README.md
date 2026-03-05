@@ -359,16 +359,43 @@ export const config: ChiralSystem = {
 };
 ```
 
+#### Technical Implementation
+
+The Terraform Import Adapter includes a custom HCL parser that handles basic Terraform syntax without external dependencies:
+
+**HCL Parsing Strategy:**
+- Regex-based resource block detection
+- Support for string, numeric, array, and boolean values
+- Nested block parsing for complex resource configurations
+- Error handling for malformed HCL files
+
+**Test Suite Enhancements:**
+- Real Terraform file creation and parsing validation
+- Temporary file management with automatic cleanup
+- Comprehensive resource mapping verification
+- Error handling and edge case testing
+
+#### Recent Improvements
+
+**Version 0.0.0** - Latest Updates:
+- Custom HCL Parser: Replaced external hcl2-parser dependency with robust regex-based parsing
+- Enhanced Test Suite: Added real Terraform file parsing tests with temporary file management
+- TypeScript Fixes: Resolved compilation errors and improved type safety
+- Resource Mapping: Improved AWS, Azure, and GCP resource detection and mapping
+- Error Handling: Better error messages and graceful failure handling
+
 #### Import Adapter Features
 
+- **Custom HCL Parsing**: Uses regex-based parsing for robust handling of Terraform HCL syntax without external dependencies
 - **Smart Resource Mapping**: Automatically maps cloud-specific instance types and configurations to Chiral workload sizes
 - **Validation**: Ensures imported configurations meet Chiral's intent schema requirements
 - **Migration Metadata**: Includes migration strategy and compliance validation settings
 - **Multi-Cloud Ready**: Imported configurations can be used to generate artifacts for any supported cloud
+- **Comprehensive Testing**: Test suite validates actual HCL parsing and resource mapping with real Terraform files
 
 #### Limitations
 
-- **HCL Parsing**: Uses basic regex-based parsing; complex HCL expressions may require manual adjustment
+- **HCL Parsing**: Uses regex-based parsing; complex nested expressions or advanced HCL features may require manual adjustment
 - **Resource Coverage**: Supports common infrastructure patterns; custom resources may need manual mapping
 - **Dependencies**: Does not currently import resource dependencies or complex relationships
 - **Variables**: Does not resolve Terraform variables; uses default values or inferred settings

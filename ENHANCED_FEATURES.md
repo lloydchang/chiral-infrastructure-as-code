@@ -45,11 +45,19 @@ chiral migrate -s terraform.tfstate -p aws --iac-tool terraform --analyze-only
 chiral import -s main.tf -p aws -o chiral.config.ts
 ```
 
-**HCL Parsing Features:**
-- Module support with recursive extraction
-- Variable resolution from `variables.tf`
-- Resource type mapping across providers
-- Enhanced error handling and validation
+**Enhanced HCL Parsing Features:**
+- **Custom Regex Parser**: Robust parsing without external hcl2-parser dependency
+- **Resource Block Detection**: Regex-based identification of resource declarations
+- **Value Type Support**: String, numeric, array, and boolean value extraction
+- **Nested Block Handling**: Support for complex resource configurations
+- **Error Recovery**: Graceful handling of malformed HCL files
+- **Test Validation**: Comprehensive test suite with real Terraform file parsing
+
+**Technical Implementation:**
+- **Parsing Strategy**: Line-by-line analysis with brace counting for block detection
+- **Resource Extraction**: Automated extraction of resource type, name, and configuration
+- **Mapping Logic**: Cloud-specific resource mapping to Chiral intent schema
+- **Validation**: Schema compliance checking and error reporting
 
 #### Migration Strategies
 

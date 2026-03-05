@@ -186,7 +186,7 @@ export class TerraformImportAdapter {
               intent.k8s!.maxNodes = firstGroup.desired_size;
             }
             if (firstGroup.instance_type) {
-              intent.k8s!.size = mapInstanceTypeToWorkloadSize(firstGroup.instance_type, 'aws');
+              intent.k8s!.size = mapInstanceTypeToWorkloadSize(firstGroup.instance_type, provider);
             }
           }
         }
@@ -198,7 +198,7 @@ export class TerraformImportAdapter {
             intent.postgres!.engineVersion = resource.config.engine_version;
           }
           if (resource.config.instance_class) {
-            intent.postgres!.size = mapDbClassToWorkloadSize(resource.config.instance_class, 'aws');
+            intent.postgres!.size = mapDbClassToWorkloadSize(resource.config.instance_class, provider);
           }
           if (resource.config.allocated_storage) {
             intent.postgres!.storageGb = resource.config.allocated_storage;
@@ -208,7 +208,7 @@ export class TerraformImportAdapter {
         
       case 'aws_instance':
         if (resource.config.instance_type) {
-          intent.adfs!.size = mapInstanceTypeToWorkloadSize(resource.config.instance_type, 'aws');
+          intent.adfs!.size = mapInstanceTypeToWorkloadSize(resource.config.instance_type, provider);
         }
         break;
         
