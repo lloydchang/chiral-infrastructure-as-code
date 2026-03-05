@@ -283,6 +283,110 @@ chiral import -s template.json -p aws -o config.ts       # CloudFormation
 chiral import -s azuredeploy.bicep -p azure -o config.ts # Bicep
 ```
 
+### Terraform Import Adapter
+
+Chiral provides a **Terraform Import Adapter** that analyzes existing Terraform HCL configurations and converts them to Chiral intent, enabling seamless migration from Terraform to Chiral's stateless approach.
+
+#### Import Process
+
+1. **Parse Terraform HCL**: Analyzes `.tf` files in the source directory
+2. **Extract Resources**: Identifies infrastructure components (EKS, RDS, EC2, etc.)
+3. **Map to Chiral Intent**: Converts cloud-specific resources to Chiral's abstract intent schema
+4. **Generate Configuration**: Creates a Chiral config file ready for multi-cloud generation
+
+#### Supported Resource Types
+
+**AWS Resources:**
+- `aws_eks_cluster` → K8s cluster configuration (version, node groups)
+- `aws_db_instance` → PostgreSQL database (engine version, instance class, storage)
+- `aws_instance` → ADFS/Windows VM (instance type)
+- `aws_vpc` → Network CIDR configuration
+
+**Azure Resources:**
+- `azurerm_kubernetes_cluster` → AKS cluster (version, node pools)
+- `azurerm_postgresql_flexible_server` → PostgreSQL (version, SKU, storage)
+- `azurerm_windows_virtual_machine` → ADFS VM (VM size)
+- `azurerm_virtual_network` → Network CIDR configuration
+
+**GCP Resources:**
+- `google_container_cluster` → GKE cluster (version, node pools, machine types)
+- `google_sql_database_instance` → Cloud SQL PostgreSQL (version, tier, storage)
+- `google_compute_instance` → Compute Engine VM (machine type)
+- `google_compute_network` → VPC network configuration
+
+#### Usage Examples
+
+```bash
+# Import AWS Terraform configuration
+chiral import -s ./terraform/aws-infra/ -p aws -o aws-config.ts
+
+# Import Azure Terraform configuration  
+chiral import -s ./terraform/azure-infra/ -p azure -o azure-config.ts
+
+# Import GCP Terraform configuration
+chiral import -s ./terraform/gcp-infra/ -p gcp -o gcp-config.ts
+```
+
+#### Generated Chiral Configuration
+
+The import adapter produces a complete Chiral system configuration:
+
+```typescript
+export const config: ChiralSystem = {
+  projectName: 'imported-infrastructure',
+  environment: 'prod',
+  networkCidr: '10.0.0.0/16',
+  k8s: {
+    version: '1.35',
+    minNodes: 2,
+    maxNodes: 5,
+    size: 'medium'
+  },
+  postgres: {
+    engineVersion: '15',
+    size: 'medium',
+    storageGb: 100
+  },
+  adfs: {
+    size: 'medium',
+    windowsVersion: '2022'
+  },
+  migration: {
+    strategy: 'progressive',
+    sourceState: './terraform/',
+    validateCompliance: true
+  }
+};
+```
+
+#### Import Adapter Features
+
+- **Smart Resource Mapping**: Automatically maps cloud-specific instance types and configurations to Chiral workload sizes
+- **Validation**: Ensures imported configurations meet Chiral's intent schema requirements
+- **Migration Metadata**: Includes migration strategy and compliance validation settings
+- **Multi-Cloud Ready**: Imported configurations can be used to generate artifacts for any supported cloud
+
+#### Limitations
+
+- **HCL Parsing**: Uses basic regex-based parsing; complex HCL expressions may require manual adjustment
+- **Resource Coverage**: Supports common infrastructure patterns; custom resources may need manual mapping
+- **Dependencies**: Does not currently import resource dependencies or complex relationships
+- **Variables**: Does not resolve Terraform variables; uses default values or inferred settings
+
+#### Next Steps After Import
+
+Once imported, use the generated configuration for multi-cloud generation:
+
+```bash
+# Generate artifacts for all clouds
+chiral compile -c imported-config.ts -o dist
+
+# Deploy to specific cloud
+cd dist/aws-assembly && cdk deploy
+az deployment group create --resource-group my-rg --template-file azure-deployment.bicep
+gcloud infra-manager deployments apply projects/my-project/locations/global/deployments/my-deployment --git-source-repo=https://github.com/my-org/my-repo --git-source-directory=dist
+```
+
 #### Pulumi Migration Support
 ```bash
 # Analyze and migrate from Pulumi projects
