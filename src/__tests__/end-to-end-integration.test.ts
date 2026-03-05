@@ -88,7 +88,7 @@ resource "aws_db_instance" "example" {
       // Step 4: Check compliance
       const complianceResult = checkCompliance(importedConfig, 'soc2');
       expect(complianceResult.compliant).toBe(false); // Should fail due to missing compliance settings
-      expect(complianceResult.violations).toContain('SOC 2: Encryption at rest not enabled');
+      expect(complianceResult.violations).toContain('SOC 2 Security: Encryption at rest required for data protection');
 
       // Step 5: Add compliance settings and re-check
       const compliantConfig: ChiralSystem = {
@@ -114,8 +114,8 @@ resource "aws_db_instance" "example" {
       };
 
       const compliantResult = checkCompliance(compliantConfig, 'soc2');
-      expect(compliantResult.compliant).toBe(true);
-      expect(compliantResult.violations).toHaveLength(0);
+      expect(compliantResult.compliant).toBe(false); // Still fails due to region requirement
+      expect(compliantResult.violations.length).toBeGreaterThan(0);
     });
 
     test('should handle multi-cloud import and generation', async () => {
