@@ -47,19 +47,77 @@ export class TerraformImportAdapter {
         const filePath = path.join(sourcePath, tfFile);
         const content = fs.readFileSync(filePath, 'utf8');
         
-        // Parse HCL content
-        const parsed = hcl2.parse(content);
+        // Simple line-by-line HCL parsing for basic resource blocks
+        const lines = content.split('\n');
+        let currentResource: any = null;
+        let braceCount = 0;
+        let resourceContent = '';
         
-        // Extract resource blocks
-        if (parsed.resource) {
-          for (const [resourceType, resourceBlock] of Object.entries(parsed.resource)) {
-            for (const [resourceName, config] of Object.entries(resourceBlock as any)) {
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          
+          // Check for resource declaration
+          const resourceMatch = line.match(/^resource\s+["']?([^"'\s]+)["']?\s+["']?([^"'\s]+)["']?\s*\{/);
+          if (resourceMatch) {
+            currentResource = {
+              resourceType: resourceMatch[1],
+              resourceName: resourceMatch[2],
+              config: {}
+            };
+            braceCount = 1;
+            resourceContent = '';
+            continue;
+          }
+          
+          // If we're inside a resource block
+          if (currentResource && braceCount > 0) {
+            // Count braces to determine when block ends
+            for (let char of line) {
+              if (char === '{') braceCount++;
+              if (char === '}') braceCount--;
+            }
+            
+            if (braceCount > 0) {
+              resourceContent += line + '\n';
+            } else {
+              // Resource block ended, parse its content
+              const config: any = {};
+              
+              // Parse string values
+              const stringValueRegex = /(\w+)\s*=\s*"([^"]*)"/g;
+              let kvMatch;
+              while ((kvMatch = stringValueRegex.exec(resourceContent)) !== null) {
+                config[kvMatch[1]] = kvMatch[2];
+              }
+              
+              // Parse numeric values
+              const numericValueRegex = /(\w+)\s*=\s*(\d+)/g;
+              while ((kvMatch = numericValueRegex.exec(resourceContent)) !== null) {
+                config[kvMatch[1]] = parseInt(kvMatch[2]);
+              }
+              
+              // Parse array values
+              const arrayValueRegex = /(\w+)\s*=\s*\[([^\]]+)\]/g;
+              while ((kvMatch = arrayValueRegex.exec(resourceContent)) !== null) {
+                const arrayContent = kvMatch[2];
+                const items = arrayContent.split(',').map(item => item.trim().replace(/"/g, ''));
+                config[kvMatch[1]] = items;
+              }
+              
+              // Parse boolean values
+              const booleanValueRegex = /(\w+)\s*=\s*(true|false)/g;
+              while ((kvMatch = booleanValueRegex.exec(resourceContent)) !== null) {
+                config[kvMatch[1]] = kvMatch[2] === 'true';
+              }
+              
               resources.push({
-                resourceType,
-                resourceName,
+                resourceType: currentResource.resourceType,
+                resourceName: currentResource.resourceName,
                 config,
-                depends_on: (config as any).depends_on || []
+                depends_on: []
               });
+              
+              currentResource = null;
             }
           }
         }
@@ -74,7 +132,7 @@ export class TerraformImportAdapter {
   static async convertToChiralIntent(resources: ParsedTerraformResource[], provider: 'aws' | 'azure' | 'gcp'): Promise<Partial<ChiralSystem>> {
     // Convert parsed Terraform resources to Chiral intent
     const intent: Partial<ChiralSystem> = {
-      projectName: 'imported-from-terraform',
+      projectName: 'imported-infrastructure',
       environment: 'prod',
       networkCidr: '10.0.0.0/16',
       k8s: {
