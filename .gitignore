@@ -106,6 +106,10 @@ azds.yaml
 terraform.tfstate
 terraform.tfstate.backup
 
+# Terraform variable files (contain secrets)
+*.tfvars
+!*.tfvars.example
+
 # ================================
 # Environment and Secrets
 # ================================

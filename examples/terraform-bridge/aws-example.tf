@@ -7,6 +7,25 @@ terraform {
   }
 }
 
+# Variables
+variable "db_username" {
+  description = "Database administrator username"
+  type        = string
+  default     = "demo_user"
+}
+
+variable "db_password" {
+  description = "Database administrator password - CHANGE THIS IN PRODUCTION"
+  type        = string
+  sensitive   = true
+}
+
+variable "db_name" {
+  description = "Database name"
+  type        = string
+  default     = "demo_db"
+}
+
 # VPC Configuration
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
@@ -53,9 +72,9 @@ resource "aws_db_instance" "postgres" {
   engine              = "postgres"
   engine_version      = "15.3"
   instance_class      = "db.t3.medium"
-  db_name             = "demo"
-  username            = "demo"
-  password            = "demo123"
+  db_name             = var.db_name
+  username            = var.db_username
+  password            = var.db_password
   parameter_group_name = "default.postgres15"
   skip_final_snapshot = true
 

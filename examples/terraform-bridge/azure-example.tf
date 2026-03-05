@@ -7,6 +7,31 @@ terraform {
   }
 }
 
+# Variables
+variable "db_administrator_login" {
+  description = "PostgreSQL administrator login"
+  type        = string
+  default     = "demo"
+}
+
+variable "db_administrator_password" {
+  description = "PostgreSQL administrator password"
+  type        = string
+  sensitive   = true
+}
+
+variable "vm_admin_username" {
+  description = "Virtual machine admin username"
+  type        = string
+  default     = "adminuser"
+}
+
+variable "vm_admin_password" {
+  description = "Virtual machine admin password"
+  type        = string
+  sensitive   = true
+}
+
 # Resource Group
 resource "azurerm_resource_group" "demo" {
   name     = "demo-rg"
@@ -65,8 +90,8 @@ resource "azurerm_postgresql_flexible_server" "demo" {
   storage_mb             = 32768
   backup_retention_days  = 7
 
-  administrator_login    = "demo"
-  administrator_password = "demo123!"
+  administrator_login    = var.db_administrator_login
+  administrator_password = var.db_administrator_password
 
   zone = "1"
 
@@ -89,8 +114,8 @@ resource "azurerm_windows_virtual_machine" "adfs" {
   resource_group_name = azurerm_resource_group.demo.name
   location            = azurerm_resource_group.demo.location
   size                = "Standard_D2s_v3"
-  admin_username      = "adminuser"
-  admin_password      = "P@ssw0rd123!"
+  admin_username      = var.vm_admin_username
+  admin_password      = var.vm_admin_password
 
   network_interface_ids = [
     azurerm_network_interface.adfs.id,

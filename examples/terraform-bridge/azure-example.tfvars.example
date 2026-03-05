@@ -1,0 +1,15 @@
+# Azure Terraform Bridge Example Variables
+# Copy this file to terraform.tfvars and update with your values
+# NEVER commit terraform.tfvars to version control
+#
+# ⚠️  SECURITY WARNING ⚠️
+# These are DEMO values only! Replace with strong, unique passwords
+# in production. Never use these default values in real deployments.
+
+# Database Configuration
+db_administrator_login    = "demo_admin"
+db_administrator_password = "REPLACE_WITH_STRONG_DB_PASSWORD_987654321!"
+
+# Virtual Machine Configuration
+vm_admin_username = "demo_admin"
+vm_admin_password = "REPLACE_WITH_STRONG_VM_PASSWORD_987654321!"

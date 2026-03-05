@@ -143,3 +143,45 @@ The Terraform Bridge provides the **best of both worlds**:
 - **Gradual escape path** from state management complexity
 
 This approach respects enterprise realities while delivering Chiral's stateless architecture benefits.
+
+## 🔒 Security Best Practices
+
+This project follows open source security standards for handling credentials:
+
+### Variable-Based Configuration
+All sensitive values are defined as Terraform variables with `sensitive = true`:
+- Database passwords
+- Admin usernames and passwords
+- API keys and connection strings
+
+### Usage Instructions
+1. **Copy example files:**
+   ```bash
+   cp aws-example.tfvars.example terraform.tfvars
+   # OR
+   cp azure-example.tfvars.example terraform.tfvars
+   ```
+
+2. **Update with real values:**
+   ```bash
+   # Edit terraform.tfvars with your actual credentials
+   db_password = "your-secure-password-here"
+   ```
+
+3. **Never commit secrets:**
+   - `terraform.tfvars` is in `.gitignore`
+   - Only commit `.tfvars.example` files
+   - Use environment variables for production
+
+### Production Recommendations
+- Use AWS Secrets Manager, Azure Key Vault, or HashiCorp Vault
+- Rotate credentials regularly
+- Enable IAM authentication where possible
+- Use Terraform workspaces for environment separation
+
+### Why This Approach?
+Open source projects cannot include real credentials, but need functional examples. This pattern:
+- ✅ Provides working demo code
+- ✅ Prevents accidental secret commits
+- ✅ Follows Terraform best practices
+- ✅ Enables secure production usage
