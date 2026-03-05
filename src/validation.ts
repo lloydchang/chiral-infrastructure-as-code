@@ -12,6 +12,12 @@ export interface ValidationResult {
   errors: string[];
   warnings: string[];
   recommendations: string[];
+  monitoringReport?: {
+    summary: string;
+    criticalIssues: number;
+    totalAlerts: number;
+    recommendations: string[];
+  };
 }
 
 export interface DriftDetectionResult {
