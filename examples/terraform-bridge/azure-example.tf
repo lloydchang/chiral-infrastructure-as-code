@@ -11,11 +11,11 @@ terraform {
 variable "db_administrator_login" {
   description = "PostgreSQL administrator login"
   type        = string
-  default     = "demo"
+  default     = "demo_admin"
 }
 
 variable "db_administrator_password" {
-  description = "PostgreSQL administrator password"
+  description = "PostgreSQL administrator password - CHANGE THIS IN PRODUCTION"
   type        = string
   sensitive   = true
 }
@@ -23,11 +23,11 @@ variable "db_administrator_password" {
 variable "vm_admin_username" {
   description = "Virtual machine admin username"
   type        = string
-  default     = "adminuser"
+  default     = "demo_admin"
 }
 
 variable "vm_admin_password" {
-  description = "Virtual machine admin password"
+  description = "Virtual machine admin password - CHANGE THIS IN PRODUCTION"
   type        = string
   sensitive   = true
 }

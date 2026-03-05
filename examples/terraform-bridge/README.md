@@ -108,13 +108,48 @@ resource "aws_cloudformation_stack" "rds_database" {
 - ✅ **Hybrid deployment** - Can run both systems during transition
 - ✅ **Cost optimization** - Eliminate $0.99/resource/month Terraform fees
 
-## 📚 Next Steps
+## � Security Considerations
 
-1. **Assess Current Setup**: Use `chiral import` to analyze your Terraform
-2. **Choose Strategy**: Select migration approach based on your needs
-3. **Generate Bridge**: Use `--terraform-bridge` flag for hybrid deployment
-4. **Migrate Gradually**: Transition services from Terraform to Chiral
-5. **Decommission Terraform**: Once fully migrated, remove Terraform dependencies
+### Demo Credentials Warning
+⚠️ **IMPORTANT**: The example Terraform files in this directory contain **demo credentials only**. These are intentionally weak/placeholder values designed to make examples runnable for demonstration purposes.
+
+**NEVER use these values in production deployments:**
+
+- Default usernames like `demo_admin`, `demo_user`
+- Placeholder passwords like `REPLACE_WITH_STRONG_DB_PASSWORD_123456789!`
+- Any credentials marked as "demo" or "change-this"
+
+### Production Requirements
+For production deployments:
+
+1. **Generate Strong Passwords**: Use password managers or secure generators
+2. **Use Secret Management**: Implement proper secret management solutions:
+   - AWS: AWS Secrets Manager, Parameter Store, or SSM
+   - Azure: Azure Key Vault
+   - GCP: Secret Manager
+3. **Never Commit Secrets**: Never commit `.tfvars` files containing real credentials
+4. **Use Environment Variables**: Consider using environment variables for sensitive values
+5. **Implement Least Privilege**: Use minimal required permissions
+
+### Example Security Implementation
+```hcl
+# ❌ DON'T DO THIS (hardcoded secrets)
+resource "aws_db_instance" "example" {
+  password = "mypassword123"
+}
+
+# ✅ DO THIS INSTEAD (use variables or secret management)
+resource "aws_db_instance" "example" {
+  password = var.db_password  # From secure source
+}
+
+# With AWS Secrets Manager
+data "aws_secretsmanager_secret_version" "db_password" {
+  secret_id = aws_secretsmanager_secret.db_password.id
+}
+```
+
+This approach ensures examples remain functional while clearly communicating security best practices.
 
 ## 🔍 Example Output
 
