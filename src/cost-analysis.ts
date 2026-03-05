@@ -7,6 +7,7 @@ import { ChiralSystem } from './intent';
 import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import { HardwareMap } from './translation/hardware-map';
 
 export interface CostEstimate {
   provider: 'aws' | 'azure' | 'gcp';
@@ -396,12 +397,7 @@ resource "google_compute_instance" "adfs" {
   }
 
   private static getAWSInstanceType(size: string): string {
-    const sizeMap: { [key: string]: string } = {
-      'small': 't3.small',
-      'medium': 't3.medium',
-      'large': 't3.large'
-    };
-    return sizeMap[size] || 't3.small';
+    return HardwareMap.aws.vm[size as keyof typeof HardwareMap.aws.vm] || HardwareMap.aws.vm.small;
   }
 
   private static getRDSInstanceClass(size: string): string {
@@ -766,7 +762,8 @@ resource "aws_instance" "adfs" {
     const pricingMap: { [key: string]: number } = {
       't3.small': 0.0208,
       't3.medium': 0.0416,
-      't3.large': 0.0832
+      't3.large': 0.0832,
+      'm5.large': 0.096
     };
     return { hourly: pricingMap[instanceType] || 0.0416 };
   }
@@ -781,12 +778,7 @@ resource "aws_instance" "adfs" {
   }
 
   private static getAWSInstanceType(size: string): string {
-    const sizeMap: { [key: string]: string } = {
-      'small': 't3.small',
-      'medium': 't3.medium',
-      'large': 't3.large'
-    };
-    return sizeMap[size] || 't3.small';
+    return HardwareMap.aws.vm[size as keyof typeof HardwareMap.aws.vm] || HardwareMap.aws.vm.small;
   }
 
   private static getAWSDBInstanceClass(size: string): string {

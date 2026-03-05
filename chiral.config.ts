@@ -44,7 +44,7 @@ export const config: ChiralSystem = {
   },
 
   adfs: {
-    size: 'large', // Resolves to m5.xlarge (AWS) / Standard_D4s_v3 (Azure) / n1-standard-2 (GCP)
+    size: 'large', // Resolves to m5.large (AWS) / Standard_D4s_v3 (Azure) / n1-standard-2 (GCP)
     windowsVersion: '2022'
   }
 };
