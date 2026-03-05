@@ -1234,7 +1234,6 @@ resource "google_compute_instance" "adfs" {
 
   private static async getCloudSQLPricingData(tier: string, region: string): Promise<{ compute: number; storagePerGb: number }> {
     const pricingMap: { [key: string]: { compute: number; storagePerGb: number } } = {
-      'db-f1-micro': { compute: 7, storagePerGb: 0.17 },
       'db-g1-small': { compute: 25, storagePerGb: 0.17 },
       'db-custom-2-4096': { compute: 100, storagePerGb: 0.17 }
     };
@@ -1243,7 +1242,7 @@ resource "google_compute_instance" "adfs" {
 
   private static async getComputePricing(machineType: string, region: string): Promise<{ hourly: number }> {
     const pricingMap: { [key: string]: number } = {
-      'e2-micro': 0.007,
+      'e2-small': 0.052,
       'e2-medium': 0.069,
       'n1-standard-2': 0.133
     };
