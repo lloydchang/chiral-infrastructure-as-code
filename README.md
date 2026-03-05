@@ -269,6 +269,79 @@ chiral migrate --source terraform/ --provider aws --strategy parallel
 
 The Terraform migration interface transforms Chiral from an IaC generation tool into a **complete migration solution** for teams wanting to escape the complexity and risks of Terraform state management.
 
+### Enhanced Migration & Multi-Format Support
+
+Chiral now provides comprehensive migration support for multiple IaC tools and enhanced capabilities:
+
+#### Multi-Format IaC Import
+```bash
+# Import from various IaC formats
+chiral import -s terraform.tfstate -p aws -o config.ts  # Terraform state
+chiral import -s main.tf -p aws -o config.ts             # Terraform HCL
+chiral import -s Pulumi.yaml -p aws -o config.ts         # Pulumi YAML
+chiral import -s template.json -p aws -o config.ts       # CloudFormation
+chiral import -s azuredeploy.bicep -p azure -o config.ts # Bicep
+```
+
+#### Pulumi Migration Support
+```bash
+# Analyze and migrate from Pulumi projects
+chiral migrate -s ./pulumi-project -p aws --iac-tool pulumi --analyze-only
+chiral migrate -s ./pulumi-project -p aws --iac-tool pulumi
+```
+
+**Pulumi Analysis Features:**
+- Project configuration parsing (`Pulumi.yaml`)
+- Language runtime detection (TypeScript, Python, Go, C#)
+- Backend configuration review
+- State file detection and security analysis
+- Resource complexity assessment
+
+#### Enhanced CLI Commands
+
+**Cost Analysis:**
+```bash
+# Multi-cloud cost comparison
+chiral cost-compare -c chiral.config.ts
+
+# Analyze existing infrastructure costs
+chiral cost-analyze --provider azure --subscription "my-sub"
+```
+
+**Configuration Validation:**
+```bash
+# Validate configuration and compliance
+chiral validate -c chiral.config.ts --compliance soc2
+```
+
+**Terraform Provider:**
+```bash
+# Build and generate Terraform provider
+chiral terraform-provider --build
+chiral terraform-provider --example
+```
+
+#### Bridge Mode for Gradual Migration
+```bash
+# Terraform bridge with state delegation
+chiral migrate -s terraform/ -p aws --terraform-bridge
+
+# Pulumi bridge with state delegation  
+chiral migrate -s pulumi-project/ -p aws --pulumi-bridge --iac-tool pulumi
+```
+
+### Comprehensive Documentation
+
+For detailed documentation of all enhanced features including migration workflows, troubleshooting guides, and integration examples, see **[ENHANCED_FEATURES.md](./ENHANCED_FEATURES.md)**.
+
+This covers:
+- Advanced Terraform & Pulumi migration strategies
+- Multi-format IaC import capabilities
+- Cost analysis and optimization
+- Compliance validation frameworks
+- Bridge modes for gradual migration
+- Troubleshooting and integration examples
+
 ### Terraform Provider Integration
 
 Chiral provides a **Terraform Provider** for seamless integration with existing Terraform workflows, allowing you to use Chiral's multi-cloud capabilities directly within Terraform configurations.
