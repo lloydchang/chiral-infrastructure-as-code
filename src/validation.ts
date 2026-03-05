@@ -23,7 +23,7 @@ export interface DriftDetectionResult {
 }
 
 export interface ComplianceCheck {
-  framework: 'soc2' | 'iso27001' | 'hipaa' | 'fedramp' | 'none';
+  framework: 'soc2' | 'iso27001' | 'hipaa' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'govramp-low' | 'govramp-moderate' | 'govramp-high' | 'none';
   compliant: boolean;
   violations: string[];
   recommendations: string[];

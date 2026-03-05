@@ -46,12 +46,14 @@ export const awsEksPostgresTemplate: ChiralSystem = {
       { description: 'Restore original security groups and IAM roles' },
       { description: 'Delete Chiral-generated resources' }
     ],
-    validateCompliance: true,
-    notes: [
-      'Ensure EKS cluster version compatibility',
-      'Migrate PostgreSQL data before cutover',
-      'Test ADFS integration thoroughly',
-      'Validate security group rules'
-    ]
-  }
+    validateCompliance: true
+  },
+
+  // Migration notes (not part of schema, just template documentation)
+  // notes: [
+  //   'Ensure EKS cluster version compatibility',
+  //   'Migrate PostgreSQL data before cutover',
+  //   'Test ADFS integration thoroughly',
+  //   'Validate security group rules'
+  // ]
 };
