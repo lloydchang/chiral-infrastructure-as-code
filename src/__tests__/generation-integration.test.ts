@@ -64,7 +64,7 @@ describe('Chiral Generation Integration', () => {
     });
   });
 
-  describe('GCP Terraform Generation', () => {
+  describe('Google Cloud Infrastructure Manager Terraform Generation', () => {
     it('should generate deployable Terraform HCL', () => {
       const tfContent = GcpTerraformAdapter.generate(testIntent);
 
@@ -151,7 +151,7 @@ describe('Chiral Generation Integration', () => {
       expect(writtenContent).toContain('integration-test-aks');
     });
 
-    it('should write valid GCP Terraform file', () => {
+    it('should write valid Google Cloud Infrastructure Manager Terraform file', () => {
       const tfContent = GcpTerraformAdapter.generate(testIntent);
       fs.writeFileSync(gcpPath, tfContent);
 

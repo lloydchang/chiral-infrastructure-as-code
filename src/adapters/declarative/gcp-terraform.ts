@@ -70,7 +70,7 @@ ${intent.terraform?.backend ? `
 # - Encrypt backend storage and restrict access via IAM.
 # - Be aware of state corruption risks from concurrent modifications or partial applies.
 # - Consider managed Terraform services (e.g., Google Cloud Infrastructure Manager, IBM Terraform Premium) for enterprise deployments.
-# - Deploy via GCP Infrastructure Manager to leverage GCP's native state management and avoid self-hosted Terraform issues.
+# - Deploy via Google Cloud Infrastructure Manager to leverage GCP's native state management and avoid self-hosted Terraform issues.
 # - See docs/CHALLENGES.md for detailed state management challenges.
 # =================================================================
 

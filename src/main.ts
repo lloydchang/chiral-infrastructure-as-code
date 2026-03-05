@@ -675,7 +675,7 @@ program
     // 1. Reads chiral config
     // 2. Instantiates Programmatic Adapter (AWS) -> Generates CDK and CloudFormation to dist/
     // 3. Instantiates Declarative Adapter (Azure) -> Generates Bicep to dist/
-    // 4. Instantiates Declarative Adapter (GCP) -> Generates GCP Infrastructure Manager Terraform Blueprint to dist/
+    // 4. Instantiates Declarative Adapter (GCP) -> Generates Google Cloud Infrastructure Manager Terraform Blueprint to dist/
     // 5. VALIDATES the generated Bicep using Azure CLI
     // =================================================================
 
@@ -851,7 +851,7 @@ program
     }
 
     if (config.environment === 'prod') {
-      console.log(`💡 [GCP] For production deployments, use Infrastructure Manager with import policies for complete mode:`);
+      console.log(`💡 [GCP] For production deployments, use Google Cloud Infrastructure Manager with import policies for complete mode:`);
       console.log(`   gcloud infra-manager deployments apply projects/${config.region?.gcp?.split('-')[0] || 'my-project'}/locations/global/deployments/${config.projectName}-deployment --git-source-repo=https://github.com/my-org/my-repo --git-source-directory=dist --service-account=infra-manager@${config.region?.gcp?.split('-')[0] || 'my-project'}.iam.gserviceaccount.com`);
     }
 

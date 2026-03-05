@@ -48,6 +48,12 @@ export interface ChiralSystem {
     delegateState?: boolean;
     sourcePath?: string;
   };
+  terraform?: {
+    backend?: {
+      bucket: string;
+      prefix?: string;
+    };
+  };
   pulumiBridge?: {
     enabled?: boolean;
     provider?: 'aws' | 'azure' | 'gcp';
