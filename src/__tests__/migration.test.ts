@@ -176,7 +176,7 @@ describe('Migration and Analysis Tests', () => {
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Premium Fees: $198.00'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Operational Overhead: $120000.00'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Total Monthly Cost: $120198.00'));
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Total Monthly Cost: $30000.00'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Chiral Cost: $30000.00'));
 
       consoleSpy.mockRestore();
     });

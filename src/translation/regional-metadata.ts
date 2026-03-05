@@ -126,8 +126,8 @@ export const RegionalMetadata: Record<string, RegionMetadata> = {
         activeDirectory: true,
       },
       instanceTypes: {
-        small: ['Standard_B2s'],
-        medium: ['Standard_D2s_v3'],
+        small: ['Standard_B1s'],
+        medium: ['Standard_B2s', 'Standard_D2s_v3'],
         large: ['Standard_D4s_v3'],
       },
       databaseClasses: {
@@ -153,8 +153,8 @@ export const RegionalMetadata: Record<string, RegionMetadata> = {
         activeDirectory: true,
       },
       instanceTypes: {
-        small: ['Standard_B2s'],
-        medium: ['Standard_D2s_v3'],
+        small: ['Standard_B1s'],
+        medium: ['Standard_B2s', 'Standard_D2s_v3'],
         large: ['Standard_D4s_v3'],
       },
       databaseClasses: {

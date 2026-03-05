@@ -36,12 +36,12 @@ export const config: ChiralSystem = {
   
   postgres: {
     engineVersion: '18.3',
-    size: 'small', // Resolves to db.t3.small (AWS) / Standard_B1s (Azure) / db-f1-micro (GCP)
+    size: 'small', // Resolves to db.t3.small (AWS) / Standard_B1s (Azure) / db-g1-small (GCP)
     storageGb: 20
   },
   
   adfs: {
-    size: 'small', // Resolves to t3.small (AWS) / Standard_B1s (Azure) / e2-micro (GCP)
+    size: 'small', // Resolves to t3.small (AWS) / Standard_B1s (Azure) / e2-small (GCP)
     windowsVersion: '11 26H2 Build 26300.7877'
   }
 };
