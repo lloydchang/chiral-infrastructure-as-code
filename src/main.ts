@@ -2164,4 +2164,7 @@ async function generateMigrationPlan(sourcePath: string, provider: string, strat
 // Export helper functions for testing
 export { analyzeTerraformSetup, analyzePulumiSetup, compareApproaches, getMigrationStrategyInfo, generateMigrationPlan };
 
-program.parse();
+// Only parse CLI if not in test environment
+if (require.main === module && !process.env.JEST_WORKER_ID) {
+  program.parse();
+}

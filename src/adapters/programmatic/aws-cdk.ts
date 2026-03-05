@@ -11,6 +11,7 @@ import * as rds from 'aws-cdk-lib/aws-rds';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import * as kms from 'aws-cdk-lib/aws-kms';
 import { KubectlV26Layer } from '@aws-cdk/lambda-layer-kubectl-v26';
 import { Construct } from 'constructs';
 import { ChiralSystem } from '../../intent';
@@ -119,10 +120,9 @@ export class AwsCdkAdapter extends cdk.Stack {
         eks.ClusterLoggingTypes.SCHEDULER
       ],
       // Add encryption configuration
-      secretsEncryptionKey: cdk.SecretValue.secretsManager(this, 'eks-secrets-key'),
-      // Add IAM role for service accounts
-      iamAuth: new iam.OpenIdConnectProvider(this, 'eks-oidc', {
-        url: 'https://sts.amazonaws.com/idp/bce037f2'
+      secretsEncryptionKey: new kms.Key(this, 'EksSecretsKey', {
+        description: 'KMS key for EKS secrets encryption',
+        alias: `${intent.projectName}-eks-secrets-key`
       })
     });
 

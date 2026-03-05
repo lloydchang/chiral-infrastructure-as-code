@@ -41,7 +41,7 @@ describe('TerraformImportAdapter', () => {
       const intent = await TerraformImportAdapter.convertToChiralIntent(mockResources, 'aws');
 
       expect(intent).toBeDefined();
-      expect(intent.projectName).toBe('imported-infrastructure');
+      expect(intent.projectName).toBe('imported-from-terraform');
       expect(intent.environment).toBe('prod');
       expect(intent.networkCidr).toBe('10.0.0.0/16');
       expect(intent.k8s).toBeDefined();
@@ -105,7 +105,7 @@ describe('TerraformImportAdapter', () => {
     it('should provide default values for required fields', async () => {
       const chiralSystem = await TerraformImportAdapter.importFromTerraform(testConfig);
 
-      expect(chiralSystem.projectName).toBe('imported-infrastructure');
+      expect(chiralSystem.projectName).toBe('imported-from-terraform');
       expect(chiralSystem.environment).toBe('prod');
       expect(chiralSystem.networkCidr).toBe('10.0.0.0/16');
     });

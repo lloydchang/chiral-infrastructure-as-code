@@ -96,7 +96,7 @@ describe('Chiral Generation Integration', () => {
       const tfContent = GcpTerraformAdapter.generate(testIntent);
 
       expect(tfContent).toContain('database_version = "POSTGRES_15"');
-      expect(tfContent).toContain('tier = "db-custom-2-4096"');
+      expect(tfContent).toContain('tier = "db-custom-4-8192"');
       expect(tfContent).toContain('disk_size = 100');
     });
   });
@@ -126,7 +126,7 @@ describe('Chiral Generation Integration', () => {
       // Large sizes should be used consistently
       expect(azureBicep).toContain('Standard_D4s_v3'); // Azure large
       expect(gcpTf).toContain('n1-standard-2'); // GCP large VM
-      expect(gcpTf).toContain('db-custom-2-4096'); // GCP large DB
+      expect(gcpTf).toContain('db-custom-4-8192'); // GCP large DB
     });
   });
 

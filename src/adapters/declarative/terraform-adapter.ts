@@ -18,6 +18,15 @@ export interface TerraformImportConfig {
   analyzeOnly?: boolean;
 }
 
+export interface TerraformConfig {
+  provider: 'aws' | 'azure' | 'gcp';
+  delegateState?: boolean;
+  outputDirectory?: string;
+  projectName: string;
+  environment: string;
+  region?: string;
+}
+
 export interface ParsedTerraformResource {
   resourceType: string;
   resourceName: string;
@@ -65,7 +74,7 @@ export class TerraformImportAdapter {
   static async convertToChiralIntent(resources: ParsedTerraformResource[], provider: 'aws' | 'azure' | 'gcp'): Promise<Partial<ChiralSystem>> {
     // Convert parsed Terraform resources to Chiral intent
     const intent: Partial<ChiralSystem> = {
-      projectName: 'imported-infrastructure',
+      projectName: 'imported-from-terraform',
       environment: 'prod',
       networkCidr: '10.0.0.0/16',
       k8s: {

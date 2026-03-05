@@ -42,6 +42,8 @@ describe('Migration and Analysis Tests', () => {
       await analyzeTerraformSetup('/path/to/terraform.tfstate', 'aws', true);
 
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('📋 Terraform Setup Analysis'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('terraform.tfstate: 3 resources'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('📊 Analysis Results:'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Total Resources: 3'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Backend Type: s3'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Terraform Premium: $2.97/month'));
@@ -150,8 +152,8 @@ describe('Migration and Analysis Tests', () => {
 
       await compareApproaches(50, 3, 'simple');
 
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Resources: 50'));
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Team Size: 3'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('📊 Detailed Comparison:'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('💰 Monthly Cost Comparison:'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Premium Fees: $49.50'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Annual Savings: $'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('✅ Zero state architecture'));
