@@ -38,7 +38,9 @@ export function validateISO27001Compliance(config: any): ValidationResult {
 
   return {
     valid: issues.length === 0,
-    issues
+    errors: issues,
+    warnings: [],
+    recommendations: []
   };
 }
 
@@ -60,7 +62,9 @@ export function validateISO27017Compliance(config: any): ValidationResult {
 
   return {
     valid: issues.length === 0,
-    issues
+    errors: issues,
+    warnings: [],
+    recommendations: []
   };
 }
 
@@ -82,7 +86,9 @@ export function validateISO27018Compliance(config: any): ValidationResult {
 
   return {
     valid: issues.length === 0,
-    issues
+    errors: issues,
+    warnings: [],
+    recommendations: []
   };
 }
 
@@ -112,7 +118,9 @@ export function validateNISTLowCompliance(config: any): ValidationResult {
 
   return {
     valid: issues.length === 0,
-    issues
+    errors: issues,
+    warnings: [],
+    recommendations: []
   };
 }
 
@@ -162,7 +170,9 @@ export function validateNISTModerateCompliance(config: any): ValidationResult {
 
   return {
     valid: issues.length === 0,
-    issues
+    errors: issues,
+    warnings: [],
+    recommendations: []
   };
 }
 
@@ -227,6 +237,8 @@ export function validateNISTHighCompliance(config: any): ValidationResult {
 
   return {
     valid: issues.length === 0,
-    issues
+    errors: issues,
+    warnings: [],
+    recommendations: []
   };
 }

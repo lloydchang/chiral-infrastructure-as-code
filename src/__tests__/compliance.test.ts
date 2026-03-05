@@ -28,14 +28,14 @@ describe('ISO 27001 Compliance', () => {
   test('validates ISO 27001 function directly', () => {
     const result = validateISO27001Compliance(baseConfig);
     expect(result.valid).toBe(true);
-    expect(result.issues.length).toBe(0);
+    expect(result.errors.length).toBe(0);
   });
 
   test('fails ISO 27001 without encryption', () => {
     const config = { ...baseConfig, compliance: { ...baseConfig.compliance, encryptionAtRest: false } };
     const result = validateISO27001Compliance(config);
     expect(result.valid).toBe(false);
-    expect(result.issues).toContain('Encryption at rest not enabled');
+    expect(result.errors).toContain('Encryption at rest not enabled');
   });
 });
 
@@ -63,14 +63,14 @@ describe('ISO 27017 Compliance', () => {
   test('validates ISO 27017 function directly', () => {
     const result = validateISO27017Compliance(baseConfig);
     expect(result.valid).toBe(true);
-    expect(result.issues.length).toBe(0);
+    expect(result.errors.length).toBe(0);
   });
 
   test('fails ISO 27017 without shared responsibility', () => {
     const config = { ...baseConfig, compliance: { ...baseConfig.compliance, sharedResponsibility: false } };
     const result = validateISO27017Compliance(config);
     expect(result.valid).toBe(false);
-    expect(result.issues).toContain('Shared responsibility model not documented');
+    expect(result.errors).toContain('Shared responsibility model not documented');
   });
 });
 
@@ -99,14 +99,14 @@ describe('ISO 27018 Compliance', () => {
   test('validates ISO 27018 function directly', () => {
     const result = validateISO27018Compliance(baseConfig);
     expect(result.valid).toBe(true);
-    expect(result.issues.length).toBe(0);
+    expect(result.errors.length).toBe(0);
   });
 
   test('fails ISO 27018 without data minimization', () => {
     const config = { ...baseConfig, compliance: { ...baseConfig.compliance, dataMinimization: false } };
     const result = validateISO27018Compliance(config);
     expect(result.valid).toBe(false);
-    expect(result.issues).toContain('Data minimization not implemented');
+    expect(result.errors).toContain('Data minimization not implemented');
   });
 });
 
@@ -137,15 +137,15 @@ describe('NIST Low Compliance', () => {
   test('validates NIST Low function directly', () => {
     const result = validateNISTLowCompliance(baseConfig);
     expect(result.valid).toBe(true);
-    expect(result.issues.length).toBe(0);
+    expect(result.errors.length).toBe(0);
   });
 
   test('fails NIST Low without encryption at rest', () => {
     const config = { ...baseConfig };
-    delete config.compliance.encryptionAtRest;
+    config.compliance.encryptionAtRest = false;
     const result = validateNISTLowCompliance(config);
     expect(result.valid).toBe(false);
-    expect(result.issues).toContain('NIST LOW: SC-28 - Encryption at rest not enabled');
+    expect(result.errors).toContain('NIST LOW: SC-28 - Encryption at rest not enabled');
   });
 });
 
@@ -182,7 +182,7 @@ describe('NIST Moderate Compliance', () => {
   test('validates NIST Moderate function directly', () => {
     const result = validateNISTModerateCompliance(baseConfig);
     expect(result.valid).toBe(true);
-    expect(result.issues.length).toBe(0);
+    expect(result.errors.length).toBe(0);
   });
 
   test('fails NIST Moderate without network segmentation', () => {
@@ -190,7 +190,7 @@ describe('NIST Moderate Compliance', () => {
     delete config.compliance.securityControls.networkSegmentation;
     const result = validateNISTModerateCompliance(config);
     expect(result.valid).toBe(false);
-    expect(result.issues).toContain('NIST MODERATE: AC-4 - Network segmentation required');
+    expect(result.errors).toContain('NIST MODERATE: AC-4 - Network segmentation required');
   });
 });
 
@@ -230,15 +230,15 @@ describe('NIST High Compliance', () => {
   test('validates NIST High function directly', () => {
     const result = validateNISTHighCompliance(baseConfig);
     expect(result.valid).toBe(true);
-    expect(result.issues.length).toBe(0);
+    expect(result.errors.length).toBe(0);
   });
 
   test('fails NIST High without privileged access management', () => {
     const config = { ...baseConfig };
-    delete config.compliance.securityControls.privilegedAccessManagement;
+    config.compliance.securityControls.privilegedAccessManagement = false;
     const result = validateNISTHighCompliance(config);
     expect(result.valid).toBe(false);
-    expect(result.issues).toContain('NIST HIGH: AC-6 - Privileged access management required');
+    expect(result.errors).toContain('NIST HIGH: AC-6 - Privileged access management required');
   });
 });
 
