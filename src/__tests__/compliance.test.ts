@@ -15,7 +15,7 @@ describe('ISO 27001 Compliance', () => {
     compliance: {
       encryptionAtRest: true,
       auditLogging: true,
-      dataResidency: true
+      dataResidency: { aws: 'us-east-1' }
     }
   };
 
@@ -49,7 +49,7 @@ describe('ISO 27017 Compliance', () => {
     adfs: { size: 'medium' as const, windowsVersion: '2022' as const },
     compliance: {
       sharedResponsibility: true,
-      dataResidency: true,
+      dataResidency: { aws: 'us-east-1' },
       auditLogging: true
     }
   };
@@ -187,7 +187,7 @@ describe('NIST Moderate Compliance', () => {
 
   test('fails NIST Moderate without network segmentation', () => {
     const config = { ...baseConfig };
-    delete config.compliance.securityControls.networkSegmentation;
+    config.compliance.securityControls.networkSegmentation = false;
     const result = validateNISTModerateCompliance(config);
     expect(result.valid).toBe(false);
     expect(result.errors).toContain('NIST MODERATE: AC-4 - Network segmentation required');
