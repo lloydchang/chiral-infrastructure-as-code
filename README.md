@@ -12,6 +12,52 @@
 npm install -g chiral-infrastructure-as-code
 ```
 
+## Optional Dependencies
+
+Chiral works without any optional dependencies, but certain features provide enhanced functionality when additional tools are installed:
+
+### Cost Analysis Tools
+
+**Azure Cost Analysis (azure-cost-cli):**
+```bash
+# Install for enhanced Azure cost estimation
+npm install -g azure-cost-cli
+# Or install via cargo if you have Rust
+cargo install azure-cost-cli
+```
+
+**AWS/GCP Cost Analysis (infracost):**
+```bash
+# Install for enhanced AWS and GCP cost estimation  
+curl -fsSL https://raw.githubusercontent.com/infracost/infracost/master/scripts/install.sh | sh
+```
+
+### Cloud Provider CLIs
+
+**AWS CLI:**
+```bash
+# macOS
+brew install awscli
+# Or via pip
+pip install awscli
+```
+
+**Azure CLI:**
+```bash
+# macOS
+brew install azure-cli
+# Or via script
+curl -L https://aka.ms/InstallAzureCli | bash
+```
+
+**Google Cloud CLI:**
+```bash
+# macOS
+brew install google-cloud-sdk
+# Or via script
+curl https://sdk.cloud.google.com | bash
+```
+
 ## Usage
 
 Create a config file (e.g., `chiral.config.ts`):
