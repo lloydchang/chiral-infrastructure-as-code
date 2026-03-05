@@ -174,6 +174,22 @@ export class SecurityComplianceEngine {
       case 'ccpa':
         violations.push(...await this.assessCCPA(config));
         break;
+      case 'hipaa':
+      case 'hipaa-low':
+      case 'hipaa-moderate':
+      case 'hipaa-high':
+        violations.push(...await this.assessHIPAA(config, framework));
+        break;
+      case 'hitrust-low':
+      case 'hitrust-moderate':
+      case 'hitrust-high':
+        violations.push(...await this.assessHITRUST(config, framework));
+        break;
+      case 'hitech-low':
+      case 'hitech-moderate':
+      case 'hitech-high':
+        violations.push(...await this.assessHITECH(config, framework));
+        break;
       default:
         violations.push(...await this.assessGeneric(config, framework));
     }
@@ -918,6 +934,326 @@ export class SecurityComplianceEngine {
   }
 
   /**
+   * HIPAA Compliance Assessment
+   */
+  private async assessHIPAA(config: ChiralSystem, framework: ComplianceFramework): Promise<SecurityViolation[]> {
+    const violations: SecurityViolation[] = [];
+    const level = this.getComplianceLevel(framework);
+
+    // Data Protection - Required at all levels
+    if (!config.compliance?.encryptionAtRest) {
+      violations.push({
+        id: `HIPAA-${level}-1`,
+        severity: 'critical',
+        category: 'technical',
+        control: '45 CFR 164.312(a)(2)(iv)',
+        title: 'PHI encryption at rest missing',
+        description: 'HIPAA requires encryption of Protected Health Information (PHI) at rest',
+        impact: 'PHI data breaches and non-compliance with HIPAA Security Rule',
+        affectedResources: ['database', 'storage'],
+        remediation: 'Enable encryption at rest for all PHI data stores'
+      });
+    }
+
+    if (!config.compliance?.encryptionInTransit) {
+      violations.push({
+        id: `HIPAA-${level}-2`,
+        severity: 'critical',
+        category: 'technical',
+        control: '45 CFR 164.312(e)(1)',
+        title: 'PHI encryption in transit missing',
+        description: 'HIPAA requires encryption of PHI during transmission',
+        impact: 'PHI data interception and non-compliance with HIPAA Security Rule',
+        affectedResources: ['network', 'api'],
+        remediation: 'Enable encryption in transit for all PHI communications'
+      });
+    }
+
+    // Audit and Monitoring - Required at all levels
+    if (!config.compliance?.auditLogging) {
+      violations.push({
+        id: `HIPAA-${level}-3`,
+        severity: 'high',
+        category: 'operational',
+        control: '45 CFR 164.312(b)',
+        title: 'PHI access audit logging missing',
+        description: 'HIPAA requires audit logs for all PHI access and system activity',
+        impact: 'Cannot detect or investigate PHI security incidents',
+        affectedResources: ['all'],
+        remediation: 'Implement comprehensive audit logging for PHI access'
+      });
+    }
+
+    // Access Controls - Required at all levels
+    if (!config.compliance?.securityControls?.privilegedAccessManagement) {
+      violations.push({
+        id: `HIPAA-${level}-4`,
+        severity: 'high',
+        category: 'policy',
+        control: '45 CFR 164.308(a)(4)',
+        title: 'Privileged access management missing',
+        description: 'HIPAA requires role-based access controls for PHI systems',
+        impact: 'Unauthorized PHI access and compliance violations',
+        affectedResources: ['access-control'],
+        remediation: 'Implement role-based access controls and privileged access management'
+      });
+    }
+
+    // High Availability - Moderate and High levels
+    if ((framework === 'hipaa-moderate' || framework === 'hipaa-high') && config.environment === 'prod' && config.k8s && config.k8s.minNodes < 2) {
+      violations.push({
+        id: `HIPAA-${level}-5`,
+        severity: 'high',
+        category: 'operational',
+        control: '45 CFR 164.308(a)(7)(ii)',
+        title: 'Insufficient redundancy for production PHI systems',
+        description: 'HIPAA requires contingency planning and system redundancy for production healthcare systems',
+        impact: 'Service disruption could prevent patient care delivery',
+        affectedResources: ['kubernetes'],
+        remediation: 'Deploy at least 2 nodes for high availability in production'
+      });
+    }
+
+    // Enhanced controls for High level
+    if (framework === 'hipaa-high') {
+      if (!config.compliance?.securityControls?.networkSegmentation) {
+        violations.push({
+          id: 'HIPAA-HIGH-6',
+          severity: 'critical',
+          category: 'technical',
+          control: '45 CFR 164.312(a)(1)',
+          title: 'Network segmentation missing for high-sensitivity PHI',
+          description: 'HIPAA High requires network segmentation for critical patient care systems',
+          impact: 'PHI exposure and non-compliance with advanced security requirements',
+          affectedResources: ['network'],
+          remediation: 'Implement network segmentation for PHI systems'
+        });
+      }
+
+      if (config.postgres && config.postgres.storageGb < 100) {
+        violations.push({
+          id: 'HIPAA-HIGH-7',
+          severity: 'medium',
+          category: 'technical',
+          control: '45 CFR 164.308(a)(7)',
+          title: 'Insufficient storage capacity for high-sensitivity PHI',
+          description: 'HIPAA High requires adequate storage for PHI databases and audit logs',
+          impact: 'Performance degradation and potential data integrity issues',
+          affectedResources: ['database'],
+          remediation: 'Increase database storage to at least 100GB for high-sensitivity PHI'
+        });
+      }
+    }
+
+    return violations;
+  }
+
+  /**
+   * HITRUST CSF Compliance Assessment
+   */
+  private async assessHITRUST(config: ChiralSystem, framework: ComplianceFramework): Promise<SecurityViolation[]> {
+    const violations: SecurityViolation[] = [];
+    const level = this.getComplianceLevel(framework);
+
+    // Core HITRUST controls - similar to HIPAA but more comprehensive
+    if (!config.compliance?.encryptionAtRest) {
+      violations.push({
+        id: `HITRUST-${level}-1`,
+        severity: 'critical',
+        category: 'technical',
+        control: '10.1',
+        title: 'Data at rest encryption missing',
+        description: 'HITRUST CSF requires encryption of sensitive data at rest',
+        impact: 'Data breaches and non-compliance with healthcare security framework',
+        affectedResources: ['database', 'storage'],
+        remediation: 'Enable encryption at rest for all sensitive healthcare data'
+      });
+    }
+
+    if (!config.compliance?.auditLogging) {
+      violations.push({
+        id: `HITRUST-${level}-2`,
+        severity: 'high',
+        category: 'operational',
+        control: '12.4',
+        title: 'Comprehensive audit logging missing',
+        description: 'HITRUST CSF requires detailed audit logging and monitoring',
+        impact: 'Cannot detect security incidents or maintain compliance evidence',
+        affectedResources: ['all'],
+        remediation: 'Implement comprehensive audit logging and monitoring'
+      });
+    }
+
+    // Endpoint Protection - HITRUST specific
+    if (!config.compliance?.securityControls?.malwareProtection) {
+      violations.push({
+        id: `HITRUST-${level}-3`,
+        severity: 'high',
+        category: 'technical',
+        control: '12.2',
+        title: 'Endpoint protection missing',
+        description: 'HITRUST CSF requires endpoint protection and malware prevention',
+        impact: 'Malware infection could compromise healthcare systems',
+        affectedResources: ['all'],
+        remediation: 'Implement endpoint protection and malware prevention controls'
+      });
+    }
+
+    // Moderate and High levels add additional controls
+    if (framework === 'hitrust-moderate' || framework === 'hitrust-high') {
+      if (!config.compliance?.securityControls?.vulnerabilityManagement) {
+        violations.push({
+          id: `HITRUST-${level}-4`,
+          severity: 'high',
+          category: 'technical',
+          control: '06.1',
+          title: 'Vulnerability management missing',
+          description: 'HITRUST CSF requires vulnerability scanning and management',
+          impact: 'Unpatched vulnerabilities could lead to security breaches',
+          affectedResources: ['all'],
+          remediation: 'Implement vulnerability scanning and patch management'
+        });
+      }
+
+      if (!config.compliance?.securityControls?.incidentResponse) {
+        violations.push({
+          id: `HITRUST-${level}-5`,
+          severity: 'high',
+          category: 'operational',
+          control: '16.1',
+          title: 'Incident response procedures missing',
+          description: 'HITRUST CSF requires comprehensive incident response planning',
+          impact: 'Security incidents cannot be effectively managed',
+          affectedResources: ['all'],
+          remediation: 'Develop and implement incident response procedures'
+        });
+      }
+    }
+
+    // High level adds advanced controls
+    if (framework === 'hitrust-high') {
+      if (!config.compliance?.securityControls?.configurationManagement) {
+        violations.push({
+          id: 'HITRUST-HIGH-6',
+          severity: 'critical',
+          category: 'technical',
+          control: '14.2',
+          title: 'Configuration management missing',
+          description: 'HITRUST High requires strict configuration management and monitoring',
+          impact: 'Configuration drift could lead to security vulnerabilities',
+          affectedResources: ['infrastructure'],
+          remediation: 'Implement configuration management and monitoring'
+        });
+      }
+    }
+
+    return violations;
+  }
+
+  /**
+   * HITECH Compliance Assessment
+   */
+  private async assessHITECH(config: ChiralSystem, framework: ComplianceFramework): Promise<SecurityViolation[]> {
+    const violations: SecurityViolation[] = [];
+    const level = this.getComplianceLevel(framework);
+
+    // Breach prevention - core HITECH requirement
+    if (!config.compliance?.encryptionAtRest) {
+      violations.push({
+        id: `HITECH-${level}-1`,
+        severity: 'critical',
+        category: 'technical',
+        control: 'Breach Prevention',
+        title: 'PHI breach prevention controls missing',
+        description: 'HITECH requires encryption to prevent PHI breaches',
+        impact: 'PHI breaches requiring notification under HITECH',
+        affectedResources: ['database', 'storage'],
+        remediation: 'Enable encryption at rest to prevent PHI breaches'
+      });
+    }
+
+    // Breach detection and notification
+    if (!config.compliance?.breachNotification) {
+      violations.push({
+        id: `HITECH-${level}-2`,
+        severity: 'critical',
+        category: 'operational',
+        control: 'Breach Notification',
+        title: 'Breach notification procedures missing',
+        description: 'HITECH requires breach notification within 60 days of discovery',
+        impact: 'Failure to notify breaches could result in penalties',
+        affectedResources: ['all'],
+        remediation: 'Implement breach notification procedures and incident response'
+      });
+    }
+
+    // Audit and monitoring for breach detection
+    if (!config.compliance?.auditLogging) {
+      violations.push({
+        id: `HITECH-${level}-3`,
+        severity: 'high',
+        category: 'operational',
+        control: 'Audit Monitoring',
+        title: 'Audit monitoring for breach detection missing',
+        description: 'HITECH requires audit monitoring to detect potential breaches',
+        impact: 'Cannot detect PHI breaches in a timely manner',
+        affectedResources: ['all'],
+        remediation: 'Implement comprehensive audit logging and monitoring'
+      });
+    }
+
+    // Moderate and High levels add enhanced controls
+    if (framework === 'hitech-moderate' || framework === 'hitech-high') {
+      if (!config.compliance?.securityControls?.incidentResponse) {
+        violations.push({
+          id: `HITECH-${level}-4`,
+          severity: 'high',
+          category: 'operational',
+          control: 'Incident Response',
+          title: 'Incident response for breach containment missing',
+          description: 'HITECH requires incident response procedures for breach containment',
+          impact: 'Security incidents cannot be contained effectively',
+          affectedResources: ['all'],
+          remediation: 'Implement incident response procedures for breach containment'
+        });
+      }
+    }
+
+    // High level adds advanced breach prevention
+    if (framework === 'hitech-high') {
+      if (!config.compliance?.securityControls?.networkSegmentation) {
+        violations.push({
+          id: 'HITECH-HIGH-5',
+          severity: 'critical',
+          category: 'technical',
+          control: 'Advanced Breach Prevention',
+          title: 'Advanced network segmentation missing',
+          description: 'HITECH High requires advanced network segmentation to prevent breaches',
+          impact: 'Increased risk of PHI breaches requiring notification',
+          affectedResources: ['network'],
+          remediation: 'Implement advanced network segmentation and access controls'
+        });
+      }
+
+      if (config.postgres && config.postgres.storageGb < 75) {
+        violations.push({
+          id: 'HITECH-HIGH-6',
+          severity: 'medium',
+          category: 'technical',
+          control: 'Storage Capacity',
+          title: 'Insufficient storage for breach investigation',
+          description: 'HITECH High requires adequate storage for breach logs and investigation',
+          impact: 'Cannot adequately investigate and document breaches',
+          affectedResources: ['database'],
+          remediation: 'Increase storage capacity to at least 75GB for breach investigation'
+        });
+      }
+    }
+
+    return violations;
+  }
+
+  /**
    * Generic compliance assessment for other frameworks
    */
   private async assessGeneric(
@@ -1194,6 +1530,13 @@ export class SecurityComplianceEngine {
     }
   }
 
+  private getComplianceLevel(framework: ComplianceFramework): string {
+    if (framework.includes('-low')) return 'LOW';
+    if (framework.includes('-moderate')) return 'MODERATE';
+    if (framework.includes('-high')) return 'HIGH';
+    return 'STANDARD';
+  }
+
   private getTotalControls(framework: ComplianceFramework): number {
     switch (framework) {
       case 'iso27001': return 114; // Annex A controls
@@ -1202,6 +1545,19 @@ export class SecurityComplianceEngine {
       case 'iso27701': return 12; // PIMS controls
       case 'gdpr': return 8; // Key GDPR requirements
       case 'ccpa': return 4; // Key CCPA requirements
+      case 'hipaa':
+      case 'hipaa-low':
+      case 'hipaa-moderate':
+      case 'hipaa-high':
+        return 7; // HIPAA Security Rule controls
+      case 'hitrust-low':
+      case 'hitrust-moderate':
+      case 'hitrust-high':
+        return 6; // HITRUST CSF controls
+      case 'hitech-low':
+      case 'hitech-moderate':
+      case 'hitech-high':
+        return 6; // HITECH controls
       default: return 10;
     }
   }
