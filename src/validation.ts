@@ -2,7 +2,7 @@
 
 // Enhanced validation and drift detection capabilities for Chiral
 
-import { ChiralSystem } from './intent';
+import { ChiralSystem, ComplianceFramework } from './intent';
 import * as fs from 'fs';
 import * as path from 'path';
 import { CostAnalyzer, AzureCostAnalyzer, CostOptimizer, CostAnalysisOptions } from './cost-analysis';
@@ -23,7 +23,7 @@ export interface DriftDetectionResult {
 }
 
 export interface ComplianceCheck {
-  framework: 'soc2' | 'iso27001' | 'hipaa' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'govramp-low' | 'govramp-moderate' | 'govramp-high' | 'hitrust-low' | 'hitrust-moderate' | 'hitrust-high' | 'hitech-low' | 'hitech-moderate' | 'hitech-high' | 'hipaa-low' | 'hipaa-moderate' | 'hipaa-high' | 'nist-low' | 'nist-moderate' | 'nist-high' | 'dod-il2' | 'dod-il4' | 'dod-il5' | 'dod-il6' | 'none';
+  framework: ComplianceFramework;
   compliant: boolean;
   violations: string[];
   recommendations: string[];
@@ -464,6 +464,8 @@ export function checkCompliance(
         recommendations.push('Configure at least 100GB storage for production healthcare databases');
       }
     }
+  }
+
   // NIST 800-53 compliance checks
   if (framework.startsWith('nist-')) {
     const level = framework.split('-')[1]; // 'low', 'moderate', 'high'
@@ -601,6 +603,7 @@ export function checkCompliance(
       }
     }
   }
+  return {
     framework,
     compliant: violations.length === 0,
     violations,
