@@ -156,7 +156,7 @@ export class TerraformImportAdapter {
     for (const resource of resources) {
       switch (provider) {
         case 'aws':
-          this.mapAwsResource(resource, intent);
+          this.mapAwsResource(resource, intent, provider);
           break;
         case 'azure':
           this.mapAzureResource(resource, intent);
