@@ -5,11 +5,13 @@
 
 import { ChiralSystem } from '../../intent';
 
-export const awsEksPostgresTemplate: Partial<ChiralSystem> = {
+export const awsEksPostgresTemplate: ChiralSystem = {
   projectName: 'migrated-aws-infrastructure',
   environment: 'prod',
   networkCidr: '10.0.0.0/16',
-
+  compliance: {
+    framework: 'hipaa' as const,
+  },
   region: {
     aws: 'us-east-1'
   },
@@ -42,9 +44,6 @@ export const awsEksPostgresTemplate: Partial<ChiralSystem> = {
       { description: 'Delete Chiral-generated resources' }
     ],
     validateCompliance: true,
-    compliance: {
-      framework: 'hipaa' as const,
-    },
     notes: [
       'Ensure EKS cluster version compatibility',
       'Migrate PostgreSQL data before cutover',

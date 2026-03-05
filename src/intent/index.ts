@@ -6,7 +6,7 @@
 
 export type EnvironmentTier = 'dev' | 'prod';
 export type WorkloadSize = 'small' | 'medium' | 'large';
-export type ComplianceFramework = 'none' | 'soc2' | 'iso27001' | 'hipaa' | 'fedramp';
+export type ComplianceFramework = 'none' | 'soc2' | 'iso27001' | 'hipaa' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high';
 export type DeploymentStrategy = 'greenfield' | 'progressive' | 'parallel';
 
 export interface KubernetesIntent {
