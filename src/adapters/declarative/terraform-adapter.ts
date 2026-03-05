@@ -37,21 +37,16 @@ export class TerraformImportAdapter {
         const filePath = path.join(sourcePath, tfFile);
         const content = fs.readFileSync(filePath, 'utf8');
         
-        // Parse HCL content
-        const parsed = hcl2.parse(content);
+        // Simple regex-based HCL parsing (basic implementation)
+        const resourceBlocks = this.extractResourceBlocks(content);
         
-        // Extract resource blocks
-        if (parsed.resource) {
-          for (const [resourceType, resourceBlock] of Object.entries(parsed.resource)) {
-            for (const [resourceName, config] of Object.entries(resourceBlock as any)) {
-              resources.push({
-                resourceType,
-                resourceName,
-                config,
-                depends_on: (config as any).depends_on || []
-              });
-            }
-          }
+        for (const block of resourceBlocks) {
+          resources.push({
+            resourceType: block.type,
+            resourceName: block.name,
+            config: block.config,
+            depends_on: block.config.depends_on || []
+          });
         }
       }
     } catch (error) {
@@ -59,6 +54,56 @@ export class TerraformImportAdapter {
     }
     
     return resources;
+  }
+
+  private static extractResourceBlocks(content: string): Array<{type: string, name: string, config: any}> {
+    const blocks: Array<{type: string, name: string, config: any}> = [];
+    
+    // Match resource blocks: resource "type" "name" { ... }
+    const resourceRegex = /resource\s+"([^"]+)"\s+"([^"]+)"\s*\{([^}]+)\}/gs;
+    let match;
+    
+    while ((match = resourceRegex.exec(content)) !== null) {
+      const [, resourceType, resourceName, blockContent] = match;
+      
+      // Simple key-value extraction from block content
+      const config = this.parseBlockContent(blockContent);
+      
+      blocks.push({
+        type: resourceType,
+        name: resourceName,
+        config
+      });
+    }
+    
+    return blocks;
+  }
+
+  private static parseBlockContent(content: string): any {
+    const config: any = {};
+    
+    // Simple parsing of key = value pairs
+    const lines = content.split('\n').map(line => line.trim()).filter(line => line && !line.startsWith('#'));
+    
+    for (const line of lines) {
+      const keyValueMatch = line.match(/^(\w+)\s*=\s*(.+)$/);
+      if (keyValueMatch) {
+        const [, key, value] = keyValueMatch;
+        
+        // Remove quotes and parse basic types
+        if (value.startsWith('"') && value.endsWith('"')) {
+          config[key] = value.slice(1, -1);
+        } else if (value === 'true' || value === 'false') {
+          config[key] = value === 'true';
+        } else if (!isNaN(Number(value))) {
+          config[key] = Number(value);
+        } else {
+          config[key] = value;
+        }
+      }
+    }
+    
+    return config;
   }
 
   static async convertToChiralIntent(resources: ParsedTerraformResource[], provider: 'aws' | 'azure' | 'gcp'): Promise<Partial<ChiralSystem>> {
@@ -84,11 +129,50 @@ export class TerraformImportAdapter {
       }
     };
     
-    // TODO: Map Terraform resources to Chiral intent
-    // - AWS EKS/AKS/GKE -> KubernetesIntent
-    // - RDS/SQL Database -> DatabaseIntent  
-    // - EC2/VM instances -> AdfsIntent
-    // - Network configurations -> network settings
+    // Map Terraform resources to Chiral intent
+    for (const resource of resources) {
+      switch (provider) {
+        case 'aws':
+          this.mapAwsResource(resource, intent);
+          }
+          break;
+          
+        case 'aws_db_instance':
+        case 'azurerm_postgresql_server':
+        case 'google_sql_database_instance':
+          // Map database configurations
+          if (resource.config.engine_version) {
+            intent.postgres!.engineVersion = resource.config.engine_version;
+          }
+          if (resource.config.instance_class || resource.config.vm_size) {
+            const instanceType = resource.config.instance_class || resource.config.vm_size;
+            intent.postgres!.size = mapDbClassToWorkloadSize(instanceType, provider);
+          }
+          if (resource.config.allocated_storage) {
+            intent.postgres!.storageGb = resource.config.allocated_storage;
+          }
+          break;
+          
+        case 'aws_instance':
+        case 'azurerm_linux_virtual_machine':
+        case 'google_compute_instance':
+          // Map VM configurations for ADFS
+          if (resource.config.instance_type || resource.config.vm_size) {
+            const instanceType = resource.config.instance_type || resource.config.vm_size;
+            intent.adfs!.size = mapInstanceTypeToWorkloadSize(instanceType, provider);
+          }
+          break;
+          
+        case 'aws_vpc':
+        case 'azurerm_virtual_network':
+        case 'google_compute_network':
+          // Extract network CIDR if available
+          if (resource.config.cidr_block) {
+            intent.networkCidr = resource.config.cidr_block;
+          }
+          break;
+      }
+    }
     
     return intent;
   }
