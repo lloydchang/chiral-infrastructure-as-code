@@ -17,6 +17,7 @@ describe('Security Compliance Tests', () => {
         encryptionInTransit: true,
         auditLogging: true,
         privacyByDesign: true,
+        purposeLimitation: true,
         dataMinimization: true,
         consentManagement: true,
         dataSubjectRights: true,
