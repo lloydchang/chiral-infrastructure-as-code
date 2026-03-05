@@ -171,7 +171,7 @@ describe('DoD Compliance Tests', () => {
       testConfig.region = {
         aws: 'us-east-1', // Commercial region - should fail
         azure: 'USGov Arizona',
-        gcp: 'us-gov-west1'
+        gcp: 'us-central1' // Commercial region - should fail
       };
       
       const result = checkCompliance(testConfig, 'dod-il5' as ComplianceFramework);
