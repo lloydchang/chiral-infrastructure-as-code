@@ -215,8 +215,10 @@ export function checkCompliance(
   // SOC 1 compliance checks (Financial Controls)
   if (framework === 'soc1') {
     // SOC 1 focuses on controls relevant to financial reporting
-    // Check for access controls, change management, and operational controls
-
+    // Type 1: Report on controls at a point in time
+    // Type 2: Report on controls over a period of time (typically 6-12 months)
+    
+    // Common SOC 1 requirements
     if (!config.compliance?.auditLogging) {
       violations.push('SOC 1: Comprehensive audit logging required for financial controls');
       recommendations.push('Enable detailed audit logging for access and changes to financial systems');
@@ -241,12 +243,48 @@ export function checkCompliance(
       violations.push('SOC 1: Default network CIDR may not meet financial controls requirements');
       recommendations.push('Use organization-specific network ranges with proper segmentation for financial systems');
     }
+    
+    // Type 2 specific requirements (operational effectiveness over time)
+    if (auditType === 'type2') {
+      // Type 2 requires evidence of operating effectiveness over time
+      if (!config.compliance?.securityControls?.backupAndRecovery) {
+        violations.push('SOC 1 Type 2: Backup and recovery testing required for operational effectiveness');
+        recommendations.push('Implement regular backup and recovery testing with documented results');
+      }
+      
+      if (!config.compliance?.securityControls?.incidentResponse) {
+        violations.push('SOC 1 Type 2: Incident response procedures with testing required');
+        recommendations.push('Implement and regularly test incident response procedures');
+      }
+      
+      if (!config.compliance?.securityControls?.vulnerabilityManagement) {
+        violations.push('SOC 1 Type 2: Vulnerability management program required');
+        recommendations.push('Implement ongoing vulnerability scanning and remediation program');
+      }
+      
+      if (!config.compliance?.retentionPolicy?.auditLogRetentionDays || config.compliance.retentionPolicy.auditLogRetentionDays < 365) {
+        violations.push('SOC 1 Type 2: Audit logs must be retained for at least 1 year');
+        recommendations.push('Configure audit log retention for minimum 365 days');
+      }
+    }
+    
+    // Type 1 specific requirements (design effectiveness)
+    if (auditType === 'type1') {
+      // Type 1 focuses on control design at a point in time
+      if (!config.compliance?.securityControls?.complianceMonitoring) {
+        violations.push('SOC 1 Type 1: Compliance monitoring controls must be designed');
+        recommendations.push('Design and implement compliance monitoring controls');
+      }
+    }
   }
 
   // SOC 2 compliance checks (Trust Services Criteria)
   if (framework === 'soc2') {
     // SOC 2 covers: Security, Availability, Processing Integrity, Confidentiality, Privacy
+    // Type 1: Report on controls at a point in time
+    // Type 2: Report on controls over a period of time (typically 6-12 months)
 
+    // Common SOC 2 requirements
     // Security: Protect against unauthorized access
     if (!config.compliance?.auditLogging) {
       violations.push('SOC 2 Security: Comprehensive audit logging required');
@@ -281,13 +319,64 @@ export function checkCompliance(
       violations.push('SOC 2 Privacy: Region specification required for data privacy compliance');
       recommendations.push('Specify regions for all cloud providers to ensure data residency for privacy');
     }
+    
+    // Type 2 specific requirements (operational effectiveness over time)
+    if (auditType === 'type2') {
+      // Type 2 requires evidence of operating effectiveness over time
+      if (!config.compliance?.encryptionInTransit) {
+        violations.push('SOC 2 Type 2: Encryption in transit required for ongoing security');
+        recommendations.push('Enable encryption in transit for all communications');
+      }
+      
+      if (!config.compliance?.securityControls?.malwareProtection) {
+        violations.push('SOC 2 Type 2: Malware protection required for ongoing security');
+        recommendations.push('Implement continuous malware protection and monitoring');
+      }
+      
+      if (!config.compliance?.securityControls?.backupAndRecovery) {
+        violations.push('SOC 2 Type 2: Backup recovery testing required for availability');
+        recommendations.push('Implement and test backup recovery procedures regularly');
+      }
+      
+      if (!config.compliance?.securityControls?.incidentResponse) {
+        violations.push('SOC 2 Type 2: Incident response testing required');
+        recommendations.push('Conduct regular incident response drills and testing');
+      }
+      
+      if (!config.compliance?.retentionPolicy?.auditLogRetentionDays || config.compliance.retentionPolicy.auditLogRetentionDays < 365) {
+        violations.push('SOC 2 Type 2: Audit logs must be retained for at least 1 year');
+        recommendations.push('Configure audit log retention for minimum 365 days');
+      }
+      
+      if (!config.compliance?.securityControls?.securityMonitoring) {
+        violations.push('SOC 2 Type 2: Continuous security monitoring required');
+        recommendations.push('Implement 24/7 security monitoring and alerting');
+      }
+    }
+    
+    // Type 1 specific requirements (design effectiveness)
+    if (auditType === 'type1') {
+      // Type 1 focuses on control design at a point in time
+      if (!config.compliance?.securityControls?.networkSegmentation) {
+        violations.push('SOC 2 Type 1: Network segmentation controls must be designed');
+        recommendations.push('Design network segmentation for security zones');
+      }
+      
+      if (!config.compliance?.securityControls?.mfaRequired) {
+        violations.push('SOC 2 Type 1: Multi-factor authentication must be configured');
+        recommendations.push('Configure MFA for all administrative access');
+      }
+    }
   }
 
   // SOC 3 compliance checks (General Use SOC 2)
   if (framework === 'soc3') {
     // SOC 3 is a simplified version of SOC 2 for general use, focusing on trust services criteria
-    // Similar to SOC 2 but less detailed
+    // Similar to SOC 2 but less detailed and for general distribution
+    // Type 1: Report on controls at a point in time
+    // Type 2: Report on controls over a period of time (typically 6-12 months)
 
+    // Common SOC 3 requirements (simplified from SOC 2)
     if (!config.compliance?.encryptionAtRest) {
       violations.push('SOC 3: Encryption at rest required');
       recommendations.push('Enable encryption at rest for data protection');
@@ -301,6 +390,34 @@ export function checkCompliance(
     if (!config.region) {
       violations.push('SOC 3: Region specification required for compliance');
       recommendations.push('Specify regions for all cloud providers');
+    }
+    
+    // Type 2 specific requirements (operational effectiveness over time)
+    if (auditType === 'type2') {
+      // Type 2 requires evidence of operating effectiveness over time (simplified)
+      if (!config.compliance?.auditLogging) {
+        violations.push('SOC 3 Type 2: Basic audit logging required for ongoing monitoring');
+        recommendations.push('Enable audit logging for security and compliance monitoring');
+      }
+      
+      if (!config.compliance?.securityControls?.backupAndRecovery) {
+        violations.push('SOC 3 Type 2: Basic backup procedures required');
+        recommendations.push('Implement regular backup procedures');
+      }
+      
+      if (!config.compliance?.retentionPolicy?.auditLogRetentionDays || config.compliance.retentionPolicy.auditLogRetentionDays < 180) {
+        violations.push('SOC 3 Type 2: Audit logs must be retained for at least 6 months');
+        recommendations.push('Configure audit log retention for minimum 180 days');
+      }
+    }
+    
+    // Type 1 specific requirements (design effectiveness)
+    if (auditType === 'type1') {
+      // Type 1 focuses on control design at a point in time (simplified)
+      if (!config.compliance?.securityControls?.mfaRequired) {
+        violations.push('SOC 3 Type 1: Basic authentication controls required');
+        recommendations.push('Configure strong authentication controls');
+      }
     }
   }
 
@@ -670,8 +787,146 @@ export function checkCompliance(
     }
   }
 
+  // NIST 800-53 compliance checks
+  if (framework.startsWith('nist-')) {
+    const level = framework.split('-')[1]; // 'low', 'moderate', 'high'
 
+    // Common checks for all NIST levels (based on SP 800-53 controls)
+    if (!config.compliance?.encryptionAtRest) {
+      violations.push(`NIST ${level.toUpperCase()}: SC-28 - Encryption at rest required`);
+      recommendations.push('Enable encryption at rest for all data stores (SC-28)');
+    }
 
+    if (!config.compliance?.auditLogging) {
+      violations.push(`NIST ${level.toUpperCase()}: AU-2 - Comprehensive audit logging required`);
+      recommendations.push('Enable detailed audit logging for security monitoring (AU-2)');
+    }
+
+    if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 2) {
+      violations.push(`NIST ${level.toUpperCase()}: SC-5 - Production environments must have high availability`);
+      recommendations.push('Deploy at least 2 nodes for fault tolerance (SC-5)');
+    }
+
+    // Level-specific checks
+    if (level === 'low') {
+      // NIST Low Impact: Basic controls
+      if (!config.compliance?.securityControls?.mfaRequired) {
+        violations.push('NIST LOW: IA-2 - Multi-factor authentication required');
+        recommendations.push('Configure MFA for administrative access (IA-2)');
+      }
+
+      if (!config.compliance?.encryptionInTransit) {
+        violations.push('NIST LOW: SC-8 - Encryption in transit required');
+        recommendations.push('Enable encryption in transit for all communications (SC-8)');
+      }
+
+      if (!config.region) {
+        violations.push('NIST LOW: AC-4 - Region specification required for access control');
+        recommendations.push('Specify regions for all cloud providers (AC-4)');
+      }
+    }
+
+    if (level === 'moderate') {
+      // NIST Moderate Impact: Additional controls beyond Low
+      if (!config.compliance?.securityControls?.mfaRequired) {
+        violations.push('NIST MODERATE: IA-2 - Multi-factor authentication required');
+        recommendations.push('Configure MFA for all access (IA-2)');
+      }
+
+      if (!config.compliance?.encryptionInTransit) {
+        violations.push('NIST MODERATE: SC-8 - Encryption in transit required');
+        recommendations.push('Enable encryption in transit for all communications (SC-8)');
+      }
+
+      if (!config.compliance?.securityControls?.networkSegmentation) {
+        violations.push('NIST MODERATE: AC-4 - Network segmentation required');
+        recommendations.push('Implement network segmentation for security zones (AC-4)');
+      }
+
+      if (!config.compliance?.securityControls?.vulnerabilityManagement) {
+        violations.push('NIST MODERATE: SI-2 - Vulnerability management required');
+        recommendations.push('Implement vulnerability scanning and remediation (SI-2)');
+      }
+
+      if (!config.compliance?.securityControls?.incidentResponse) {
+        violations.push('NIST MODERATE: IR-4 - Incident response procedures required');
+        recommendations.push('Implement incident response procedures (IR-4)');
+      }
+
+      if (!config.compliance?.retentionPolicy?.auditLogRetentionDays || config.compliance.retentionPolicy.auditLogRetentionDays < 365) {
+        violations.push('NIST MODERATE: AU-11 - Audit logs must be retained for at least 1 year');
+        recommendations.push('Configure audit log retention for minimum 365 days (AU-11)');
+      }
+
+      if (config.postgres && config.postgres.storageGb < 50 && config.environment === 'prod') {
+        violations.push('NIST MODERATE: SC-32 - Production databases must have adequate storage');
+        recommendations.push('Increase database storage to ensure processing integrity (SC-32)');
+      }
+    }
+
+    if (level === 'high') {
+      // NIST High Impact: All controls, most stringent requirements
+      if (!config.compliance?.securityControls?.mfaRequired) {
+        violations.push('NIST HIGH: IA-2 - Multi-factor authentication required');
+        recommendations.push('Configure MFA for all access with enhanced controls (IA-2)');
+      }
+
+      if (!config.compliance?.encryptionInTransit) {
+        violations.push('NIST HIGH: SC-8 - Encryption in transit required');
+        recommendations.push('Enable encryption in transit with FIPS-validated algorithms (SC-8)');
+      }
+
+      if (!config.compliance?.securityControls?.networkSegmentation) {
+        violations.push('NIST HIGH: AC-4 - Advanced network segmentation required');
+        recommendations.push('Implement advanced network segmentation and isolation (AC-4)');
+      }
+
+      if (!config.compliance?.securityControls?.vulnerabilityManagement) {
+        violations.push('NIST HIGH: SI-2 - Continuous vulnerability management required');
+        recommendations.push('Implement continuous vulnerability scanning and remediation (SI-2)');
+      }
+
+      if (!config.compliance?.securityControls?.incidentResponse) {
+        violations.push('NIST HIGH: IR-4 - Comprehensive incident response required');
+        recommendations.push('Implement comprehensive incident response with testing (IR-4)');
+      }
+
+      if (!config.compliance?.securityControls?.privilegedAccessManagement) {
+        violations.push('NIST HIGH: AC-6 - Privileged access management required');
+        recommendations.push('Implement privileged access management (PAM) (AC-6)');
+      }
+
+      if (!config.compliance?.securityControls?.malwareProtection) {
+        violations.push('NIST HIGH: SI-3 - Advanced malware protection required');
+        recommendations.push('Implement advanced malware protection and monitoring (SI-3)');
+      }
+
+      if (!config.compliance?.securityControls?.securityMonitoring) {
+        violations.push('NIST HIGH: SI-4 - Continuous security monitoring required');
+        recommendations.push('Implement 24/7 security monitoring and alerting (SI-4)');
+      }
+
+      if (!config.compliance?.retentionPolicy?.auditLogRetentionDays || config.compliance.retentionPolicy.auditLogRetentionDays < 730) {
+        violations.push('NIST HIGH: AU-11 - Audit logs must be retained for at least 2 years');
+        recommendations.push('Configure audit log retention for minimum 730 days (AU-11)');
+      }
+
+      if (config.postgres && config.postgres.storageGb < 100 && config.environment === 'prod') {
+        violations.push('NIST HIGH: SC-32 - Production databases must have enhanced storage capacity');
+        recommendations.push('Increase database storage to meet high impact requirements (SC-32)');
+      }
+
+      if (config.k8s && config.k8s.maxNodes > 20) {
+        violations.push('NIST HIGH: SC-5 - Large node counts require additional security controls');
+        recommendations.push('Implement additional security monitoring for large clusters (SC-5)');
+      }
+
+      if (!config.region) {
+        violations.push('NIST HIGH: AC-4 - Explicit region specification required for high impact systems');
+        recommendations.push('Specify regions for all cloud providers to ensure data sovereignty (AC-4)');
+      }
+    }
+  }
 
   return {
     framework,
