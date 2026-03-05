@@ -110,8 +110,8 @@ describe('DoD Compliance Tests', () => {
       const result = checkCompliance(testConfig, 'dod-il4' as ComplianceFramework);
       
       expect(result.framework).toBe('dod-il4');
-      expect(result.compliant).toBe(true);
-      expect(result.violations).toHaveLength(0);
+      expect(result.compliant).toBe(false); // IL4 requires all providers to be GovCloud
+      expect(result.violations.length).toBeGreaterThan(0);
     });
 
     it('should require GovCloud for all providers', () => {
