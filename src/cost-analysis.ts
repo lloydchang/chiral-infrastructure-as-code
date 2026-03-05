@@ -390,8 +390,8 @@ resource "google_compute_instance" "adfs" {
     return {
       compute: { kubernetes: config.k8s.maxNodes * 145, vm: 95, total: 0 },
       storage: { database: config.postgres.storageGb * 0.23 + 55, vmDisk: 18, total: 0 },
-      network: { dataTransfer: 25, loadBalancer: 25, total: 0 },
-      other: { management: 35, monitoring: 18, total: 0 }
+      network: { dataTransfer: 0, loadBalancer: 0, total: 0 },
+      other: { management: 0, monitoring: 0, total: 0 }
     };
   }
 }

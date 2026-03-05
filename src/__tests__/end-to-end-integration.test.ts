@@ -214,10 +214,6 @@ resource aks 'Microsoft.ContainerService/managedClusters@2023-05-01' = {
           size: 'large',
           storageGb: 2000,
         },
-        adfs: {
-          size: 'large',
-          windowsVersion: '2022',
-        },
         compliance: {
           encryptionAtRest: true,
           auditLogging: true,
@@ -232,8 +228,7 @@ resource aks 'Microsoft.ContainerService/managedClusters@2023-05-01' = {
           },
           retentionPolicy: {
             auditLogRetentionDays: 730,
-            dataRetentionDays: 2555,
-            backupRetentionDays: 2555,
+            defaultRetentionDays: 2555,
             piiRetentionDays: 2555,
           },
         },
