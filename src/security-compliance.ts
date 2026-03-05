@@ -293,10 +293,10 @@ export class SecurityComplianceEngine {
 
     if (!config.compliance?.securityControls?.malwareProtection) {
       violations.push({
-        id: 'ISO27001-A.12.2.1',
+        id: 'ISO27001-A.12.2.2',
         severity: 'high',
         category: 'technical',
-        control: 'A.12.2.1',
+        control: 'A.12.2.2',
         title: 'Malware protection missing',
         description: 'Malware protection controls are not implemented',
         impact: 'Systems could be compromised by malware',
@@ -347,6 +347,20 @@ export class SecurityComplianceEngine {
         impact: 'Increased risk of unauthorized access to production systems',
         affectedResources: ['authentication', 'access-control'],
         remediation: 'Enable multi-factor authentication for all production administrative access'
+      });
+    }
+
+    if (!config.compliance?.securityControls?.privilegedAccessManagement) {
+      violations.push({
+        id: 'ISO27001-A.9.2.2',
+        severity: 'high',
+        category: 'policy',
+        control: 'A.9.2.2',
+        title: 'Privileged access management missing',
+        description: 'Privileged access management controls are not implemented',
+        impact: 'Unauthorized privileged access could compromise system security',
+        affectedResources: ['access-control', 'personnel'],
+        remediation: 'Implement privileged access management controls'
       });
     }
 

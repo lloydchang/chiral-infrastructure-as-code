@@ -209,7 +209,7 @@ describe('Security Penetration Tests', () => {
       const results = await complianceEngine.assessCompliance(insecureConfig, ['iso27001']);
       const iso27001Result = results.find(r => r.framework === 'iso27001');
       
-      expect(iso27001Result!.violations.filter(v => v.control.includes('A.12.2.1'))).toHaveLength(1);
+      expect(iso27001Result!.violations.filter(v => v.control.includes('A.12.2.2'))).toHaveLength(1);
     });
   });
 
