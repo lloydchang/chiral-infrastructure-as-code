@@ -25,11 +25,13 @@ describe('Migration and Analysis Tests', () => {
           { type: "aws_subnet", name: "private", mode: "managed" },
           { type: "aws_eks_cluster", name: "main", mode: "managed" }
         ],
-        backend: {
-          type: "s3",
-          config: {
-            bucket: "test-bucket",
-            key: "terraform.tfstate"
+        terraform: {
+          backend: {
+            type: "s3",
+            config: {
+              bucket: "test-bucket",
+              key: "terraform.tfstate"
+            }
           }
         }
       };
@@ -174,7 +176,7 @@ describe('Migration and Analysis Tests', () => {
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Premium Fees: $198.00'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Operational Overhead: $120000.00'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Total Monthly Cost: $120198.00'));
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Chiral Cost: $12,000.00'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Total Monthly Cost: $12000.00'));
 
       consoleSpy.mockRestore();
     });

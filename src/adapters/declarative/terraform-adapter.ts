@@ -159,10 +159,10 @@ export class TerraformImportAdapter {
           this.mapAwsResource(resource, intent, provider);
           break;
         case 'azure':
-          this.mapAzureResource(resource, intent);
+          this.mapAzureResource(resource, intent, provider);
           break;
         case 'gcp':
-          this.mapGcpResource(resource, intent);
+          this.mapGcpResource(resource, intent, provider);
           break;
       }
     }
@@ -220,7 +220,7 @@ export class TerraformImportAdapter {
     }
   }
 
-  private static mapAzureResource(resource: ParsedTerraformResource, intent: Partial<ChiralSystem>): void {
+  private static mapAzureResource(resource: ParsedTerraformResource, intent: Partial<ChiralSystem>, provider: 'aws' | 'azure' | 'gcp'): void {
     switch (resource.resourceType) {
       case 'azurerm_kubernetes_cluster':
         if (resource.config.kubernetes_version) {
@@ -265,7 +265,7 @@ export class TerraformImportAdapter {
     }
   }
 
-  private static mapGcpResource(resource: ParsedTerraformResource, intent: Partial<ChiralSystem>): void {
+  private static mapGcpResource(resource: ParsedTerraformResource, intent: Partial<ChiralSystem>, provider: 'aws' | 'azure' | 'gcp'): void {
     switch (resource.resourceType) {
       case 'google_container_cluster':
         if (resource.config.min_master_version) {
@@ -276,7 +276,7 @@ export class TerraformImportAdapter {
           intent.k8s!.maxNodes = resource.config.initial_node_count;
         }
         if (resource.config.node_config?.machine_type) {
-          intent.k8s!.size = mapInstanceTypeToWorkloadSize(resource.config.node_config.machine_type, 'gcp');
+          intent.k8s!.size = mapInstanceTypeToWorkloadSize(resource.config.node_config.machine_type, provider);
         }
         break;
         
@@ -288,7 +288,7 @@ export class TerraformImportAdapter {
           }
         }
         if (resource.config.tier) {
-          intent.postgres!.size = mapDbClassToWorkloadSize(resource.config.tier, 'gcp');
+          intent.postgres!.size = mapDbClassToWorkloadSize(resource.config.tier, provider);
         }
         if (resource.config.disk_size) {
           intent.postgres!.storageGb = resource.config.disk_size;
@@ -297,7 +297,7 @@ export class TerraformImportAdapter {
         
       case 'google_compute_instance':
         if (resource.config.machine_type) {
-          intent.adfs!.size = mapInstanceTypeToWorkloadSize(resource.config.machine_type, 'gcp');
+          intent.adfs!.size = mapInstanceTypeToWorkloadSize(resource.config.machine_type, provider);
         }
         break;
         
