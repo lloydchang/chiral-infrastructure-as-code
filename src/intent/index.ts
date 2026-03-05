@@ -119,6 +119,7 @@ export interface ChiralSystem {
       dataSubjectRequests?: boolean; // Handle data subject requests
       privacyTraining?: boolean; // Provide privacy training
       privacyAudits?: boolean; // Conduct privacy audits
+      dataProtectionOfficer?: boolean; // Appoint data protection officer
     };
     cloudSpecificControls?: {
       sharedResponsibility?: boolean; // Define shared responsibilities

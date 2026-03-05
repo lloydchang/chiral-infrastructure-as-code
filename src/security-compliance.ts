@@ -719,7 +719,107 @@ export class SecurityComplianceEngine {
   }
 
   private async assessGDPR(config: ChiralSystem): Promise<SecurityViolation[]> {
-    return [];
+    const violations: SecurityViolation[] = [];
+
+    if (!config.compliance?.privacyByDesign) {
+      violations.push({
+        id: 'GDPR-1',
+        severity: 'critical',
+        category: 'privacy',
+        control: 'Privacy by Design and Default',
+        title: 'Privacy by design not implemented',
+        description: 'GDPR requires privacy by design and by default principles',
+        impact: 'Non-compliance with GDPR Article 25',
+        affectedResources: ['all'],
+        remediation: 'Implement privacy by design and by default principles'
+      });
+    }
+
+    if (!config.compliance?.dataMinimization) {
+      violations.push({
+        id: 'GDPR-2',
+        severity: 'high',
+        category: 'privacy',
+        control: 'Data Minimization',
+        title: 'Data minimization not implemented',
+        description: 'GDPR requires minimization of personal data processing',
+        impact: 'Non-compliance with GDPR Article 5(1)(c)',
+        affectedResources: ['database', 'storage'],
+        remediation: 'Implement data minimization principles'
+      });
+    }
+
+    if (!config.compliance?.consentManagement) {
+      violations.push({
+        id: 'GDPR-3',
+        severity: 'critical',
+        category: 'privacy',
+        control: 'Consent Management',
+        title: 'Consent management missing',
+        description: 'GDPR requires proper consent management for data processing',
+        impact: 'Non-compliance with GDPR Article 7',
+        affectedResources: ['all'],
+        remediation: 'Implement proper consent management procedures'
+      });
+    }
+
+    if (!config.compliance?.dataSubjectRights) {
+      violations.push({
+        id: 'GDPR-4',
+        severity: 'critical',
+        category: 'privacy',
+        control: 'Data Subject Rights',
+        title: 'Data subject rights not supported',
+        description: 'GDPR requires support for data subject rights (access, rectification, erasure, etc.)',
+        impact: 'Non-compliance with GDPR Articles 15-22',
+        affectedResources: ['all'],
+        remediation: 'Implement procedures to handle data subject rights'
+      });
+    }
+
+    if (!config.compliance?.breachNotification) {
+      violations.push({
+        id: 'GDPR-5',
+        severity: 'critical',
+        category: 'privacy',
+        control: 'Breach Notification',
+        title: 'Breach notification procedures missing',
+        description: 'GDPR requires notification of personal data breaches within 72 hours',
+        impact: 'Non-compliance with GDPR Article 33',
+        affectedResources: ['all'],
+        remediation: 'Implement breach notification procedures'
+      });
+    }
+
+    if (!config.compliance?.privacyImpactAssessment) {
+      violations.push({
+        id: 'GDPR-6',
+        severity: 'high',
+        category: 'privacy',
+        control: 'Privacy Impact Assessment',
+        title: 'Privacy impact assessments missing',
+        description: 'GDPR requires DPIAs for high-risk processing activities',
+        impact: 'Non-compliance with GDPR Article 35',
+        affectedResources: ['all'],
+        remediation: 'Conduct privacy impact assessments for high-risk processing'
+      });
+    }
+
+    if (!config.compliance?.privacyControls?.dataProtectionOfficer) {
+      violations.push({
+        id: 'GDPR-7',
+        severity: 'high',
+        category: 'privacy',
+        control: 'Data Protection Officer',
+        title: 'Data protection officer not appointed',
+        description: 'GDPR requires appointment of DPO for certain organizations',
+        impact: 'Non-compliance with GDPR Article 37',
+        affectedResources: ['personnel'],
+        remediation: 'Appoint a data protection officer'
+      });
+    }
+
+    return violations;
   }
 
   /**

@@ -15,7 +15,8 @@ describe('ISO 27001 Compliance', () => {
     compliance: {
       encryptionAtRest: true,
       auditLogging: true,
-      dataResidency: { aws: 'us-east-1' }
+      dataResidency: { aws: 'us-east-1' },
+      region: { aws: 'us-east-1' }
     }
   };
 
@@ -50,7 +51,9 @@ describe('ISO 27017 Compliance', () => {
     compliance: {
       sharedResponsibility: true,
       dataResidency: { aws: 'us-east-1' },
-      auditLogging: true
+      auditLogging: true,
+      cloudProviderAssessment: true,
+      serviceLevelAgreements: true
     }
   };
 
@@ -86,7 +89,21 @@ describe('ISO 27018 Compliance', () => {
       dataMinimization: true,
       consentManagement: true,
       breachNotification: true,
-      encryptionAtRest: true
+      encryptionAtRest: true,
+      privacyByDesign: true,
+      purposeLimitation: true,
+      dataSubjectRights: true,
+      privacyImpactAssessment: true,
+      privacyControls: {
+        dataClassification: true,
+        dataLossPrevention: true,
+        consentRecording: true,
+        dataSubjectRequests: true,
+        privacyAudits: true
+      },
+      retentionPolicy: {
+        piiRetentionDays: 365
+      }
     }
   };
 

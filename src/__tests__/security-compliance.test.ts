@@ -56,7 +56,8 @@ describe('Security Compliance Tests', () => {
           privacyNotices: true,
           dataSubjectRequests: true,
           privacyTraining: true,
-          privacyAudits: true
+          privacyAudits: true,
+          dataProtectionOfficer: true
         },
         retentionPolicy: {
           defaultRetentionDays: 2555,

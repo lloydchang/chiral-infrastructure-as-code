@@ -426,12 +426,12 @@ export function checkCompliance(
   // ISO 27001 compliance checks
   if (framework === 'iso27001') {
     // Only check for explicitly disabled critical controls
-    if (config.compliance?.encryptionAtRest === false) {
+    if (!config.compliance?.encryptionAtRest) {
       violations.push('ISO 27001: A.10.1.1 - Encryption at rest required for data protection');
       recommendations.push('Enable encryption at rest for all data stores (ISO 27001 A.10.1.1)');
     }
 
-    if (config.compliance?.auditLogging === false) {
+    if (!config.compliance?.auditLogging) {
       violations.push('ISO 27001: A.12.4.1 - Event logging required for security monitoring');
       recommendations.push('Enable comprehensive audit logging (ISO 27001 A.12.4.1)');
     }
@@ -500,62 +500,62 @@ export function checkCompliance(
   // ISO 27018 privacy in cloud compliance checks
   if (framework === 'iso27018') {
     // Privacy-specific controls - only check explicitly disabled
-    if (config.compliance?.privacyByDesign === false) {
+    if (!config.compliance?.privacyByDesign) {
       violations.push('ISO 27018: Privacy by design principles required');
       recommendations.push('Implement privacy by design in all systems and processes');
     }
 
-    if (config.compliance?.dataMinimization === false) {
+    if (!config.compliance?.dataMinimization) {
       violations.push('ISO 27018: Data minimization principles required');
       recommendations.push('Implement data minimization practices');
     }
 
-    if (config.compliance?.purposeLimitation === false) {
+    if (!config.compliance?.purposeLimitation) {
       violations.push('ISO 27018: Purpose limitation required');
       recommendations.push('Implement purpose limitation controls');
     }
 
-    if (config.compliance?.consentManagement === false) {
+    if (!config.compliance?.consentManagement) {
       violations.push('ISO 27018: Consent management required');
       recommendations.push('Implement user consent management procedures');
     }
 
-    if (config.compliance?.dataSubjectRights === false) {
+    if (!config.compliance?.dataSubjectRights) {
       violations.push('ISO 27018: Data subject rights support required');
       recommendations.push('Implement procedures to handle data subject rights');
     }
 
-    if (config.compliance?.breachNotification === false) {
+    if (!config.compliance?.breachNotification) {
       violations.push('ISO 27018: Breach notification procedures required');
       recommendations.push('Implement data breach notification procedures');
     }
 
-    if (config.compliance?.privacyImpactAssessment === false) {
+    if (!config.compliance?.privacyImpactAssessment) {
       violations.push('ISO 27018: Privacy impact assessments required');
       recommendations.push('Conduct privacy impact assessments for all systems');
     }
 
-    if (config.compliance?.privacyControls?.dataClassification === false) {
+    if (!config.compliance?.privacyControls?.dataClassification) {
       violations.push('ISO 27018: Data classification required');
       recommendations.push('Implement data classification for personal data');
     }
 
-    if (config.compliance?.privacyControls?.dataLossPrevention === false) {
+    if (!config.compliance?.privacyControls?.dataLossPrevention) {
       violations.push('ISO 27018: Data loss prevention required');
       recommendations.push('Implement data loss prevention controls');
     }
 
-    if (config.compliance?.privacyControls?.consentRecording === false) {
+    if (!config.compliance?.privacyControls?.consentRecording) {
       violations.push('ISO 27018: Consent recording required');
       recommendations.push('Implement consent recording and tracking');
     }
 
-    if (config.compliance?.privacyControls?.dataSubjectRequests === false) {
+    if (!config.compliance?.privacyControls?.dataSubjectRequests) {
       violations.push('ISO 27018: Data subject request handling required');
       recommendations.push('Implement procedures to handle data subject requests');
     }
 
-    if (config.compliance?.privacyControls?.privacyAudits === false) {
+    if (!config.compliance?.privacyControls?.privacyAudits) {
       violations.push('ISO 27018: Privacy audits required');
       recommendations.push('Conduct regular privacy audits');
     }
