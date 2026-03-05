@@ -3,7 +3,6 @@
 // Enhanced validation and drift detection capabilities for Chiral
 
 import { ChiralSystem, ComplianceFramework } from './intent';
-import { validateISO27001Compliance, validateISO27017Compliance, validateISO27018Compliance, validateNISTLowCompliance, validateNISTModerateCompliance, validateNISTHighCompliance } from './compliance';
 import * as fs from 'fs';
 import * as path from 'path';
 import { CostAnalyzer, AzureCostAnalyzer, CostOptimizer, CostAnalysisOptions } from './cost-analysis';
@@ -803,6 +802,18 @@ export function checkCompliance(
       const nistResult = validateNISTHighCompliance(config);
       violations.push(...nistResult.errors);
       recommendations.push(...nistResult.recommendations);
+    if (level === 'moderate' || level === 'high') {
+      if (!config.compliance?.securityControls?.mfaRequired) {
+        violations.push(`NIST ${level.toUpperCase()}: Multi-factor authentication required`);
+        recommendations.push('Implement MFA for all administrative access');
+      }
+    }
+
+    if (level === 'high') {
+      if (!config.compliance?.securityControls?.privilegedAccessManagement) {
+        violations.push(`NIST HIGH: Privileged access management required`);
+        recommendations.push('Implement PAM for privileged account management');
+      }
     }
   }
 
