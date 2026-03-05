@@ -21,14 +21,17 @@ export const HardwareMap = {
   aws: {
     db: {
       small: 'db.t3.small',
+      medium: 'db.t3.medium',
       large: 'db.m5.large'
     },
     vm: {
       small: 't3.small',
+      medium: 't3.medium',
       large: 'm5.xlarge'
     },
     k8s: {
       small: 't3.small',
+      medium: 't3.medium',
       large: 'm5.large'
     }
   } as CloudSkuMap,
@@ -36,14 +39,17 @@ export const HardwareMap = {
   azure: {
     db: {
       small: 'Standard_B1s',
+      medium: 'Standard_B2s',
       large: 'Standard_D4s_v3'
     },
     vm: {
       small: 'Standard_B1s',
+      medium: 'Standard_D2s_v3',
       large: 'Standard_D4s_v3'
     },
     k8s: {
       small: 'Standard_B2s',
+      medium: 'Standard_D2s_v3',
       large: 'Standard_D4s_v3'
     }
   } as CloudSkuMap,
@@ -51,14 +57,17 @@ export const HardwareMap = {
   gcp: {
     db: {
       small: 'db-f1-micro',
+      medium: 'db-g1-small',
       large: 'db-custom-2-4096'
     },
     vm: {
       small: 'e2-micro',
+      medium: 'e2-medium',
       large: 'n1-standard-2'
     },
     k8s: {
       small: 'e2-small',
+      medium: 'e2-medium',
       large: 'n1-standard-2'
     }
   } as CloudSkuMap

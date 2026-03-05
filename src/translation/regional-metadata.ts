@@ -66,11 +66,11 @@ export const RegionalMetadata: Record<string, RegionMetadata> = {
         activeDirectory: true,
       },
       instanceTypes: {
-        small: ['t3.medium', 't3.small'],
+        small: ['t3.small'],
         large: ['m5.large', 'm5.xlarge'],
       },
       databaseClasses: {
-        small: ['db.t3.medium'],
+        small: ['db.t3.small'],
         large: ['db.m5.large'],
       },
       pricingTier: 'standard',
@@ -91,11 +91,11 @@ export const RegionalMetadata: Record<string, RegionMetadata> = {
         activeDirectory: true,
       },
       instanceTypes: {
-        small: ['t3.medium'],
+        small: ['t3.small'],
         large: ['m5.large'],
       },
       databaseClasses: {
-        small: ['db.t3.medium'],
+        small: ['db.t3.small'],
         large: ['db.m5.large'],
       },
       pricingTier: 'premium',
@@ -120,11 +120,11 @@ export const RegionalMetadata: Record<string, RegionMetadata> = {
         activeDirectory: true,
       },
       instanceTypes: {
-        small: ['Standard_D2s_v3'],
+        small: ['Standard_B2s'],
         large: ['Standard_D4s_v3'],
       },
       databaseClasses: {
-        small: ['Standard_B2s'],
+        small: ['Standard_B1s'],
         large: ['Standard_D4s_v3'],
       },
       pricingTier: 'standard',
@@ -145,11 +145,11 @@ export const RegionalMetadata: Record<string, RegionMetadata> = {
         activeDirectory: true,
       },
       instanceTypes: {
-        small: ['Standard_D2s_v3'],
+        small: ['Standard_B2s'],
         large: ['Standard_D4s_v3'],
       },
       databaseClasses: {
-        small: ['Standard_B2s'],
+        small: ['Standard_B1s'],
         large: ['Standard_D4s_v3'],
       },
       pricingTier: 'premium',
@@ -174,7 +174,7 @@ export const RegionalMetadata: Record<string, RegionMetadata> = {
         activeDirectory: false, // GCP doesn't have native AD
       },
       instanceTypes: {
-        small: ['e2-medium'],
+        small: ['e2-small'],
         large: ['n1-standard-2'],
       },
       databaseClasses: {

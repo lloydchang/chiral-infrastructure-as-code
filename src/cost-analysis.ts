@@ -422,19 +422,17 @@ resource "google_compute_instance" "adfs" {
   private static getAWSInstanceType(size: string): string {
     const sizeMap: { [key: string]: string } = {
       'small': 't3.small',
-      'medium': 't3.large',
-      'large': 'm5.xlarge'
+      'large': 't3.xlarge'
     };
-    return sizeMap[size] || 't3.large';
+    return sizeMap[size] || 't3.small';
   }
 
   private static getRDSInstanceClass(size: string): string {
     const sizeMap: { [key: string]: string } = {
       'small': 'db.t3.small',
-      'medium': 'db.t3.medium',
       'large': 'db.m5.large'
     };
-    return sizeMap[size] || 'db.t3.large';
+    return sizeMap[size] || 'db.t3.small';
   }
 
   private static getWindowsAMI(version: string): string {
@@ -448,16 +446,14 @@ resource "google_compute_instance" "adfs" {
   private static getGCPMachineType(size: string): string {
     const sizeMap: { [key: string]: string } = {
       'small': 'e2-micro',
-      'medium': 'e2-medium',
       'large': 'n1-standard-2'
     };
-    return sizeMap[size] || 'e2-standard-2';
+    return sizeMap[size] || 'e2-micro';
   }
 
   private static getCloudSQLTier(size: string): string {
     const sizeMap: { [key: string]: string } = {
       'small': 'db-f1-micro',
-      'medium': 'db-g1-small',
       'large': 'db-n1-standard-2'
     };
     return sizeMap[size] || 'db-n1-standard-2';
@@ -787,19 +783,17 @@ resource "aws_instance" "adfs" {
   private static getAWSInstanceType(size: string): string {
     const sizeMap: { [key: string]: string } = {
       'small': 't3.small',
-      'medium': 't3.large',
       'large': 'm5.xlarge'
     };
-    return sizeMap[size] || 't3.large';
+    return sizeMap[size] || 't3.small';
   }
 
   private static getAWSDBInstanceClass(size: string): string {
     const sizeMap: { [key: string]: string } = {
       'small': 'db.t3.small',
-      'medium': 'db.t3.medium',
       'large': 'db.m5.large'
     };
-    return sizeMap[size] || 'db.t3.large';
+    return sizeMap[size] || 'db.t3.small';
   }
 
   static async analyzeAWSCosts(accountId: string, options: CostAnalysisOptions = {}): Promise<CostEstimate> {
@@ -1252,17 +1246,15 @@ resource "google_compute_instance" "adfs" {
 
   private static getGCPMachineType(size: string): string {
     const sizeMap: { [key: string]: string } = {
-      'small': 'e2-medium',
-      'medium': 'n1-standard-2',
+      'small': 'e2-micro',
       'large': 'n1-standard-4'
     };
-    return sizeMap[size] || 'n1-standard-2';
+    return sizeMap[size] || 'e2-micro';
   }
 
   private static getGCPDatabaseTier(size: string): string {
     const sizeMap: { [key: string]: string } = {
       'small': 'db-n1-standard-1',
-      'medium': 'db-n1-standard-2',
       'large': 'db-n1-standard-4'
     };
     return sizeMap[size] || 'db-n1-standard-2';
@@ -1726,11 +1718,11 @@ export class AzureCostAnalyzer {
 
   private static getVMSku(config: ChiralSystem): string {
     const sizeMap: { [key: string]: string } = {
-      'small': 'Standard_D2s_v3',
+      'small': 'Standard_B1s',
       'medium': 'Standard_D4s_v3',
       'large': 'Standard_D8s_v3'
     };
-    return sizeMap[config.adfs.size] || 'Standard_D4s_v3';
+    return sizeMap[config.adfs.size] || 'Standard_B1s';
   }
 
   private static getDbSku(config: ChiralSystem): string {

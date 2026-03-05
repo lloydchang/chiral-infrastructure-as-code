@@ -6,39 +6,43 @@ import { WorkloadSize, EnvironmentTier, ChiralSystem } from '../intent';
 
 // AWS mappings
 const awsInstanceTypeToSize: { [key: string]: WorkloadSize } = {
-  't3.medium': 'small',
+  't3.small': 'small',
+  't3.medium': 'small', // Legacy mapping - was incorrectly labeled as medium
   't3.large': 'large',
   'm5.large': 'large',
-  't3.small': 'small',
   'm5.xlarge': 'large',
 };
 
 const awsDbClassToSize: { [key: string]: WorkloadSize } = {
-  'db.t3.medium': 'small',
-  'db.m5.large': 'large',
   'db.t3.small': 'small',
+  'db.t3.medium': 'small', // Legacy mapping - was incorrectly labeled as medium
+  'db.m5.large': 'large',
   'db.m5.xlarge': 'large',
 };
 
 // Azure mappings
 const azureVmSizeToSize: { [key: string]: WorkloadSize } = {
+  'Standard_B1s': 'small',
   'Standard_B2s': 'small',
+  'Standard_D2s_v3': 'small', // Legacy mapping - was incorrectly labeled as small
   'Standard_D4s_v3': 'large',
-  'Standard_D2s_v3': 'small',
 };
 
 const azureDbSkuToSize: { [key: string]: WorkloadSize } = {
+  'Standard_B1s': 'small',
   'Standard_B2s': 'small',
+  'Standard_D2s_v3': 'small', // Legacy mapping - was incorrectly labeled as small
   'Standard_D4s_v3': 'large',
-  'Standard_D2s_v3': 'small',
 };
 
 // GCP mappings
 const gcpMachineTypeToSize: { [key: string]: WorkloadSize } = {
-  'e2-medium': 'small',
+  'e2-micro': 'small',
+  'e2-small': 'small',
+  'e2-medium': 'small', // Legacy mapping - was incorrectly labeled as medium
   'n1-standard-2': 'large',
-  'f1-micro': 'small',
   'n1-standard-4': 'large',
+  'f1-micro': 'small',
 };
 
 const gcpDbTierToSize: { [key: string]: WorkloadSize } = {

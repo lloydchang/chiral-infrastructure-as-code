@@ -5,7 +5,7 @@
 // Defines the abstract business requirements (The Schema).
 
 export type EnvironmentTier = 'dev' | 'prod';
-export type WorkloadSize = 'small' | 'large';
+export type WorkloadSize = 'small' | 'medium' | 'large';
 export type ComplianceFramework = 'none' | 'soc2' | 'iso27001' | 'hipaa' | 'fedramp';
 export type DeploymentStrategy = 'greenfield' | 'progressive' | 'parallel';
 

@@ -331,7 +331,7 @@ describe('Cost Analysis', () => {
         
         expect(report).toContain('Detailed Breakdown');
         expect(report).toContain('AWS:');
-        expect(report).toContain('Azure:');
+        expect(report).toContain('AZURE:');
         expect(report).toContain('GCP:');
       });
     });
