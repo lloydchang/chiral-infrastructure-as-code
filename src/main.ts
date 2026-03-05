@@ -1439,12 +1439,11 @@ program
     }
   });
 
-// Validate command
 program
   .command('validate')
   .description('Validate Chiral configuration for deployment readiness')
   .requiredOption('-c, --config <path>', 'Path to chiral config file')
-  .option('--compliance <framework>', 'Compliance framework to check (none, soc2, iso27001, hipaa, fedramp-low, fedramp-moderate, fedramp-high, govramp-low, govramp-moderate, govramp-high)', 'none')
+  .option('--compliance <framework>', 'Compliance framework to check (soc2, iso27001, hipaa, fedramp-low, fedramp-moderate, fedramp-high, govramp-low, govramp-moderate, govramp-high, hitrust-low, hitrust-moderate, hitrust-high, hitech-low, hitech-moderate, hitech-high, hipaa-low, hipaa-moderate, hipaa-high, dod-il2, dod-il4, dod-il5, dod-il6)', 'none')
   .action(async (options) => {
     const configPath = path.resolve(options.config);
     let framework: ComplianceFramework = options.compliance;
