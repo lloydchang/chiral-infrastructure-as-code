@@ -245,6 +245,10 @@ resource aks 'Microsoft.ContainerService/managedClusters@2023-05-01' = {
 
       // Validate large config
       const validationResult = validateChiralConfig(largeConfig);
+      if (!validationResult.valid) {
+        console.log('Validation errors:', validationResult.errors);
+        console.log('Validation warnings:', validationResult.warnings);
+      }
       expect(validationResult.valid).toBe(true);
 
       // Check compliance for large config

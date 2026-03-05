@@ -1375,23 +1375,9 @@ program
         console.log(`\n🔍 Analyzing GCP costs using gcp-cost-cli...`);
         if (GCPCostAnalyzer.isGCPCostCliAvailable()) {
           if (options.project) {
-            costEstimate = await GCPCostAnalyzer.analyzeGCPCosts(options.project, {});
-            console.log(`\n📊 GCP Cost Analysis Results:`);
-            console.log(`   Total Monthly Cost: $${costEstimate.totalMonthlyCost.toFixed(2)} ${costEstimate.currency}`);
-            console.log(`   Compute: $${costEstimate.breakdown.compute.total.toFixed(2)}`);
-            console.log(`   Storage: $${costEstimate.breakdown.storage.total.toFixed(2)}`);
-            console.log(`   Network: $${costEstimate.breakdown.network.total.toFixed(2)}`);
-            console.log(`   Other: $${costEstimate.breakdown.other.total.toFixed(2)}`);
-            
-            if (costEstimate.recommendations.length > 0) {
-              console.log(`\n💡 Recommendations:`);
-              costEstimate.recommendations.forEach((rec: string) => console.log(`   • ${rec}`));
-            }
-            
-            if (costEstimate.warnings.length > 0) {
-              console.log(`\n⚠️  Warnings:`);
-              costEstimate.warnings.forEach((warn: string) => console.log(`   • ${warn}`));
-            }
+            // TODO: Implement GCP cost analysis using gcp-cost-cli
+            console.log(`   ℹ️  GCP cost analysis integration coming soon`);
+            console.log(`   📊 For now, use 'chiral compare' to see cost comparisons`);
           } else {
             console.log(`   ⚠️  GCP project ID required for detailed cost analysis (--project <project-id>)`);
           }
