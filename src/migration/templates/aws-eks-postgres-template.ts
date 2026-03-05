@@ -36,17 +36,16 @@ export const awsEksPostgresTemplate: Partial<ChiralSystem> = {
   migration: {
     source: 'terraform',
     strategy: 'progressive',
-    rollbackPlan: {
-      steps: [
-        'Scale EKS node groups back to original size',
-        'Switch traffic back to original load balancer',
-        'Restore original security groups and IAM roles',
-        'Delete Chiral-generated resources'
-      ],
-      estimatedTime: '2 hours',
-      requiresDowntime: false
+    rollbackPlan: [
+      { description: 'Scale EKS node groups back to original size' },
+      { description: 'Switch traffic back to original load balancer' },
+      { description: 'Restore original security groups and IAM roles' },
+      { description: 'Delete Chiral-generated resources' }
+    ],
+    validateCompliance: true,
+    compliance: {
+      framework: 'hipaa' as const,
     },
-    validateCompliance: ['soc2', 'hipaa'],
     notes: [
       'Ensure EKS cluster version compatibility',
       'Migrate PostgreSQL data before cutover',

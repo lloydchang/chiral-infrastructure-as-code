@@ -97,7 +97,7 @@ export class MigrationPlaybookGenerator {
       gcp: ['Google Cloud CLI configured', 'Infrastructure Manager permissions']
     };
 
-    return [...common, ...providerSpecific[provider]];
+    return [...common, ...providerSpecific[provider as keyof typeof providerSpecific]];
   }
 
   private static generateSteps(config: {
