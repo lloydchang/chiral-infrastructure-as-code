@@ -170,7 +170,7 @@ export class TerraformImportAdapter {
     return intent;
   }
 
-  private static mapAwsResource(resource: ParsedTerraformResource, intent: Partial<ChiralSystem>): void {
+  private static mapAwsResource(resource: ParsedTerraformResource, intent: Partial<ChiralSystem>, provider: 'aws' | 'azure' | 'gcp'): void {
     switch (resource.resourceType) {
       case 'aws_eks_cluster':
         if (resource.config.version) {
