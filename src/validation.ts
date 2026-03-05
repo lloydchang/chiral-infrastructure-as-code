@@ -23,7 +23,7 @@ export interface DriftDetectionResult {
 }
 
 export interface ComplianceCheck {
-  framework: 'soc2' | 'iso27001' | 'hipaa' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'none';
+  framework: 'soc2' | 'iso27001' | 'hipaa' | 'fedramp' | 'none';
   compliant: boolean;
   violations: string[];
   recommendations: string[];
@@ -252,74 +252,16 @@ export function checkCompliance(
   }
 
   // FedRAMP compliance checks
-  if (framework.startsWith('fedramp-')) {
-    // Common FedRAMP checks for all levels
-    if (!config.region) {
-      violations.push(`FedRAMP ${framework.split('-')[1].toUpperCase()}: Region specification required for compliance`);
-      recommendations.push('Specify regions for all cloud providers');
+  if (framework === 'fedramp') {
+    // Check for government cloud compliance
+    if (config.region?.aws && !config.region.aws.includes('gov')) {
+      violations.push('FedRAMP: AWS GovCloud required for federal workloads');
+      recommendations.push('Use AWS GovCloud regions for federal compliance');
     }
 
-    // Level-specific checks
-    const level = framework.split('-')[1]; // low, moderate, high
-
-    if (level === 'low') {
-      // Low impact: Basic security controls
-      if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 2) {
-        violations.push('FedRAMP Low: Production environments must have high availability');
-        recommendations.push('Deploy at least 2 nodes for production workloads');
-      }
-    }
-
-    if (level === 'moderate') {
-      // Moderate impact: Additional security controls
-      if (config.compliance && !config.compliance.encryptionAtRest) {
-        violations.push('FedRAMP Moderate: Encryption at rest required');
-        recommendations.push('Enable encryption at rest for all data stores');
-      }
-
-      if (config.compliance && !config.compliance.auditLogging) {
-        violations.push('FedRAMP Moderate: Audit logging required');
-        recommendations.push('Enable comprehensive audit logging');
-      }
-
-      if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 3) {
-        violations.push('FedRAMP Moderate: Production environments must have enhanced availability');
-        recommendations.push('Deploy at least 3 nodes for production workloads');
-      }
-    }
-
-    if (level === 'high') {
-      // High impact: Strict government controls
-      if (config.region?.aws && !config.region.aws.includes('gov')) {
-        violations.push('FedRAMP High: AWS GovCloud required for high-impact federal workloads');
-        recommendations.push('Use AWS GovCloud regions for federal compliance');
-      }
-
-      if (config.region?.azure && !config.region.azure.includes('usgov')) {
-        violations.push('FedRAMP High: Azure Government required for high-impact federal workloads');
-        recommendations.push('Use Azure Government regions for federal compliance');
-      }
-
-      // All moderate requirements plus additional high controls
-      if (config.compliance && !config.compliance.encryptionAtRest) {
-        violations.push('FedRAMP High: Encryption at rest required');
-        recommendations.push('Enable encryption at rest for all data stores');
-      }
-
-      if (config.compliance && !config.compliance.auditLogging) {
-        violations.push('FedRAMP High: Comprehensive audit logging required');
-        recommendations.push('Enable detailed audit logging with retention');
-      }
-
-      if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 3) {
-        violations.push('FedRAMP High: Production environments must have maximum availability');
-        recommendations.push('Deploy at least 3 nodes with redundancy for production workloads');
-      }
-
-      if (config.postgres && config.postgres.storageGb < 100 && config.environment === 'prod') {
-        violations.push('FedRAMP High: Production databases must have enhanced backup storage');
-        recommendations.push('Configure at least 100GB storage for production databases');
-      }
+    if (config.region?.azure && !config.region.azure.includes('usgov')) {
+      violations.push('FedRAMP: Azure Government required for federal workloads');
+      recommendations.push('Use Azure Government regions for federal compliance');
     }
   }
 
