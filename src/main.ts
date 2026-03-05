@@ -257,7 +257,7 @@ const inferNodeCount = (resources: any[], type: 'min' | 'max'): number => {
   return Math.max(...counts, 1);
 };
 
-const inferWorkloadSize = (resources: any[]): 'small' | 'large' => {
+const inferWorkloadSize = (resources: any[]): 'small' | 'medium' | 'large' => {
   // Enhanced size inference based on instance types and resource configurations
   const instanceTypes = resources.map(r => {
     const props = r.values || r.properties || {};
@@ -267,14 +267,25 @@ const inferWorkloadSize = (resources: any[]): 'small' | 'large' => {
   // Map common instance types to sizes
   const largePatterns = [
     /large/i, /xlarge/i, /2xlarge/i, /4xlarge/i, /8xlarge/i,
-    /standard_d[2-9]/i, /n1-standard-[2-9]/i, /m5\.[2-9]/i
+    /standard_d[4-9]/i, /n1-standard-[4-9]/i, /m5\.[2-9]/i, /custom-[4-9]/i
+  ];
+  
+  const mediumPatterns = [
+    /medium/i, /t3\.medium/i, /standard_d[2-3]/i, /n1-standard-[2-3]/i, 
+    /e2-medium/i, /db-g1-small/i, /custom-2-/i
   ];
   
   const hasLargeInstance = instanceTypes.some(type => 
     largePatterns.some(pattern => pattern.test(type))
   );
   
-  return hasLargeInstance ? 'large' : 'small';
+  const hasMediumInstance = instanceTypes.some(type => 
+    mediumPatterns.some(pattern => pattern.test(type))
+  );
+  
+  if (hasLargeInstance) return 'large';
+  if (hasMediumInstance) return 'medium';
+  return 'small';
 };
 
 const inferDatabaseVersion = (resources: any[]): string => {
@@ -483,7 +494,7 @@ const buildChiralSystemFromResources = (resources: any[], provider: string, stac
     return counts.length > 0 ? Math.max(...counts, 1) : (type === 'min' ? 1 : 5);
   };
 
-  const inferWorkloadSize = (resources: any[]): 'small' | 'large' => {
+  const inferWorkloadSize = (resources: any[]): 'small' | 'medium' | 'large' => {
     const instanceTypes: string[] = [];
 
     for (const r of resources) {
@@ -510,14 +521,25 @@ const buildChiralSystemFromResources = (resources: any[], provider: string, stac
     // Map to workload sizes
     const largePatterns = [
       /large/i, /xlarge/i, /2xlarge/i, /4xlarge/i, /8xlarge/i,
-      /standard_d[4-9]/i, /n1-standard-[4-9]/i, /m5\./i, /db\..*\.large/i
+      /standard_d[4-9]/i, /n1-standard-[4-9]/i, /m5\./i, /db\..*\.large/i, /custom-[4-9]/i
+    ];
+
+    const mediumPatterns = [
+      /medium/i, /t3\.medium/i, /standard_d[2-3]/i, /n1-standard-[2-3]/i,
+      /e2-medium/i, /db-g1-small/i, /custom-2-/i, /db\.t3\.medium/i
     ];
 
     const hasLargeInstance = instanceTypes.some(type =>
       largePatterns.some(pattern => pattern.test(type))
     );
 
-    return hasLargeInstance ? 'large' : 'small';
+    const hasMediumInstance = instanceTypes.some(type =>
+      mediumPatterns.some(pattern => pattern.test(type))
+    );
+
+    if (hasLargeInstance) return 'large';
+    if (hasMediumInstance) return 'medium';
+    return 'small';
   };
 
   const inferDatabaseVersion = (resources: any[]): string => {
