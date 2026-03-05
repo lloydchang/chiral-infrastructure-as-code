@@ -181,6 +181,150 @@ describe('Security Compliance Tests', () => {
     });
   });
 
+  describe('HIPAA Compliance', () => {
+    it('should be compliant with HIPAA Low', async () => {
+      const results = await complianceEngine.assessCompliance(testConfig, ['hipaa-low']);
+      const hipaaResult = results.find(r => r.framework === 'hipaa-low');
+      
+      expect(hipaaResult).toBeDefined();
+      expect(hipaaResult!.compliant).toBe(true);
+      expect(hipaaResult!.score).toBeGreaterThan(90);
+    });
+
+    it('should detect missing PHI encryption in HIPAA', async () => {
+      const insecureConfig = { ...testConfig };
+      insecureConfig.compliance!.encryptionAtRest = false;
+
+      const results = await complianceEngine.assessCompliance(insecureConfig, ['hipaa']);
+      const hipaaResult = results.find(r => r.framework === 'hipaa');
+      
+      expect(hipaaResult!.violations.filter(v => v.severity === 'critical')).toHaveLength(2);
+      expect(hipaaResult!.violations.some(v => v.title.includes('PHI encryption'))).toBe(true);
+    });
+
+    it('should detect missing audit logging for PHI access', async () => {
+      const insecureConfig = { ...testConfig };
+      insecureConfig.compliance!.auditLogging = false;
+
+      const results = await complianceEngine.assessCompliance(insecureConfig, ['hipaa-high']);
+      const hipaaResult = results.find(r => r.framework === 'hipaa-high');
+      
+      expect(hipaaResult!.violations.some(v => v.title.includes('PHI access audit logging'))).toBe(true);
+    });
+
+    it('should require network segmentation for HIPAA High', async () => {
+      const insecureConfig = { ...testConfig };
+      insecureConfig.compliance!.securityControls!.networkSegmentation = false;
+
+      const results = await complianceEngine.assessCompliance(insecureConfig, ['hipaa-high']);
+      const hipaaResult = results.find(r => r.framework === 'hipaa-high');
+      
+      expect(hipaaResult!.violations.some(v => v.title.includes('Network segmentation missing'))).toBe(true);
+    });
+
+    it('should require adequate storage for HIPAA High', async () => {
+      const insecureConfig = { ...testConfig };
+      insecureConfig.postgres!.storageGb = 50; // Below 100GB requirement
+
+      const results = await complianceEngine.assessCompliance(insecureConfig, ['hipaa-high']);
+      const hipaaResult = results.find(r => r.framework === 'hipaa-high');
+      
+      expect(hipaaResult!.violations.some(v => v.title.includes('storage capacity'))).toBe(true);
+    });
+  });
+
+  describe('HITRUST CSF Compliance', () => {
+    it('should be compliant with HITRUST Low', async () => {
+      const results = await complianceEngine.assessCompliance(testConfig, ['hitrust-low']);
+      const hitrustResult = results.find(r => r.framework === 'hitrust-low');
+      
+      expect(hitrustResult).toBeDefined();
+      expect(hitrustResult!.compliant).toBe(true);
+      expect(hitrustResult!.score).toBeGreaterThan(90);
+    });
+
+    it('should detect missing endpoint protection in HITRUST', async () => {
+      const insecureConfig = { ...testConfig };
+      insecureConfig.compliance!.securityControls!.malwareProtection = false;
+
+      const results = await complianceEngine.assessCompliance(insecureConfig, ['hitrust-moderate']);
+      const hitrustResult = results.find(r => r.framework === 'hitrust-moderate');
+      
+      expect(hitrustResult!.violations.some(v => v.title.includes('Endpoint protection missing'))).toBe(true);
+    });
+
+    it('should require vulnerability management for HITRUST Moderate', async () => {
+      const insecureConfig = { ...testConfig };
+      insecureConfig.compliance!.securityControls!.vulnerabilityManagement = false;
+
+      const results = await complianceEngine.assessCompliance(insecureConfig, ['hitrust-moderate']);
+      const hitrustResult = results.find(r => r.framework === 'hitrust-moderate');
+      
+      expect(hitrustResult!.violations.some(v => v.title.includes('Vulnerability management missing'))).toBe(true);
+    });
+
+    it('should require configuration management for HITRUST High', async () => {
+      const insecureConfig = { ...testConfig };
+      insecureConfig.compliance!.securityControls!.configurationManagement = false;
+
+      const results = await complianceEngine.assessCompliance(insecureConfig, ['hitrust-high']);
+      const hitrustResult = results.find(r => r.framework === 'hitrust-high');
+      
+      expect(hitrustResult!.violations.some(v => v.title.includes('Configuration management missing'))).toBe(true);
+    });
+  });
+
+  describe('HITECH Compliance', () => {
+    it('should be compliant with HITECH Low', async () => {
+      const results = await complianceEngine.assessCompliance(testConfig, ['hitech-low']);
+      const hitechResult = results.find(r => r.framework === 'hitech-low');
+      
+      expect(hitechResult).toBeDefined();
+      expect(hitechResult!.compliant).toBe(true);
+      expect(hitechResult!.score).toBeGreaterThan(90);
+    });
+
+    it('should detect missing breach notification in HITECH', async () => {
+      const insecureConfig = { ...testConfig };
+      insecureConfig.compliance!.breachNotification = false;
+
+      const results = await complianceEngine.assessCompliance(insecureConfig, ['hitech-moderate']);
+      const hitechResult = results.find(r => r.framework === 'hitech-moderate');
+      
+      expect(hitechResult!.violations.some(v => v.title.includes('Breach notification procedures missing'))).toBe(true);
+    });
+
+    it('should require incident response for HITECH Moderate', async () => {
+      const insecureConfig = { ...testConfig };
+      insecureConfig.compliance!.securityControls!.incidentResponse = false;
+
+      const results = await complianceEngine.assessCompliance(insecureConfig, ['hitech-moderate']);
+      const hitechResult = results.find(r => r.framework === 'hitech-moderate');
+      
+      expect(hitechResult!.violations.some(v => v.title.includes('Incident response for breach containment'))).toBe(true);
+    });
+
+    it('should require advanced network segmentation for HITECH High', async () => {
+      const insecureConfig = { ...testConfig };
+      insecureConfig.compliance!.securityControls!.networkSegmentation = false;
+
+      const results = await complianceEngine.assessCompliance(insecureConfig, ['hitech-high']);
+      const hitechResult = results.find(r => r.framework === 'hitech-high');
+      
+      expect(hitechResult!.violations.some(v => v.title.includes('Advanced network segmentation missing'))).toBe(true);
+    });
+
+    it('should require adequate storage for breach investigation in HITECH High', async () => {
+      const insecureConfig = { ...testConfig };
+      insecureConfig.postgres!.storageGb = 50; // Below 75GB requirement
+
+      const results = await complianceEngine.assessCompliance(insecureConfig, ['hitech-high']);
+      const hitechResult = results.find(r => r.framework === 'hitech-high');
+      
+      expect(hitechResult!.violations.some(v => v.title.includes('storage for breach investigation'))).toBe(true);
+    });
+  });
+
   describe('Multi-Framework Compliance', () => {
     it('should assess multiple frameworks simultaneously', async () => {
       const frameworks: ComplianceFramework[] = ['iso27001', 'iso27017', 'iso27018', 'gdpr'];
