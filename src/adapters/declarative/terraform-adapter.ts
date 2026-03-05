@@ -243,7 +243,7 @@ export class TerraformImportAdapter {
           intent.postgres!.engineVersion = resource.config.version;
         }
         if (resource.config.sku_name) {
-          intent.postgres!.size = mapDbClassToWorkloadSize(resource.config.sku_name, 'azure');
+          intent.postgres!.size = mapDbClassToWorkloadSize(resource.config.sku_name, provider);
         }
         if (resource.config.storage_mb) {
           intent.postgres!.storageGb = Math.floor(resource.config.storage_mb / 1024);

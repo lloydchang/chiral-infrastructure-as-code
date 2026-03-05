@@ -170,13 +170,13 @@ describe('Migration and Analysis Tests', () => {
 
       // For 200 resources, 10 team members, complex complexity:
       // Terraform: $198 (premium) + $120,000 (operational) = $120,198
-      // Chiral: $0 (premium) + $12,000 (operational) = $12,000
-      // Savings: $108,198 monthly = $1,298,376 annually = 90.0%
+      // Chiral: $0 (premium) + $30,000 (operational) = $30,000
+      // Savings: $90,198 monthly = $1,082,376 annually = 75.0%
 
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Premium Fees: $198.00'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Operational Overhead: $120000.00'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Total Monthly Cost: $120198.00'));
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Total Monthly Cost: $12000.00'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Total Monthly Cost: $30000.00'));
 
       consoleSpy.mockRestore();
     });
