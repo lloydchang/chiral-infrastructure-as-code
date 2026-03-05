@@ -43,8 +43,6 @@ export const config: ChiralSystem = {
   migration: {
     strategy: 'progressive',
     sourceState: 'terraform.tfstate',
-    validateCompliance: true,
-    estimatedSavings: 1188, // $99/month * 12 months
-    migrationDate: new Date().toISOString()
+    validateCompliance: true
   }
 };

@@ -6,6 +6,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import { ChiralSystem } from '../../intent';
+import { WorkloadSize } from '../../intent';
 import { AwsCdkAdapter } from '../programmatic/aws-cdk';
 import { AzureBicepAdapter } from '../declarative/azure-bicep';
 import { GcpTerraformAdapter } from '../declarative/gcp-terraform';
@@ -134,16 +135,16 @@ output "artifacts" {
         version: config.k8s.version,
         minNodes: config.k8s.min_nodes,
         maxNodes: config.k8s.max_nodes,
-        size: config.k8s.size
+        size: config.k8s.size as WorkloadSize
       },
       postgres: {
         engineVersion: config.postgres.engine_version,
-        size: config.postgres.size,
+        size: config.postgres.size as WorkloadSize,
         storageGb: config.postgres.storage_gb
       },
       adfs: {
-        size: config.adfs.size,
-        windowsVersion: config.adfs.windows_version
+        size: config.adfs.size as WorkloadSize,
+        windowsVersion: config.adfs.windows_version as '2019' | '2022'
       }
     };
 
@@ -184,13 +185,20 @@ output "artifacts" {
       fs.mkdirSync(awsDir, { recursive: true });
     }
 
-    const adapter = new AwsCdkAdapter(undefined, 'chiral-stack', intent);
-    const cloudAssembly = adapter.synth();
-    
-    // Save CDK assembly
+    // For now, create a placeholder CDK app structure
+    // TODO: Properly integrate with AwsCdkAdapter when CDK app lifecycle is available
+    const cdkAppContent = `
+import * as cdk from 'aws-cdk-lib';
+import { AwsCdkAdapter } from './aws-cdk-adapter';
+
+const app = new cdk.App();
+new AwsCdkAdapter(app, 'chiral-stack', ${JSON.stringify(intent, null, 2)});
+app.synth();
+    `;
+
     fs.writeFileSync(
-      path.join(awsDir, 'cdk-assembly.json'),
-      JSON.stringify(cloudAssembly.manifest, null, 2)
+      path.join(awsDir, 'app.ts'),
+      cdkAppContent
     );
 
     return awsDir;
@@ -243,16 +251,16 @@ output "artifacts" {
         version: config.k8s.version,
         minNodes: config.k8s.min_nodes,
         maxNodes: config.k8s.max_nodes,
-        size: config.k8s.size
+        size: config.k8s.size as WorkloadSize
       },
       postgres: {
         engineVersion: config.postgres.engine_version,
-        size: config.postgres.size,
+        size: config.postgres.size as WorkloadSize,
         storageGb: config.postgres.storage_gb
       },
       adfs: {
-        size: config.adfs.size,
-        windowsVersion: config.adfs.windows_version
+        size: config.adfs.size as WorkloadSize,
+        windowsVersion: config.adfs.windows_version as '2019' | '2022'
       }
     };
 

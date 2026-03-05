@@ -37,10 +37,9 @@ ${r.depends_on ? `    depends_on:\n${r.depends_on.map(d => `      - ${d}`).join(
 
 # Outputs
 outputs:
-${Object.keys(config.outputs || {}).map(outputName => `  ${outputName}:
-    description: ${config.outputs[outputName].description}
-    value: ${JSON.stringify(config.outputs[outputName].value)}`).join('\n')}
-`);
+${config.outputs ? Object.keys(config.outputs).map(outputName => `  ${outputName}:
+    description: ${config.outputs![outputName].description}
+    value: ${JSON.stringify(config.outputs![outputName].value)}`).join('\n') : ''}`);
 
   return yamlBlocks.join('\n');
 }

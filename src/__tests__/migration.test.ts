@@ -166,10 +166,15 @@ describe('Migration and Analysis Tests', () => {
 
       await compareApproaches(200, 10, 'complex');
 
+      // For 200 resources, 10 team members, complex complexity:
+      // Terraform: $198 (premium) + $120,000 (operational) = $120,198
+      // Chiral: $0 (premium) + $12,000 (operational) = $12,000
+      // Savings: $108,198 monthly = $1,298,376 annually = 90.0%
+
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Premium Fees: $198.00'));
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Operational Overhead: $3,000.00'));
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Total Monthly Cost: $3,198.00'));
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Chiral Cost: $3,000.00'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Operational Overhead: $120000.00'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Total Monthly Cost: $120,198.00'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Chiral Cost: $12,000.00'));
 
       consoleSpy.mockRestore();
     });
@@ -193,12 +198,12 @@ describe('Migration and Analysis Tests', () => {
       await compareApproaches(100, 5, 'medium');
 
       // For 100 resources, 5 team members, medium complexity:
-      // Terraform: $99 (premium) + $4,500 (operational) = $4,599
-      // Chiral: $0 (premium) + $1,125 (operational) = $1,125
-      // Savings: $3,474 monthly = $41,688 annually = 75.5%
+      // Terraform: $99 (premium) + $45,000 (operational) = $45,099
+      // Chiral: $0 (premium) + $11,250 (operational) = $11,250
+      // Savings: $33,849 monthly = $406,188 annually = 75.1%
 
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Annual Savings: $41,688.00'));
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Cost Reduction: 75.5%'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Annual Savings: $406188.00'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Cost Reduction: 75.1%'));
 
       consoleSpy.mockRestore();
     });

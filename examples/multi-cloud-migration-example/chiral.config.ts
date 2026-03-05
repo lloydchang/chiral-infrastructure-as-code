@@ -43,12 +43,8 @@ export const config: ChiralSystem = {
 
   // Migration metadata for tracking
   migration: {
-    strategy: 'parallel',        // Parallel migration across clouds
-    sourceState: 'terraform.tfstate',
-    validateCompliance: true,
-    estimatedSavings: 3564,    // $297/month * 12 months
-    migrationDate: new Date().toISOString(),
-    totalResources: 300,
-    complexity: 'complex'
+    strategy: 'progressive',
+    sourceState: './terraform.tfstate',
+    validateCompliance: true
   }
 };

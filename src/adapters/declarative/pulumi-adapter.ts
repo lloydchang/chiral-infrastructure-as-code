@@ -12,6 +12,7 @@ export interface PulumiConfig {
   resources: PulumiResource[];
   variables: PulumiVariable[];
   backend?: PulumiBackend;
+  outputs?: Record<string, any>;
 }
 
 export interface PulumiResource {
@@ -80,9 +81,9 @@ export class PulumiAdapter {
     const config: PulumiConfig = {
       provider,
       region,
-      resources: this.generateResources(intent, regionalHardware, options.delegateState),
+      resources: this.generateResources(intent, regionalHardware, options.delegateState ?? false),
       variables: this.extractVariables(intent, region),
-      backend: options.delegateState ? this.generateDelegatedBackend(provider, region) : undefined
+      backend: options.delegateState ? this.generateDelegatedBackend(provider, region, intent) : undefined
     };
 
     return config;
@@ -158,7 +159,7 @@ export class PulumiAdapter {
     return 'aws';
   }
 
-  private static getDefaultRegion(provider: string): string {
+  private static getDefaultRegion(provider: 'aws' | 'azure' | 'gcp'): string {
     const defaults = {
       aws: 'us-east-1',
       azure: 'eastus',
@@ -204,7 +205,7 @@ export class PulumiAdapter {
         type: 'aws:cloudformation:Stack',
         name: `${intent.projectName}-eks`,
         properties: {
-          template: file('aws-eks-template.json'),
+          template: 'aws-eks-template.json',
           parameters: {
             ClusterName: intent.projectName,
             NodeInstanceType: machineType,
@@ -220,9 +221,9 @@ export class PulumiAdapter {
         name: `${intent.projectName}-eks`,
         properties: {
           version: intent.k8s.version,
-          roleArn: aws.iam.Role.eks.arn,
+          roleArn: 'arn:aws:iam::123456789012:role/eks-service-role', // Placeholder ARN
           vpcConfig: {
-            subnetIds: [aws.subnet.private.id]
+            subnetIds: ['subnet-12345', 'subnet-67890'] // Placeholder subnet IDs
           },
           nodeGroup: {
             instanceTypes: [machineType],
@@ -244,7 +245,7 @@ export class PulumiAdapter {
         type: 'aws:cloudformation:Stack',
         name: `${intent.projectName}-database`,
         properties: {
-          template: file('aws-rds-template.json'),
+          template: 'aws-rds-template.json',
           parameters: {
             DatabaseName: `${intent.projectName}-postgres`,
             InstanceClass: instanceClass,
@@ -280,7 +281,7 @@ export class PulumiAdapter {
         type: 'aws:cloudformation:Stack',
         name: `${intent.projectName}-adfs`,
         properties: {
-          template: file('aws-adfs-template.json'),
+          template: 'aws-adfs-template.json',
           parameters: {
             InstanceType: instanceType,
             WindowsVersion: intent.adfs.windowsVersion
@@ -295,7 +296,7 @@ export class PulumiAdapter {
         properties: {
           ami: '_windows_server_2019_english_full',
           instanceType: instanceType,
-          userData: base64('<powershell>...</powershell>'),
+          userData: Buffer.from('<powershell>...</powershell>').toString('base64'),
           getPasswordData: false
         }
       };
@@ -309,7 +310,7 @@ export class PulumiAdapter {
         type: 'aws:cloudformation:Stack',
         name: `${intent.projectName}-network`,
         properties: {
-          template: file('aws-vpc-template.json'),
+          template: 'aws-vpc-template.json',
           parameters: {
             VpcCidr: intent.networkCidr
           }
@@ -356,7 +357,7 @@ export class PulumiAdapter {
     ];
   }
 
-  private static generateDelegatedBackend(provider: string, region: string): PulumiBackend {
+  private static generateDelegatedBackend(provider: string, region: string, intent: ChiralSystem): PulumiBackend {
     switch (provider) {
       case 'aws':
         return {
