@@ -821,10 +821,9 @@ export function checkCompliance(
     }
 
     if (level === 'high') {
-      if (!config.compliance?.securityControls?.privilegedAccessManagement) {
-        violations.push(`NIST HIGH: Privileged access management required`);
-        recommendations.push('Implement PAM for privileged account management');
-      }
+      const nistResult = validateNISTHighCompliance(config);
+      violations.push(...nistResult.errors);
+      recommendations.push(...nistResult.recommendations);
     }
   }
 
