@@ -597,7 +597,7 @@ resource "aws_db_instance" "main" {
   allocated_storage = ${config.postgres.storageGb}
   
   username = "postgres"
-  password = "password123"
+  password = var.db_password
 }
 
 resource "aws_instance" "adfs" {

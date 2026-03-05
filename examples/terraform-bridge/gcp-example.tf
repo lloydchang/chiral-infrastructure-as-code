@@ -7,6 +7,13 @@ terraform {
   }
 }
 
+# Variables
+variable "adfs_service_password" {
+  description = "ADFS service account password"
+  type        = string
+  sensitive   = true
+}
+
 # VPC Network
 resource "google_compute_network" "demo" {
   name                    = "demo-vpc"
@@ -115,7 +122,7 @@ resource "google_compute_instance" "adfs" {
 
       # Configure basic ADFS setup
       $cert = New-SelfSignedCertificate -DnsName "demo-adfs.example.com" -CertStoreLocation "cert:\LocalMachine\My"
-      Install-AdfsFarm -CertificateThumbprint $cert.Thumbprint -FederationServiceName "demo-adfs.example.com" -ServiceAccountCredential (New-Object System.Management.Automation.PSCredential("EXAMPLE\ADFSService", (ConvertTo-SecureString "P@ssw0rd123!" -AsPlainText -Force)))
+      Install-AdfsFarm -CertificateThumbprint $cert.Thumbprint -FederationServiceName "demo-adfs.example.com" -ServiceAccountCredential (New-Object System.Management.Automation.PSCredential("EXAMPLE\ADFSService", (ConvertTo-SecureString "${var.adfs_service_password}" -AsPlainText -Force)))
     EOT
   }
 

@@ -1,0 +1,10 @@
+# GCP Terraform Bridge Example Variables
+# Copy this file to terraform.tfvars and update with your values
+# NEVER commit terraform.tfvars to version control
+#
+# ⚠️  SECURITY WARNING ⚠️
+# These are DEMO values only! Replace with strong, unique passwords
+# in production. Never use these default values in real deployments.
+
+# ADFS Service Account
+adfs_service_password = "REPLACE_WITH_STRONG_ADFS_PASSWORD_123456789!"
