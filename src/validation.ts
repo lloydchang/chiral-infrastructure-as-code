@@ -793,15 +793,15 @@ export function checkCompliance(
 
     if (level === 'low') {
       const nistResult = validateNISTLowCompliance(config);
-      violations.push(...nistResult.errors.map(err => err));
+      violations.push(...nistResult.errors);
       recommendations.push(...nistResult.recommendations);
     } else if (level === 'moderate') {
       const nistResult = validateNISTModerateCompliance(config);
-      violations.push(...nistResult.errors.map(err => err));
+      violations.push(...nistResult.errors);
       recommendations.push(...nistResult.recommendations);
     } else if (level === 'high') {
       const nistResult = validateNISTHighCompliance(config);
-      violations.push(...nistResult.errors.map(err => err));
+      violations.push(...nistResult.errors);
       recommendations.push(...nistResult.recommendations);
     }
   }

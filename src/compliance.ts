@@ -46,24 +46,46 @@ export function validateISO27001Compliance(config: any): ValidationResult {
 
 export function validateISO27017Compliance(config: any): ValidationResult {
   const issues: string[] = [];
+  const monitor = new CloudSecurityMonitor({
+    enabled: true,
+    alertThresholds: { failedLogins: 5, unusualActivity: 10, configChanges: 3 },
+    logRetentionDays: 365,
+    realTimeMonitoring: true,
+    complianceMonitoring: true
+  });
 
-  // Cloud-specific controls
-  if (!config.cloud?.sharedResponsibility) {
+  // Cloud shared responsibility checks
+  if (!config.compliance?.sharedResponsibility) {
     issues.push('Shared responsibility model not documented');
   }
 
-  if (!config.cloud?.dataResidency) {
+  // Data residency checks
+  if (!config.compliance?.dataResidency) {
     issues.push('Data residency controls not implemented');
   }
 
-  if (!config.cloud?.auditLogging) {
-    issues.push('Cloud audit logging not enabled');
+  // Cloud-specific monitoring
+  if (config.region?.aws) {
+    monitorAwsSecurity(config, monitor);
+  }
+  if (config.region?.azure) {
+    monitorAzureSecurity(config, monitor);
+  }
+  if (config.region?.gcp) {
+    monitorGcpSecurity(config, monitor);
+  }
+
+  // Check for monitoring alerts
+  const alerts = monitor.getRecentAlerts(1); // Last hour
+  if (alerts.length > 0) {
+    issues.push(`${alerts.length} security alerts detected in cloud environment`);
   }
 
   return {
     valid: issues.length === 0,
     errors: issues,
     warnings: [],
+    monitoringReport: monitor.generateSecurityReport(),
     recommendations: []
   };
 }
