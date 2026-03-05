@@ -422,7 +422,8 @@ resource "google_compute_instance" "adfs" {
   private static getAWSInstanceType(size: string): string {
     const sizeMap: { [key: string]: string } = {
       'small': 't3.small',
-      'large': 't3.xlarge'
+      'medium': 't3.medium',
+      'large': 'm5.xlarge'
     };
     return sizeMap[size] || 't3.small';
   }
@@ -430,6 +431,7 @@ resource "google_compute_instance" "adfs" {
   private static getRDSInstanceClass(size: string): string {
     const sizeMap: { [key: string]: string } = {
       'small': 'db.t3.small',
+      'medium': 'db.t3.medium',
       'large': 'db.m5.large'
     };
     return sizeMap[size] || 'db.t3.small';
@@ -446,6 +448,7 @@ resource "google_compute_instance" "adfs" {
   private static getGCPMachineType(size: string): string {
     const sizeMap: { [key: string]: string } = {
       'small': 'e2-micro',
+      'medium': 'e2-medium',
       'large': 'n1-standard-2'
     };
     return sizeMap[size] || 'e2-micro';
@@ -454,9 +457,10 @@ resource "google_compute_instance" "adfs" {
   private static getCloudSQLTier(size: string): string {
     const sizeMap: { [key: string]: string } = {
       'small': 'db-f1-micro',
-      'large': 'db-n1-standard-2'
+      'medium': 'db-g1-small',
+      'large': 'db-custom-2-4096'
     };
-    return sizeMap[size] || 'db-n1-standard-2';
+    return sizeMap[size] || 'db-f1-micro';
   }
 }
 
@@ -764,25 +768,26 @@ resource "aws_instance" "adfs" {
 
   private static async getEC2Pricing(instanceType: string, region: string): Promise<{ hourly: number }> {
     const pricingMap: { [key: string]: number } = {
+      't3.small': 0.0208,
       't3.medium': 0.0416,
-      't3.large': 0.0832,
-      't3.xlarge': 0.1664
+      'm5.xlarge': 0.192
     };
-    return { hourly: pricingMap[instanceType] || 0.0832 };
+    return { hourly: pricingMap[instanceType] || 0.0416 };
   }
 
   private static async getRDSPricing(instanceClass: string, region: string): Promise<{ compute: number; storagePerGb: number }> {
     const pricingMap: { [key: string]: { compute: number; storagePerGb: number } } = {
+      'db.t3.small': { compute: 25, storagePerGb: 0.23 },
       'db.t3.medium': { compute: 55, storagePerGb: 0.23 },
-      'db.t3.large': { compute: 110, storagePerGb: 0.23 },
-      'db.t3.xlarge': { compute: 220, storagePerGb: 0.23 }
+      'db.m5.large': { compute: 110, storagePerGb: 0.23 }
     };
-    return pricingMap[instanceClass] || { compute: 110, storagePerGb: 0.23 };
+    return pricingMap[instanceClass] || { compute: 55, storagePerGb: 0.23 };
   }
 
   private static getAWSInstanceType(size: string): string {
     const sizeMap: { [key: string]: string } = {
       'small': 't3.small',
+      'medium': 't3.medium',
       'large': 'm5.xlarge'
     };
     return sizeMap[size] || 't3.small';
@@ -791,6 +796,7 @@ resource "aws_instance" "adfs" {
   private static getAWSDBInstanceClass(size: string): string {
     const sizeMap: { [key: string]: string } = {
       'small': 'db.t3.small',
+      'medium': 'db.t3.medium',
       'large': 'db.m5.large'
     };
     return sizeMap[size] || 'db.t3.small';
@@ -1228,36 +1234,38 @@ resource "google_compute_instance" "adfs" {
 
   private static async getCloudSQLPricingData(tier: string, region: string): Promise<{ compute: number; storagePerGb: number }> {
     const pricingMap: { [key: string]: { compute: number; storagePerGb: number } } = {
-      'db-n1-standard-1': { compute: 25, storagePerGb: 0.17 },
-      'db-n1-standard-2': { compute: 50, storagePerGb: 0.17 },
-      'db-n1-standard-4': { compute: 100, storagePerGb: 0.17 }
+      'db-f1-micro': { compute: 7, storagePerGb: 0.17 },
+      'db-g1-small': { compute: 25, storagePerGb: 0.17 },
+      'db-custom-2-4096': { compute: 100, storagePerGb: 0.17 }
     };
-    return pricingMap[tier] || { compute: 50, storagePerGb: 0.17 };
+    return pricingMap[tier] || { compute: 25, storagePerGb: 0.17 };
   }
 
   private static async getComputePricing(machineType: string, region: string): Promise<{ hourly: number }> {
     const pricingMap: { [key: string]: number } = {
+      'e2-micro': 0.007,
       'e2-medium': 0.069,
-      'n1-standard-2': 0.133,
-      'n1-standard-4': 0.266
+      'n1-standard-2': 0.133
     };
-    return { hourly: pricingMap[machineType] || 0.133 };
+    return { hourly: pricingMap[machineType] || 0.069 };
   }
 
   private static getGCPMachineType(size: string): string {
     const sizeMap: { [key: string]: string } = {
       'small': 'e2-micro',
-      'large': 'n1-standard-4'
+      'medium': 'e2-medium',
+      'large': 'n1-standard-2'
     };
     return sizeMap[size] || 'e2-micro';
   }
 
   private static getGCPDatabaseTier(size: string): string {
     const sizeMap: { [key: string]: string } = {
-      'small': 'db-n1-standard-1',
-      'large': 'db-n1-standard-4'
+      'small': 'db-f1-micro',
+      'medium': 'db-g1-small',
+      'large': 'db-custom-2-4096'
     };
-    return sizeMap[size] || 'db-n1-standard-2';
+    return sizeMap[size] || 'db-f1-micro';
   }
 
   static async analyzeGCPCosts(projectId: string, options: CostAnalysisOptions = {}): Promise<CostEstimate> {
@@ -1710,7 +1718,6 @@ export class AzureCostAnalyzer {
     // Map size to Azure SKU - this should match the mapping in azure-bicep.ts
     const sizeMap: { [key: string]: string } = {
       'small': 'Standard_B2s',
-      'medium': 'Standard_D4s_v3',
       'large': 'Standard_D8s_v3'
     };
     return sizeMap[config.k8s.size] || 'Standard_D4s_v3';
@@ -1719,7 +1726,6 @@ export class AzureCostAnalyzer {
   private static getVMSku(config: ChiralSystem): string {
     const sizeMap: { [key: string]: string } = {
       'small': 'Standard_B1s',
-      'medium': 'Standard_D4s_v3',
       'large': 'Standard_D8s_v3'
     };
     return sizeMap[config.adfs.size] || 'Standard_B1s';
@@ -1728,7 +1734,6 @@ export class AzureCostAnalyzer {
   private static getDbSku(config: ChiralSystem): string {
     const sizeMap: { [key: string]: string } = {
       'small': 'Standard_B2s',
-      'medium': 'Standard_D4s_v3',
       'large': 'Standard_D8s_v3'
     };
     return sizeMap[config.postgres.size] || 'Standard_D4s_v3';

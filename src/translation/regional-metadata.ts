@@ -15,11 +15,13 @@ export interface RegionalCapabilities {
   /** Instance types available in this region */
   instanceTypes: {
     small: string[];
+    medium: string[];
     large: string[];
   };
   /** Database instance classes available */
   databaseClasses: {
     small: string[];
+    medium: string[];
     large: string[];
   };
   /** Regional pricing tier or cost considerations */
@@ -67,10 +69,12 @@ export const RegionalMetadata: Record<string, RegionMetadata> = {
       },
       instanceTypes: {
         small: ['t3.small'],
+        medium: ['t3.medium'],
         large: ['m5.large', 'm5.xlarge'],
       },
       databaseClasses: {
         small: ['db.t3.small'],
+        medium: ['db.t3.medium'],
         large: ['db.m5.large'],
       },
       pricingTier: 'standard',
@@ -92,10 +96,12 @@ export const RegionalMetadata: Record<string, RegionMetadata> = {
       },
       instanceTypes: {
         small: ['t3.small'],
+        medium: ['t3.medium'],
         large: ['m5.large'],
       },
       databaseClasses: {
         small: ['db.t3.small'],
+        medium: ['db.t3.medium'],
         large: ['db.m5.large'],
       },
       pricingTier: 'premium',
@@ -121,10 +127,12 @@ export const RegionalMetadata: Record<string, RegionMetadata> = {
       },
       instanceTypes: {
         small: ['Standard_B2s'],
+        medium: ['Standard_D2s_v3'],
         large: ['Standard_D4s_v3'],
       },
       databaseClasses: {
         small: ['Standard_B1s'],
+        medium: ['Standard_B2s'],
         large: ['Standard_D4s_v3'],
       },
       pricingTier: 'standard',
@@ -146,10 +154,12 @@ export const RegionalMetadata: Record<string, RegionMetadata> = {
       },
       instanceTypes: {
         small: ['Standard_B2s'],
+        medium: ['Standard_D2s_v3'],
         large: ['Standard_D4s_v3'],
       },
       databaseClasses: {
         small: ['Standard_B1s'],
+        medium: ['Standard_B2s'],
         large: ['Standard_D4s_v3'],
       },
       pricingTier: 'premium',
@@ -175,10 +185,12 @@ export const RegionalMetadata: Record<string, RegionMetadata> = {
       },
       instanceTypes: {
         small: ['e2-small'],
+        medium: ['e2-medium'],
         large: ['n1-standard-2'],
       },
       databaseClasses: {
         small: ['db-f1-micro'],
+        medium: ['db-g1-small'],
         large: ['db-custom-2-4096'],
       },
       pricingTier: 'standard',
@@ -205,7 +217,7 @@ export function isServiceAvailable(provider: string, regionId: string, service: 
 /**
  * Get available instance types for a region and size
  */
-export function getRegionalInstanceTypes(provider: string, regionId: string, size: 'small' | 'large'): string[] {
+export function getRegionalInstanceTypes(provider: string, regionId: string, size: 'small' | 'medium' | 'large'): string[] {
   const metadata = getRegionalMetadata(provider, regionId);
   return metadata?.capabilities.instanceTypes[size] || [];
 }

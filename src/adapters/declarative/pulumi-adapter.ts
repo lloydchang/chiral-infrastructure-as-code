@@ -222,7 +222,7 @@ export class PulumiAdapter {
           version: intent.k8s.version,
           roleArn: aws.iam.Role.eks.arn,
           vpcConfig: {
-            subnetIds: [aws.subnet.private.*.id]
+            subnetIds: [aws.subnet.private.id]
           },
           nodeGroup: {
             instanceTypes: [machineType],

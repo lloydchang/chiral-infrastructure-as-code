@@ -26,12 +26,12 @@ export const HardwareMap = {
     },
     vm: {
       small: 't3.small',
-      medium: 't3.medium',
+      medium: 't3.large',
       large: 'm5.xlarge'
     },
     k8s: {
       small: 't3.small',
-      medium: 't3.medium',
+      medium: 't3.large',
       large: 'm5.large'
     }
   } as CloudSkuMap,
@@ -92,14 +92,17 @@ export function getRegionalHardwareMap(provider: 'aws' | 'azure' | 'gcp', region
     return {
       db: {
         small: dbClasses.small[0] || HardwareMap[provider].db.small,
+        medium: HardwareMap[provider].db.medium, // Use global mapping for medium
         large: dbClasses.large[0] || HardwareMap[provider].db.large
       },
       vm: {
         small: instanceTypes.small[0] || HardwareMap[provider].vm.small,
+        medium: HardwareMap[provider].vm.medium, // Use global mapping for medium
         large: instanceTypes.large[0] || HardwareMap[provider].vm.large
       },
       k8s: {
         small: instanceTypes.small[0] || HardwareMap[provider].k8s.small,
+        medium: HardwareMap[provider].k8s.medium, // Use global mapping for medium
         large: instanceTypes.large[0] || HardwareMap[provider].k8s.large
       }
     };
