@@ -252,7 +252,7 @@ export class TerraformImportAdapter {
         
       case 'azurerm_windows_virtual_machine':
         if (resource.config.vm_size) {
-          intent.adfs!.size = mapInstanceTypeToWorkloadSize(resource.config.vm_size, 'azure');
+          intent.adfs!.size = mapInstanceTypeToWorkloadSize(resource.config.vm_size, provider);
         }
         break;
         
