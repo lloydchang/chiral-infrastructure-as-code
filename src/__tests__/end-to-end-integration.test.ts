@@ -83,7 +83,7 @@ resource "aws_db_instance" "example" {
       expect(validationResult.errors).toHaveLength(0);
 
       // Step 3: Check deployment readiness
-      const readinessResult = checkDeploymentReadiness(importedConfig);
+      const readinessResult = await checkDeploymentReadiness(importedConfig);
       expect(readinessResult.ready).toBe(true);
 
       // Step 4: Check compliance
@@ -108,8 +108,7 @@ resource "aws_db_instance" "example" {
           },
           retentionPolicy: {
             auditLogRetentionDays: 365,
-            dataRetentionDays: 2555,
-            backupRetentionDays: 2555,
+            defaultRetentionDays: 2555,
             piiRetentionDays: 2555,
           },
         },
@@ -178,6 +177,10 @@ resource aks 'Microsoft.ContainerService/managedClusters@2023-05-01' = {
           size: 'small',
           storageGb: 0,
         },
+        adfs: {
+          size: 'small',
+          windowsVersion: '2022',
+        },
       };
 
       const result = validateChiralConfig(invalidConfig);
@@ -213,6 +216,10 @@ resource aks 'Microsoft.ContainerService/managedClusters@2023-05-01' = {
           engineVersion: '15',
           size: 'large',
           storageGb: 2000,
+        },
+        adfs: {
+          size: 'large',
+          windowsVersion: '2022',
         },
         compliance: {
           encryptionAtRest: true,

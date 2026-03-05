@@ -36,7 +36,7 @@ import { TerraformImportAdapter } from './adapters/declarative/terraform-adapter
 // =================================================================
 // IMPORT HELPERS
 // =================================================================
-const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 'gcp', stackName?: string): Promise<ChiralSystem> => {
+export const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 'gcp', stackName?: string): Promise<ChiralSystem> => {
   const ext = path.extname(sourcePath);
   let resources: any[] = [];
 
@@ -1374,22 +1374,26 @@ program
       } else if (provider === 'gcp' && options.project) {
         console.log(`\n🔍 Analyzing GCP costs using gcp-cost-cli...`);
         if (GCPCostAnalyzer.isGCPCostCliAvailable()) {
-          costEstimate = await GCPCostAnalyzer.analyzeGCPCosts(options.project, {});
-          console.log(`\n📊 GCP Cost Analysis Results:`);
-          console.log(`   Total Monthly Cost: $${costEstimate.totalMonthlyCost.toFixed(2)} ${costEstimate.currency}`);
-          console.log(`   Compute: $${costEstimate.breakdown.compute.total.toFixed(2)}`);
-          console.log(`   Storage: $${costEstimate.breakdown.storage.total.toFixed(2)}`);
-          console.log(`   Network: $${costEstimate.breakdown.network.total.toFixed(2)}`);
-          console.log(`   Other: $${costEstimate.breakdown.other.total.toFixed(2)}`);
-          
-          if (costEstimate.recommendations.length > 0) {
-            console.log(`\n💡 Recommendations:`);
-            costEstimate.recommendations.forEach((rec: string) => console.log(`   • ${rec}`));
-          }
-          
-          if (costEstimate.warnings.length > 0) {
-            console.log(`\n⚠️  Warnings:`);
-            costEstimate.warnings.forEach((warn: string) => console.log(`   • ${warn}`));
+          if (options.project) {
+            costEstimate = await GCPCostAnalyzer.analyzeGCPCosts(options.project, {});
+            console.log(`\n📊 GCP Cost Analysis Results:`);
+            console.log(`   Total Monthly Cost: $${costEstimate.totalMonthlyCost.toFixed(2)} ${costEstimate.currency}`);
+            console.log(`   Compute: $${costEstimate.breakdown.compute.total.toFixed(2)}`);
+            console.log(`   Storage: $${costEstimate.breakdown.storage.total.toFixed(2)}`);
+            console.log(`   Network: $${costEstimate.breakdown.network.total.toFixed(2)}`);
+            console.log(`   Other: $${costEstimate.breakdown.other.total.toFixed(2)}`);
+            
+            if (costEstimate.recommendations.length > 0) {
+              console.log(`\n💡 Recommendations:`);
+              costEstimate.recommendations.forEach((rec: string) => console.log(`   • ${rec}`));
+            }
+            
+            if (costEstimate.warnings.length > 0) {
+              console.log(`\n⚠️  Warnings:`);
+              costEstimate.warnings.forEach((warn: string) => console.log(`   • ${warn}`));
+            }
+          } else {
+            console.log(`   ⚠️  GCP project ID required for detailed cost analysis (--project <project-id>)`);
           }
         } else {
           console.log(`   ⚠️  Install gcp-cost-cli for detailed GCP cost analysis`);

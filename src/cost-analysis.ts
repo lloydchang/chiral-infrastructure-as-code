@@ -1204,128 +1204,131 @@ resource "google_compute_instance" "adfs" {
     const sizeMap: { [key: string]: string } = {
       'small': 'db-g1-small',
       'medium': 'db-custom-2-4096',
-      'large': 'db-custom-4-8192'
-    };
-    return sizeMap[size] || 'db-g1-small';
-  }
 
+  const totalMonthlyCost = Object.values(breakdown).reduce((sum, category) => sum + category.total, 0);
 
-    try {
-      // Use gcp-cost-cli to analyze actual costs
-      const costData = await this.fetchGCPCostData(projectId, region);
-      return this.calculateGCPAnalysisCosts(costData, region, currency);
-    } catch (error) {
-      console.warn('Failed to analyze GCP costs:', error);
-      throw error;
-    }
-  }
+  return {
+    provider: 'gcp',
+    totalMonthlyCost,
+    currency,
+    breakdown,
+    recommendations: ['Install infracost or gcloud CLI for more accurate pricing'],
+    warnings: ['Using fallback pricing - install infracost for accurate costs']
+  };
+}
 
-  private static async fetchGCPCostData(projectId: string, region: string): Promise<any> {
-    // Use gcp-cost-cli to get actual billing data
-    // This is a placeholder for actual gcp-cost-cli integration
-    // Example: execSync(`gcp-cost-cli analyze --project ${projectId} --region ${region} --format json`);
-    
-    // For now, return mock data structure that gcp-cost-cli would provide
-    return {
-      projectId,
-      region,
-      services: {
-        'Compute Engine': {
-          totalCost: 220.40,
-          resources: [
-            { name: 'instance-1', cost: 75.20, type: 'VM Instance' },
-            { name: 'gke-cluster-nodes', cost: 145.20, type: 'GKE Nodes' }
-          ]
-        },
-        'Cloud SQL': {
-          totalCost: 165.85,
-          resources: [
-            { name: 'postgres-instance', cost: 165.85, type: 'Cloud SQL Instance' }
-          ]
-        },
-        'Cloud Storage': {
-          totalCost: 38.75,
-          resources: [
-            { name: 'bucket-1', cost: 38.75, type: 'Storage Bucket' }
-          ]
-        }
+private static async getGKEPricing(region: string): Promise<{ managementFee: number; nodeCost: number }> {
+  return { managementFee: 74, nodeCost: 66 }; // Simplified GKE pricing
+}
+
+private static async getCloudSQLPricingData(tier: string, region: string): Promise<number> {
+  return 100; // Simplified Cloud SQL pricing
+}
+
+static getFallbackGCPPricing(config: ChiralSystem, region: string, currency: string): CostEstimate {
+  const breakdown = this.getFallbackGCPBreakdown(config);
+  const totalMonthlyCost = Object.values(breakdown).reduce((sum, cat) => sum + cat.total, 0);
+
+  return {
+    provider: 'gcp',
+    totalMonthlyCost,
+    currency,
+    breakdown,
+    recommendations: ['Install Infracost for more accurate GCP pricing'],
+    warnings: ['Using fallback pricing - install Infracost for accurate costs']
+  };
+}
+
+private static getFallbackGCPBreakdown(config: ChiralSystem): CostBreakdown {
+  return {
+    compute: { kubernetes: config.k8s.maxNodes * 140, vm: 90, total: 0 },
+    storage: { database: config.postgres.storageGb * 0.25 + 50, vmDisk: 17, total: 0 },
+    network: { dataTransfer: 22, loadBalancer: 20, total: 0 },
+    other: { management: 32, monitoring: 16, total: 0 }
+  };
+}
+
+private static getGCPMachineType(size: string): string {
+  const sizeMap: { [key: string]: string } = {
+    'small': 'e2-small',
+    'medium': 'e2-medium',
+    'large': 'n1-standard-2'
+  };
+  return sizeMap[size] || 'e2-small';
+}
+
+private static getGCPDatabaseTier(size: string): string {
+  const sizeMap: { [key: string]: string } = {
+    'small': 'db-g1-small',
+    'medium': 'db-custom-2-4096',
+    'large': 'db-custom-4-8192'
+  };
+  return sizeMap[size] || 'db-g1-small';
+}
+
+private static async fetchGCPCostData(projectId: string, region: string): Promise<any> {
+  // Use gcp-cost-cli to get actual billing data
+  // This is a placeholder for actual gcp-cost-cli integration
+  // Example: execSync(`gcp-cost-cli analyze --project ${projectId} --region ${region} --format json`);
+  
+  // For now, return mock data structure that gcp-cost-cli would provide
+  return {
+    projectId,
+    region,
+    services: {
+      'Compute Engine': {
+        totalCost: 220.40,
+        resources: [
+          { name: 'instance-1', cost: 75.20, type: 'VM Instance' },
+          { name: 'gke-cluster-nodes', cost: 145.20, type: 'GKE Nodes' }
+        ]
       },
-      totalMonthlyCost: 425.00
-    };
-  }
-
-  private static calculateGCPAnalysisCosts(costData: any, region: string, currency: string): CostEstimate {
-    const breakdown: CostBreakdown = {
-      compute: { kubernetes: 0, vm: 0, total: 0 },
-      storage: { database: 0, vmDisk: 0, total: 0 },
-      network: { dataTransfer: 0, loadBalancer: 0, total: 0 },
-      other: { management: 0, monitoring: 0, total: 0 }
-    };
-
-    const recommendations: string[] = [];
-    const warnings: string[] = [];
-
-    // Parse gcp-cost-cli data
-    Object.entries(costData.services).forEach(([serviceName, serviceData]: [string, any]) => {
-      if (serviceName.includes('Compute Engine') || serviceName.includes('Kubernetes Engine')) {
-        serviceData.resources.forEach((resource: any) => {
-          if (resource.type.includes('GKE')) {
-            breakdown.compute.kubernetes += resource.cost;
-          } else {
-            breakdown.compute.vm += resource.cost;
-          }
-        });
-      } else if (serviceName.includes('Cloud SQL')) {
-        breakdown.storage.database = serviceData.totalCost;
-      } else if (serviceName.includes('Cloud Storage')) {
-        breakdown.storage.vmDisk = serviceData.totalCost;
-      } else if (serviceName.includes('Cloud Load Balancing')) {
-        breakdown.network.loadBalancer = serviceData.totalCost;
-      } else {
-        breakdown.other.management += serviceData.totalCost;
+      'Cloud SQL': {
+        totalCost: 165.85,
+        resources: [
+          { name: 'postgres-instance', cost: 165.85, type: 'Cloud SQL Instance' }
+        ]
+      },
+      'Cloud Storage': {
+        totalCost: 38.75,
+        resources: [
+          { name: 'bucket-1', cost: 38.75, type: 'Storage Bucket' }
+        ]
       }
-    });
+    },
+    totalMonthlyCost: 425.00
+  };
+}
 
-    // Estimate network data transfer (not directly from gcp-cost-cli)
-    breakdown.network.dataTransfer = Math.max(0, costData.totalMonthlyCost * 0.08); // Estimate 8% for data transfer
+private static calculateGCPAnalysisCosts(costData: any, region: string, currency: string): CostEstimate {
+  const breakdown: CostBreakdown = {
+    compute: { kubernetes: 0, vm: 0, total: 0 },
+    storage: { database: 0, vmDisk: 0, total: 0 },
+    network: { dataTransfer: 0, loadBalancer: 0, total: 0 },
+    other: { management: 0, monitoring: 0, total: 0 }
+  };
 
-    // Calculate totals
-    breakdown.compute.total = breakdown.compute.kubernetes + breakdown.compute.vm;
-    breakdown.storage.total = breakdown.storage.database + breakdown.storage.vmDisk;
-    breakdown.network.total = breakdown.network.dataTransfer + breakdown.network.loadBalancer;
-    breakdown.other.total = breakdown.other.management + breakdown.other.monitoring;
+  const recommendations: string[] = [];
+  const warnings: string[] = [];
 
-    const totalMonthlyCost = costData.totalMonthlyCost || Object.values(breakdown).reduce((sum, cat) => sum + cat.total, 0);
-
-    // Generate recommendations based on actual usage
-    if (breakdown.compute.vm > 180) {
-      recommendations.push('Consider Committed Use Discounts for sustained compute usage');
-    }
-
-    if (breakdown.storage.database > 140) {
-      recommendations.push('Consider Cloud SQL Enterprise edition for high-performance workloads');
-    }
-
-    if (totalMonthlyCost > 1000) {
-      warnings.push(`High actual monthly cost: $${totalMonthlyCost.toFixed(2)}`);
-    }
-
-    return {
-      provider: 'gcp',
-      totalMonthlyCost,
-      currency,
-      breakdown,
-      recommendations,
-      warnings
-    };
-  }
-
-  static async analyzeGCPCosts(projectId: string, options: CostAnalysisOptions = {}): Promise<CostEstimate> {
-    const region = options.region || 'us-central1';
-    const currency = options.currency || 'USD';
-
-    try {
-      // Use gcp-cost-cli to analyze actual costs
+  // Parse gcp-cost-cli data
+  Object.entries(costData.services).forEach(([serviceName, serviceData]: [string, any]) => {
+    if (serviceName.includes('Compute Engine') || serviceName.includes('Kubernetes Engine')) {
+      serviceData.resources.forEach((resource: any) => {
+        if (resource.type.includes('GKE')) {
+          breakdown.compute.kubernetes += resource.cost;
+        } else {
+          breakdown.compute.vm += resource.cost;
+        }
+      });
+    } else if (serviceName.includes('Cloud SQL')) {
+      breakdown.storage.database = serviceData.totalCost;
+    } else if (serviceName.includes('Cloud Storage')) {
+      breakdown.storage.vmDisk = serviceData.totalCost;
+    } else if (serviceName.includes('Cloud Load Balancing')) {
+      breakdown.network.loadBalancer = serviceData.totalCost;
+    } else {
+      breakdown.other.management += serviceData.totalCost;
       const costData = await this.fetchGCPCostData(projectId, region);
       return this.calculateGCPAnalysisCosts(costData, region, currency);
     } catch (error) {
