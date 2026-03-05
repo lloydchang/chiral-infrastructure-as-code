@@ -105,8 +105,8 @@ describe('TerraformImportAdapter', () => {
     it('should provide default values for required fields', async () => {
       const chiralSystem = await TerraformImportAdapter.importFromTerraform(testConfig);
 
-      expect(chiralSystem.projectName).toBe('imported-from-terraform');
-      expect(chiralSystem.environment).toBe('dev');
+      expect(chiralSystem.projectName).toBe('imported-infrastructure');
+      expect(chiralSystem.environment).toBe('prod');
       expect(chiralSystem.networkCidr).toBe('10.0.0.0/16');
     });
 
@@ -144,8 +144,7 @@ describe('TerraformImportAdapter', () => {
       expect(chiralSystem.adfs).toBeDefined();
     });
 
-    it('should be ready for HCL parsing implementation', async () => {
-      // This test documents the expected structure for when HCL parsing is implemented
+    it('should map AWS resources to Chiral intent correctly', async () => {
       const mockResources: ParsedTerraformResource[] = [
         {
           resourceType: 'aws_eks_cluster',
@@ -163,16 +162,42 @@ describe('TerraformImportAdapter', () => {
           config: {
             engine: 'postgres',
             engine_version: '15',
-            instance_class: 'db.t3.medium'
+            instance_class: 'db.t3.medium',
+            allocated_storage: 100
+          }
+        },
+        {
+          resourceType: 'aws_instance',
+          resourceName: 'my-vm',
+          config: {
+            instance_type: 't3.medium'
+          }
+        },
+        {
+          resourceType: 'aws_vpc',
+          resourceName: 'main',
+          config: {
+            cidr_block: '10.0.0.0/16'
           }
         }
       ];
 
-      // When implemented, this should map resources to Chiral intent
       const intent = await TerraformImportAdapter.convertToChiralIntent(mockResources, 'aws');
 
-      // Currently returns defaults, but structure should support mapping
-      expect(intent).toBeDefined();
+      // Verify EKS cluster mapping
+      expect(intent.k8s?.version).toBe('1.28');
+      expect(intent.k8s?.size).toBe('medium'); // default since no node groups specified
+
+      // Verify RDS mapping
+      expect(intent.postgres?.engineVersion).toBe('15');
+      expect(intent.postgres?.size).toBe('medium'); // db.t3.medium maps to medium
+      expect(intent.postgres?.storageGb).toBe(100);
+
+      // Verify EC2 instance mapping (AD FS)
+      expect(intent.adfs?.size).toBe('medium'); // t3.medium maps to medium
+
+      // Verify VPC mapping
+      expect(intent.networkCidr).toBe('10.0.0.0/16');
     });
   });
 
