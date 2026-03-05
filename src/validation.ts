@@ -818,14 +818,21 @@ export function checkCompliance(
     }
 
     if (level === 'high') {
-      const nistResult = validateNISTHighCompliance(config);
-      violations.push(...nistResult.errors);
-      // Add cost optimization recommendations
-      // const costOptimizations = CostOptimizer.analyzeConfiguration(config);
-      // recommendations.push(...costOptimizations);
-      const costOptimizations: string[] = []; // Temporary fix
-      recommendations.push(...costOptimizations);
-      recommendations.push(...nistResult.recommendations);
+      if (!config.compliance?.securityControls?.privilegedAccessManagement) {
+        violations.push(`NIST HIGH: Privileged access management required`);
+        recommendations.push('Implement PAM for privileged account management');
+      }
+
+      // High-level specific requirements
+      if (config.postgres && config.postgres.storageGb < 100 && config.environment === 'prod') {
+        violations.push('NIST HIGH: Production databases must have enhanced storage capacity');
+        recommendations.push('Configure at least 100GB storage for high-impact production databases');
+      }
+
+      if (config.k8s && config.k8s.minNodes < 3 && config.environment === 'prod') {
+        violations.push('NIST HIGH: High-impact production environments require enhanced availability');
+        recommendations.push('Deploy at least 3 nodes for high-impact production workloads');
+      }
     }
   }
 
