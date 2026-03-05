@@ -30,13 +30,13 @@ describe('Chiral Generation Integration', () => {
     it('should generate deployable Bicep template', () => {
       const bicepContent = AzureBicepAdapter.generate(testIntent);
 
-      // Validate Bicep structure
+      // Validate Bicep structure (AVM modules)
       expect(bicepContent).toContain('@description');
       expect(bicepContent).toContain('param location');
       expect(bicepContent).toContain('param adminPassword');
-      expect(bicepContent).toContain('Microsoft.Network/virtualNetworks');
-      expect(bicepContent).toContain('Microsoft.ContainerService/managedClusters');
-      expect(bicepContent).toContain('Microsoft.DBforPostgreSQL/flexibleServers');
+      expect(bicepContent).toContain('br/public:avm/res/network/virtual-network:0.6.1');
+      expect(bicepContent).toContain('br/public:avm/res/container-service/managed-cluster:0.1.0');
+      expect(bicepContent).toContain('br/public:avm/res/db-for-postgre-sql/flexible-server:0.1.0');
       expect(bicepContent).toContain('Microsoft.Compute/virtualMachines');
 
       // Validate resource naming

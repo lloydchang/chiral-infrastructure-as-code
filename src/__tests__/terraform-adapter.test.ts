@@ -14,10 +14,34 @@ describe('TerraformImportAdapter', () => {
     });
 
     it('should return an array of ParsedTerraformResource', async () => {
-      // Since it's a TODO implementation, it returns empty array
-      const resources = await TerraformImportAdapter.parseTerraformFiles(testConfig.sourcePath, testConfig.provider);
+      // Create a test Terraform file
+      const testContent = `
+resource "aws_eks_cluster" "test" {
+  name = "test-cluster"
+  version = "1.28"
+}
+
+resource "aws_db_instance" "test" {
+  engine = "postgres"
+  engine_version = "15"
+  instance_class = "db.t3.medium"
+}
+`;
+      
+      // Write to a temporary file for testing
+      const tempDir = '/tmp/test-terraform';
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+      fs.writeFileSync(path.join(tempDir, 'test.tf'), testContent);
+      
+      const resources = await TerraformImportAdapter.parseTerraformFiles(tempDir, 'aws');
+      
       expect(Array.isArray(resources)).toBe(true);
-      expect(resources.length).toBe(0);
+      expect(resources.length).toBeGreaterThan(0);
+      
+      // Clean up
+      fs.rmSync(tempDir, { recursive: true, force: true });
     });
 
     it('should handle different providers', async () => {
