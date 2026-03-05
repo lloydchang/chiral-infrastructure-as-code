@@ -1,0 +1,292 @@
+name: Security Compliance Check
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  security-compliance:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      security-events: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build project
+      run: npm run build
+
+    - name: Run security compliance validation
+      run: |
+        echo "🔒 Running ISO 27001:2022 compliance check..."
+        npx ts-node src/main.ts validate -c chiral.config.ts --compliance iso27001 || exit 1
+        
+        echo "☁️ Running ISO 27017 cloud security check..."
+        npx ts-node src/main.ts validate -c chiral.config.ts --compliance iso27017 || exit 1
+        
+        echo "🔐 Running ISO 27018 privacy check..."
+        npx ts-node src/main.ts validate -c chiral.config.ts --compliance iso27018 || exit 1
+        
+        echo "🇪🇺 Running GDPR compliance check..."
+        npx ts-node src/main.ts validate -c chiral.config.ts --compliance gdpr || exit 1
+
+    - name: Generate comprehensive compliance report
+      run: |
+        npx ts-node src/main.ts compliance-report -c chiral.config.ts -o compliance-report.md --frameworks iso27001,iso27017,iso27018,gdpr
+
+    - name: Run security scan
+      run: |
+        echo "🔍 Running security vulnerability scan..."
+        npm audit --audit-level=high
+        
+        echo "🛡️ Running infrastructure security scan..."
+        npx ts-node src/main.ts security-scan -c chiral.config.ts
+
+    - name: Validate configuration security
+      run: |
+        echo "✅ Validating configuration security..."
+        npx ts-node src/main.ts validate -c chiral.config.ts --security
+
+    - name: Check for hardcoded secrets
+      uses: trufflesecurity/trufflehog@main
+      with:
+        base: main
+        head: HEAD
+
+    - name: Run dependency security check
+      run: |
+        echo "📦 Checking dependencies for security vulnerabilities..."
+        npm audit --audit-level=moderate
+
+    - name: Upload compliance report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: compliance-report
+        path: compliance-report.md
+        retention-days: 30
+
+    - name: Upload security scan results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-scan-results
+        path: |
+          security-scan-results.json
+          npm-audit-report.json
+        retention-days: 30
+
+    - name: Comment PR with compliance results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          try {
+            const complianceReport = fs.readFileSync('compliance-report.md', 'utf8');
+            const comment = `## 🔒 Security Compliance Report
+            
+            ${complianceReport}
+            
+            ---
+            *This report was generated automatically by the security compliance pipeline.*
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          } catch (error) {
+            console.log('Could not read compliance report:', error.message);
+          }
+
+    - name: Update security metrics
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "📊 Updating security metrics..."
+        # Update security metrics dashboard or monitoring system
+        # This could integrate with your security information and event management (SIEM) system
+
+    - name: Notify security team on failures
+      if: failure()
+      run: |
+        echo "🚨 Security compliance check failed!"
+        # Send notification to security team
+        # This could integrate with Slack, Teams, or other notification systems
+
+  privacy-impact-assessment:
+    runs-on: ubuntu-latest
+    needs: security-compliance
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run Privacy Impact Assessment
+      run: |
+        echo "🔐 Running Privacy Impact Assessment..."
+        npx ts-node src/main.ts privacy-assessment -c chiral.config.ts -o pia-report.md
+
+    - name: Validate privacy controls
+      run: |
+        echo "🛡️ Validating privacy controls..."
+        npx ts-node src/main.ts validate -c chiral.config.ts --privacy
+
+    - name: Upload PIA report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: pia-report
+        path: pia-report.md
+        retention-days: 90
+
+  cloud-security-validation:
+    runs-on: ubuntu-latest
+    needs: security-compliance
+    strategy:
+      matrix:
+        cloud: [aws, azure, gcp]
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Validate cloud-specific security
+      run: |
+        echo "☁️ Validating ${{ matrix.cloud }} security controls..."
+        npx ts-node src/main.ts validate -c chiral.config.ts --cloud ${{ matrix.cloud }} --compliance iso27017
+
+    - name: Generate cloud security report
+      run: |
+        npx ts-node src/main.ts cloud-security-report -c chiral.config.ts --cloud ${{ matrix.cloud }} -o ${{ matrix.cloud }}-security-report.md
+
+    - name: Upload cloud security report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ${{ matrix.cloud }}-security-report
+        path: ${{ matrix.cloud }}-security-report.md
+        retention-days: 30
+
+  continuous-monitoring:
+    runs-on: ubuntu-latest
+    needs: [security-compliance, privacy-impact-assessment, cloud-security-validation]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Setup monitoring
+      run: |
+        echo "📊 Setting up continuous security monitoring..."
+        # This could set up monitoring alerts, dashboards, or integrate with monitoring tools
+
+    - name: Generate compliance metrics
+      run: |
+        echo "📈 Generating compliance metrics..."
+        npx ts-node src/main.ts compliance-metrics -c chiral.config.ts -o compliance-metrics.json
+
+    - name: Update compliance dashboard
+      run: |
+        echo "📋 Updating compliance dashboard..."
+        # This could update a compliance dashboard or send metrics to a monitoring system
+
+    - name: Archive compliance data
+      uses: actions/upload-artifact@v4
+      with:
+        name: compliance-archive-${{ github.run_number }}
+        path: |
+          compliance-report.md
+          pia-report.md
+          *-security-report.md
+          compliance-metrics.json
+        retention-days: 365
+
+  security-testing:
+    runs-on: ubuntu-latest
+    needs: security-compliance
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run security tests
+      run: |
+        echo "🧪 Running security tests..."
+        npm run test:security
+
+    - name: Run penetration tests
+      run: |
+        echo "🔍 Running penetration tests..."
+        npm run test:penetration
+
+    - name: Run compliance tests
+      run: |
+        echo "✅ Running compliance tests..."
+        npm run test:compliance
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-test-results
+        path: |
+          test-results/
+          coverage/
+        retention-days: 30
