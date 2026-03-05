@@ -31,7 +31,7 @@ Chiral Infrastructure as Code is a **stateless multi-cloud infrastructure genera
 - ✅ **Multi-Cloud Output**: Single config → AWS, Azure, GCP artifacts
 - ✅ **Familiar Interfaces**: Terraform provider syntax, gradual migration
 - ✅ **Cost Intelligence**: Real-time multi-cloud cost comparison
-- ✅ **Compliance-First**: Built-in SOC 2, ISO 27001, HIPAA, FedRAMP
+- ✅ **Compliance-First**: Built-in SOC 2, ISO 27001, HIPAA, FedRAMP (Low/Moderate/High), GovRAMP (Low/Moderate/High)
 
 ## 🚀 Installation & Setup
 
@@ -679,15 +679,136 @@ export const iso27001Config = {
 
 #### FedRAMP Compliance
 
+Chiral supports all three FedRAMP impact levels: Low, Moderate, and High.
+
+##### FedRAMP Low Impact
+
+Basic security controls for low-risk systems.
+
 ```typescript
-export const fedrampConfig = {
+export const fedrampLowConfig = {
   compliance: {
-    framework: 'fedramp',
+    framework: 'fedramp-low',
+    encryptionAtRest: true,
+    auditLogging: true,
     dataResidency: {
-      aws: 'us-gov-east-1',    // GovCloud required
-      azure: 'usgovvirginia',   // Government cloud
-      gcp: 'us-central1'        // Standard (GCP doesn't have GovCloud)
+      aws: 'us-east-1',        // Commercial cloud allowed
+      azure: 'East US',
+      gcp: 'us-central1'
     }
+  }
+};
+```
+
+##### FedRAMP Moderate Impact
+
+Enhanced controls for moderate-risk systems, often requiring government cloud.
+
+```typescript
+export const fedrampModerateConfig = {
+  compliance: {
+    framework: 'fedramp-moderate',
+    encryptionAtRest: true,
+    auditLogging: true,
+    dataResidency: {
+      aws: 'us-gov-east-1',    // GovCloud recommended
+      azure: 'usgovvirginia',   // Government cloud required
+      gcp: 'us-central1'        // Commercial with compensating controls
+    }
+  }
+};
+```
+
+##### FedRAMP High Impact
+
+Most stringent controls for high-risk systems, requiring government cloud and additional safeguards.
+
+```typescript
+export const fedrampHighConfig = {
+  compliance: {
+    framework: 'fedramp-high',
+    encryptionAtRest: true,
+    auditLogging: true,
+    dataResidency: {
+      aws: 'us-gov-east-1',    // GovCloud mandatory
+      azure: 'usgovvirginia',   // Government cloud mandatory
+      gcp: 'us-central1'        // Requires additional security controls
+    }
+  },
+  // Additional high-impact requirements
+  k8s: {
+    minNodes: 3,              // Enhanced availability
+    maxNodes: 15,             // Controlled scaling
+    size: 'large'
+  }
+};
+```
+
+#### GovRAMP Compliance (formerly StateRAMP)
+
+GovRAMP provides compliance standards for state and local government agencies. Chiral supports GovRAMP across all impact levels.
+
+##### GovRAMP Low Impact
+
+```typescript
+export const govrampLowConfig = {
+  compliance: {
+    framework: 'govramp-low',
+    encryptionAtRest: true,
+    auditLogging: true,
+    dataResidency: {
+      aws: 'us-east-1',        // Data residency within state boundaries
+      azure: 'East US',
+      gcp: 'us-central1'
+    }
+  }
+};
+```
+
+##### GovRAMP Moderate Impact
+
+```typescript
+export const govrampModerateConfig = {
+  compliance: {
+    framework: 'govramp-moderate',
+    encryptionAtRest: true,
+    auditLogging: true,
+    dataResidency: {
+      aws: 'us-east-1',        // State-specific data residency
+      azure: 'East US',
+      gcp: 'us-central1'
+    }
+  },
+  k8s: {
+    minNodes: 2,              // High availability for state systems
+    maxNodes: 10,
+    size: 'large'
+  }
+};
+```
+
+##### GovRAMP High Impact
+
+```typescript
+export const govrampHighConfig = {
+  compliance: {
+    framework: 'govramp-high',
+    encryptionAtRest: true,
+    auditLogging: true,
+    dataResidency: {
+      aws: 'us-east-1',        // Strict state data residency
+      azure: 'East US',
+      gcp: 'us-central1'
+    }
+  },
+  k8s: {
+    minNodes: 3,              // Maximum availability
+    maxNodes: 12,             // Controlled scaling for oversight
+    size: 'large'
+  },
+  postgres: {
+    storageGb: 100,           // Minimum storage requirements
+    engineVersion: '15'
   }
 };
 ```

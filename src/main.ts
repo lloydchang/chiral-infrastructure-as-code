@@ -1459,10 +1459,10 @@ program
   .command('validate')
   .description('Validate Chiral configuration for deployment readiness')
   .requiredOption('-c, --config <path>', 'Path to chiral config file')
-  .option('--compliance <framework>', 'Compliance framework to check (soc2, iso27001, hipaa, fedramp-low, fedramp-moderate, fedramp-high, dod-il2, dod-il4, dod-il5, dod-il6)', 'none')
+  .option('--compliance <framework>', 'Compliance framework to check (soc2, iso27001, hipaa, fedramp-low, fedramp-moderate, fedramp-high, govramp-low, govramp-moderate, govramp-high, hitrust-low, hitrust-moderate, hitrust-high, hitech-low, hitech-moderate, hitech-high, hipaa-low, hipaa-moderate, hipaa-high, nist-low, nist-moderate, nist-high)', 'none')
   .action(async (options) => {
     const configPath = path.resolve(options.config);
-    const framework = options.compliance as 'soc2' | 'iso27001' | 'hipaa' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'dod-il2' | 'dod-il4' | 'dod-il5' | 'dod-il6' | 'none' || 'none';
+    const framework = options.compliance as 'soc2' | 'iso27001' | 'hipaa' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'govramp-low' | 'govramp-moderate' | 'govramp-high' | 'hitrust-low' | 'hitrust-moderate' | 'hitrust-high' | 'hitech-low' | 'hitech-moderate' | 'hitech-high' | 'hipaa-low' | 'hipaa-moderate' | 'hipaa-high' | 'nist-low' | 'nist-moderate' | 'nist-high' | 'none';
 
     console.log(`\n🔍 Validating Chiral Configuration`);
     console.log(`   Config: ${configPath}`);
