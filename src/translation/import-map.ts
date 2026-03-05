@@ -23,15 +23,15 @@ const awsDbClassToSize: { [key: string]: WorkloadSize } = {
 // Azure mappings
 const azureVmSizeToSize: { [key: string]: WorkloadSize } = {
   'Standard_B1s': 'small',
-  'Standard_B2s': 'small',
-  'Standard_D2s_v3': 'small', // Legacy mapping - was incorrectly labeled as small
+  'Standard_B2s': 'medium', // Fixed: was incorrectly mapped to small
+  'Standard_D2s_v3': 'medium', // Fixed: was incorrectly mapped to small
   'Standard_D4s_v3': 'large',
 };
 
 const azureDbSkuToSize: { [key: string]: WorkloadSize } = {
   'Standard_B1s': 'small',
-  'Standard_B2s': 'small',
-  'Standard_D2s_v3': 'small', // Legacy mapping - was incorrectly labeled as small
+  'Standard_B2s': 'medium', // Fixed: was incorrectly mapped to small
+  'Standard_D2s_v3': 'large', // This is used for large DB instances
   'Standard_D4s_v3': 'large',
 };
 

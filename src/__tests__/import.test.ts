@@ -11,7 +11,7 @@ describe('Import Mappings', () => {
 
     it('maps Azure VM sizes correctly', () => {
       expect(mapInstanceTypeToWorkloadSize('Standard_B1s', 'azure')).toBe('small');
-      expect(mapInstanceTypeToWorkloadSize('Standard_D2s_v3', 'azure')).toBe('small'); // Legacy mapping
+      expect(mapInstanceTypeToWorkloadSize('Standard_D2s_v3', 'azure')).toBe('medium'); // Fixed mapping
       expect(mapInstanceTypeToWorkloadSize('Standard_D4s_v3', 'azure')).toBe('large');
     });
 
@@ -30,7 +30,8 @@ describe('Import Mappings', () => {
     });
 
     it('maps Azure DB SKUs correctly', () => {
-      expect(mapDbClassToWorkloadSize('Standard_B2s', 'azure')).toBe('small');
+      expect(mapDbClassToWorkloadSize('Standard_B1s', 'azure')).toBe('small');
+      expect(mapDbClassToWorkloadSize('Standard_B2s', 'azure')).toBe('medium'); // Fixed mapping
       expect(mapDbClassToWorkloadSize('Standard_D4s_v3', 'azure')).toBe('large');
     });
 
