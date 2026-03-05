@@ -23,7 +23,7 @@ export interface DriftDetectionResult {
 }
 
 export interface ComplianceCheck {
-  framework: 'soc2' | 'iso27001' | 'hipaa' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'govramp-low' | 'govramp-moderate' | 'govramp-high' | 'dod-il2' | 'dod-il4' | 'dod-il5' | 'dod-il6' | 'none';
+  framework: 'soc2' | 'iso27001' | 'hipaa' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'govramp-low' | 'govramp-moderate' | 'govramp-high' | 'hitrust-low' | 'hitrust-moderate' | 'hitrust-high' | 'hitech-low' | 'hitech-moderate' | 'hitech-high' | 'hipaa-low' | 'hipaa-moderate' | 'hipaa-high' | 'nist-low' | 'nist-moderate' | 'nist-high' | 'dod-il2' | 'dod-il4' | 'dod-il5' | 'dod-il6' | 'none';
   compliant: boolean;
   violations: string[];
   recommendations: string[];
@@ -534,6 +534,70 @@ export function checkCompliance(
       if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 3) {
         violations.push('NIST 800-53 HIGH: SI-4 (Information System Monitoring) - High-impact systems require enhanced monitoring');
         recommendations.push('Deploy at least 3 nodes for comprehensive system monitoring (NIST SI-4)');
+      }
+    }
+  // DOD Impact Level compliance checks
+  if (framework.startsWith('dod-')) {
+    const level = framework.split('-')[1]; // 'il2', 'il4', 'il5', 'il6'
+
+    // Common controls for all DOD IL levels - based on NIST 800-53 but DOD-specific
+    if (!config.compliance?.encryptionAtRest) {
+      violations.push(`DOD IL${level.toUpperCase()}: Encryption at rest required`);
+      recommendations.push('Enable encryption at rest for all data stores');
+    }
+
+    if (!config.compliance?.auditLogging) {
+      violations.push(`DOD IL${level.toUpperCase()}: Comprehensive audit logging required`);
+      recommendations.push('Enable detailed audit logging for all resources');
+    }
+
+    if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 2) {
+      violations.push(`DOD IL${level.toUpperCase()}: Production environments must have high availability`);
+      recommendations.push('Deploy at least 2 nodes for fault tolerance');
+    }
+
+    // Level-specific checks
+    if (level === 'il4' || level === 'il5' || level === 'il6') {
+      // Moderate and higher require government cloud or equivalent controls
+      if (config.region?.aws && !config.region.aws.includes('gov')) {
+        violations.push(`DOD IL${level.toUpperCase()}: AWS GovCloud or equivalent controls required`);
+        recommendations.push('Use AWS GovCloud regions or implement compensating controls');
+      }
+
+      if (config.region?.azure && !config.region.azure.includes('usgov')) {
+        violations.push(`DOD IL${level.toUpperCase()}: Azure Government required`);
+        recommendations.push('Use Azure Government regions');
+      }
+
+      if (config.postgres && config.postgres.storageGb < 50 && config.environment === 'prod') {
+        violations.push(`DOD IL${level.toUpperCase()}: Production databases must have minimum 50GB storage`);
+        recommendations.push('Increase database storage to meet compliance requirements');
+      }
+    }
+
+    if (level === 'il5' || level === 'il6') {
+      // High impact additional requirements
+      if (config.k8s && config.k8s.maxNodes > 20) {
+        violations.push(`DOD IL${level.toUpperCase()}: Large node counts require additional security controls`);
+        recommendations.push('Implement additional security monitoring for large clusters');
+      }
+
+      if (!config.region) {
+        violations.push(`DOD IL${level.toUpperCase()}: Explicit region specification required`);
+        recommendations.push('Specify regions for all cloud providers to ensure data sovereignty');
+      }
+    }
+
+    if (level === 'il6') {
+      // Highest impact - most stringent requirements
+      if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 3) {
+        violations.push('DOD IL6: Highest impact systems require enhanced availability');
+        recommendations.push('Deploy at least 3 nodes for critical systems');
+      }
+
+      if (!config.compliance?.dataResidency) {
+        violations.push('DOD IL6: Data residency controls required for highest impact systems');
+        recommendations.push('Specify data residency regions and implement strict controls');
       }
     }
   }

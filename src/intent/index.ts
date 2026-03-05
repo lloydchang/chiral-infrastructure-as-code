@@ -6,7 +6,7 @@
 
 export type EnvironmentTier = 'dev' | 'prod';
 export type WorkloadSize = 'small' | 'medium' | 'large';
-export type ComplianceFramework = 'none' | 'soc2' | 'iso27001' | 'hipaa' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'govramp-low' | 'govramp-moderate' | 'govramp-high' | 'hitrust-low' | 'hitrust-moderate' | 'hitrust-high' | 'hitech-low' | 'hitech-moderate' | 'hitech-high' | 'hipaa-low' | 'hipaa-moderate' | 'hipaa-high' | 'nist-low' | 'nist-moderate' | 'nist-high';
+export type ComplianceFramework = 'none' | 'soc2' | 'iso27001' | 'hipaa' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'govramp-low' | 'govramp-moderate' | 'govramp-high' | 'hitrust-low' | 'hitrust-moderate' | 'hitrust-high' | 'hitech-low' | 'hitech-moderate' | 'hitech-high' | 'hipaa-low' | 'hipaa-moderate' | 'hipaa-high' | 'nist-low' | 'nist-moderate' | 'nist-high' | 'dod-il2' | 'dod-il4' | 'dod-il5' | 'dod-il6';
 export type DeploymentStrategy = 'greenfield' | 'progressive' | 'parallel';
 
 export interface KubernetesIntent {

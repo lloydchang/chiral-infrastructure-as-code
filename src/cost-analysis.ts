@@ -1526,7 +1526,12 @@ export class AzureCostAnalyzer {
     const currency = options.currency || 'USD';
 
     if (!this.isAvailable()) {
-      console.warn('azure-cost-cli not found, using fallback pricing estimation');
+      console.warn('⚠️  azure-cost-cli not found - using fallback pricing estimation');
+      console.warn('💡 For more accurate Azure cost analysis, install azure-cost-cli:');
+      console.warn('   npm install -g azure-cost-cli');
+      console.warn('   # or');
+      console.warn('   cargo install azure-cost-cli');
+      console.warn('   See README.md for full installation instructions.');
       return this.getFallbackAzurePricing(config, region, currency);
     }
 
