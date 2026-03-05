@@ -15,6 +15,7 @@ describe('Compliance Checks', () => {
         compliance: {
           framework: 'iso27001',
           encryptionAtRest: true,
+          encryptionInTransit: true,
           auditLogging: true,
           securityControls: {
             backupAndRecovery: true,

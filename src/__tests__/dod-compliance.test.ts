@@ -44,7 +44,7 @@ describe('DoD Compliance Tests', () => {
 
   describe('DoD IL2 Compliance', () => {
     it('should pass IL2 compliance with proper configuration', () => {
-      const result = checkCompliance(testConfig, 'dod-il2');
+      const result = checkCompliance(testConfig, 'dod-il2' as ComplianceFramework);
       
       expect(result.framework).toBe('dod-il2');
       expect(result.compliant).toBe(true);
@@ -54,7 +54,7 @@ describe('DoD Compliance Tests', () => {
     it('should fail IL2 compliance without encryption at rest', () => {
       testConfig.compliance!.encryptionAtRest = false;
       
-      const result = checkCompliance(testConfig, 'dod-il2');
+      const result = checkCompliance(testConfig, 'dod-il2' as ComplianceFramework);
       
       expect(result.compliant).toBe(false);
       expect(result.violations).toContain('DoD IL2: Encryption at rest required for defense data');
@@ -64,7 +64,7 @@ describe('DoD Compliance Tests', () => {
     it('should fail IL2 compliance without audit logging', () => {
       testConfig.compliance!.auditLogging = false;
       
-      const result = checkCompliance(testConfig, 'dod-il2');
+      const result = checkCompliance(testConfig, 'dod-il2' as ComplianceFramework);
       
       expect(result.compliant).toBe(false);
       expect(result.violations).toContain('DoD IL2: Comprehensive audit logging required');
@@ -78,7 +78,7 @@ describe('DoD Compliance Tests', () => {
         gcp: 'us-central1' // Commercial region
       };
       
-      const result = checkCompliance(testConfig, 'dod-il2');
+      const result = checkCompliance(testConfig, 'dod-il2' as ComplianceFramework);
       
       expect(result.compliant).toBe(false);
       expect(result.violations).toContain('DoD IL2: AWS GovCloud recommended for CUI workloads');
@@ -88,7 +88,7 @@ describe('DoD Compliance Tests', () => {
     it('should fail IL2 compliance with default network CIDR', () => {
       testConfig.networkCidr = '10.0.0.0/16';
       
-      const result = checkCompliance(testConfig, 'dod-il2');
+      const result = checkCompliance(testConfig, 'dod-il2' as ComplianceFramework);
       
       expect(result.compliant).toBe(false);
       expect(result.violations).toContain('DoD IL2: Default network CIDR may not meet security requirements');
@@ -97,7 +97,7 @@ describe('DoD Compliance Tests', () => {
 
   describe('DoD IL4 Compliance', () => {
     beforeEach(() => {
-      testConfig.compliance!.framework = 'dod-il4';
+      testConfig.compliance!.framework = 'dod-il4' as ComplianceFramework;
     });
 
     it('should pass IL4 compliance with GovCloud regions', () => {
@@ -107,7 +107,7 @@ describe('DoD Compliance Tests', () => {
         gcp: 'us-gov-west1'
       };
       
-      const result = checkCompliance(testConfig, 'dod-il4');
+      const result = checkCompliance(testConfig, 'dod-il4' as ComplianceFramework);
       
       expect(result.framework).toBe('dod-il4');
       expect(result.compliant).toBe(true);
@@ -121,7 +121,7 @@ describe('DoD Compliance Tests', () => {
         gcp: 'us-gov-west1' // Gov - should pass
       };
       
-      const result = checkCompliance(testConfig, 'dod-il4');
+      const result = checkCompliance(testConfig, 'dod-il4' as ComplianceFramework);
       
       expect(result.compliant).toBe(false);
       expect(result.violations).toContain('DoD IL4: AWS GovCloud required for IL4 workloads');
@@ -130,7 +130,7 @@ describe('DoD Compliance Tests', () => {
     it('should require minimum database storage for production', () => {
       testConfig.postgres.storageGb = 25; // Below 50GB requirement
       
-      const result = checkCompliance(testConfig, 'dod-il4');
+      const result = checkCompliance(testConfig, 'dod-il4' as ComplianceFramework);
       
       expect(result.compliant).toBe(false);
       expect(result.violations).toContain('DoD IL4: Production databases must have minimum 50GB storage');
@@ -139,7 +139,7 @@ describe('DoD Compliance Tests', () => {
     it('should flag large node counts', () => {
       testConfig.k8s.maxNodes = 25; // Above 20 node limit
       
-      const result = checkCompliance(testConfig, 'dod-il4');
+      const result = checkCompliance(testConfig, 'dod-il4' as ComplianceFramework);
       
       expect(result.compliant).toBe(false);
       expect(result.violations).toContain('DoD IL4: Large node counts require additional security controls');
@@ -148,7 +148,7 @@ describe('DoD Compliance Tests', () => {
 
   describe('DoD IL5 Compliance', () => {
     beforeEach(() => {
-      testConfig.compliance!.framework = 'dod-il5';
+      testConfig.compliance!.framework = 'dod-il5' as ComplianceFramework;
       testConfig.k8s.minNodes = 3; // IL5 requires minimum 3 nodes
       testConfig.postgres.storageGb = 100; // IL5 requires minimum 100GB
     });
@@ -160,7 +160,7 @@ describe('DoD Compliance Tests', () => {
         gcp: 'us-gov-west1'
       };
       
-      const result = checkCompliance(testConfig, 'dod-il5');
+      const result = checkCompliance(testConfig, 'dod-il5' as ComplianceFramework);
       
       expect(result.framework).toBe('dod-il5');
       expect(result.compliant).toBe(true);
@@ -174,7 +174,7 @@ describe('DoD Compliance Tests', () => {
         gcp: 'us-gov-west1'
       };
       
-      const result = checkCompliance(testConfig, 'dod-il5');
+      const result = checkCompliance(testConfig, 'dod-il5' as ComplianceFramework);
       
       expect(result.compliant).toBe(false);
       expect(result.violations).toContain('DoD IL5: AWS GovCloud (Secret Region) required');
@@ -183,7 +183,7 @@ describe('DoD Compliance Tests', () => {
     it('should require minimum 3 nodes for high availability', () => {
       testConfig.k8s.minNodes = 2; // Below IL5 requirement
       
-      const result = checkCompliance(testConfig, 'dod-il5');
+      const result = checkCompliance(testConfig, 'dod-il5' as ComplianceFramework);
       
       expect(result.compliant).toBe(false);
       expect(result.violations).toContain('DoD IL5: High-security environments require enhanced availability');
@@ -192,7 +192,7 @@ describe('DoD Compliance Tests', () => {
     it('should require minimum 100GB database storage', () => {
       testConfig.postgres.storageGb = 75; // Below IL5 requirement
       
-      const result = checkCompliance(testConfig, 'dod-il5');
+      const result = checkCompliance(testConfig, 'dod-il5' as ComplianceFramework);
       
       expect(result.compliant).toBe(false);
       expect(result.violations).toContain('DoD IL5: Production databases must have minimum 100GB storage');
@@ -201,7 +201,7 @@ describe('DoD Compliance Tests', () => {
     it('should require explicit region specification', () => {
       delete testConfig.region;
       
-      const result = checkCompliance(testConfig, 'dod-il5');
+      const result = checkCompliance(testConfig, 'dod-il5' as ComplianceFramework);
       
       expect(result.compliant).toBe(false);
       expect(result.violations).toContain('DoD IL5: Explicit region specification required for data sovereignty');
@@ -210,12 +210,12 @@ describe('DoD Compliance Tests', () => {
 
   describe('DoD IL6 Compliance', () => {
     beforeEach(() => {
-      testConfig.compliance!.framework = 'dod-il6';
+      testConfig.compliance!.framework = 'dod-il6' as ComplianceFramework;
       testConfig.k8s.maxNodes = 5; // IL6 requires minimal attack surface
     });
 
     it('should always recommend specialized environments', () => {
-      const result = checkCompliance(testConfig, 'dod-il6');
+      const result = checkCompliance(testConfig, 'dod-il6' as ComplianceFramework);
       
       expect(result.framework).toBe('dod-il6');
       expect(result.compliant).toBe(false); // IL6 always fails due to specialized requirements
@@ -226,7 +226,7 @@ describe('DoD Compliance Tests', () => {
     it('should require production environment', () => {
       testConfig.environment = 'dev';
       
-      const result = checkCompliance(testConfig, 'dod-il6');
+      const result = checkCompliance(testConfig, 'dod-il6' as ComplianceFramework);
       
       expect(result.compliant).toBe(false);
       expect(result.violations).toContain('DoD IL6: Classified workloads must use production-grade security');
@@ -235,7 +235,7 @@ describe('DoD Compliance Tests', () => {
     it('should limit cluster size for minimal attack surface', () => {
       testConfig.k8s.maxNodes = 15; // Above IL5 recommendation
       
-      const result = checkCompliance(testConfig, 'dod-il6');
+      const result = checkCompliance(testConfig, 'dod-il6' as ComplianceFramework);
       
       expect(result.compliant).toBe(false);
       expect(result.violations).toContain('DoD IL6: Classified environments require minimal attack surface');
@@ -291,9 +291,9 @@ describe('DoD Compliance Tests', () => {
         }
       };
       
-      const il2Result = checkCompliance(configWithCommercialRegions, 'dod-il2');
-      const il4Result = checkCompliance(configWithCommercialRegions, 'dod-il4');
-      const il5Result = checkCompliance(configWithCommercialRegions, 'dod-il5');
+      const il2Result = checkCompliance(configWithCommercialRegions, 'dod-il2' as ComplianceFramework);
+      const il4Result = checkCompliance(configWithCommercialRegions, 'dod-il4' as ComplianceFramework);
+      const il5Result = checkCompliance(configWithCommercialRegions, 'dod-il5' as ComplianceFramework);
       
       // IL2 should recommend GovCloud
       expect(il2Result.violations).toContain('DoD IL2: AWS GovCloud recommended for CUI workloads');
