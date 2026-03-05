@@ -1718,6 +1718,7 @@ export class AzureCostAnalyzer {
     // Map size to Azure SKU - this should match the mapping in azure-bicep.ts
     const sizeMap: { [key: string]: string } = {
       'small': 'Standard_B2s',
+      'medium': 'Standard_D4s_v3',
       'large': 'Standard_D8s_v3'
     };
     return sizeMap[config.k8s.size] || 'Standard_D4s_v3';
@@ -1726,6 +1727,7 @@ export class AzureCostAnalyzer {
   private static getVMSku(config: ChiralSystem): string {
     const sizeMap: { [key: string]: string } = {
       'small': 'Standard_B1s',
+      'medium': 'Standard_D4s_v3',
       'large': 'Standard_D8s_v3'
     };
     return sizeMap[config.adfs.size] || 'Standard_B1s';
@@ -1734,6 +1736,7 @@ export class AzureCostAnalyzer {
   private static getDbSku(config: ChiralSystem): string {
     const sizeMap: { [key: string]: string } = {
       'small': 'Standard_B2s',
+      'medium': 'Standard_D4s_v3',
       'large': 'Standard_D8s_v3'
     };
     return sizeMap[config.postgres.size] || 'Standard_D4s_v3';
