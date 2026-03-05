@@ -77,7 +77,7 @@ export const config: ChiralSystem = {
     version: '1.35',
     minNodes: 1,
     maxNodes: 3,
-    size: 'small' // Resolves to t3.small (AWS) / Standard_B2s (Azure) / e2-small (GCP)
+    size: 'small' // Resolves to t3.small (AWS) / Standard_B1s (Azure) / e2-small (GCP)
   },
   
   postgres: {
