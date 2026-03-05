@@ -23,7 +23,7 @@ describe('HardwareMap', () => {
     });
 
     it('should map large VM size correctly', () => {
-      expect(HardwareMap.aws.vm.large).toBe('t3.large');
+      expect(HardwareMap.aws.vm.large).toBe('m5.large');
     });
 
     it('should map small k8s node size correctly', () => {
