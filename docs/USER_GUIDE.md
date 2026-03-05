@@ -656,7 +656,7 @@ export const secureConfig = {
   },
   compliance: {
     encryptionAtRest: true,           // Encrypt all data
-    auditLogging: true              // Enable comprehensive logging
+    auditLogging: true              // Enable logging
   }
 };
 ```
@@ -801,7 +801,7 @@ if (driftResult.hasDrift) {
 
 ### Support
 
-For enterprise support and consulting, contact the Chiral team through GitHub discussions.
+For questions and discussions, use GitHub discussions.
 
 ---
 

@@ -213,7 +213,7 @@ Chiral provides a **complete Terraform import workflow** that enables migration 
 - **Complete HCL Parser**: Parse Terraform `.tf` files and extract resource definitions
 - **Resource Mapping**: Convert AWS/Azure/GCP resources to Chiral intent
 - **Progressive Migration**: Stateless generation with migration metadata
-- **Production Ready**: 96.5% test coverage with comprehensive integration tests
+- **Production Ready**: 96.5% test coverage with integration tests
 
 #### Quick Start
 ```typescript
@@ -245,7 +245,7 @@ For detailed documentation, see **[TERRAFORM_IMPORT_WORKFLOW.md](docs/TERRAFORM_
 
 ### Terraform Migration Interface
 
-Chiral provides a comprehensive Terraform migration interface designed to help teams escape Terraform's state management issues and adopt Chiral's stateless, native cloud IaC approach.
+Chiral provides a Terraform migration interface designed to help teams escape Terraform's state management issues and adopt Chiral's stateless, native cloud IaC approach.
 
 #### Migration Analysis & Planning
 
@@ -355,7 +355,7 @@ The Terraform migration interface transforms Chiral from an IaC generation tool 
 
 ### Enhanced Migration & Multi-Format Support
 
-Chiral now provides comprehensive migration support for multiple IaC tools and enhanced capabilities:
+Chiral now provides migration support for multiple IaC tools and enhanced capabilities:
 
 #### Multi-Format IaC Import
 ```bash
@@ -456,7 +456,7 @@ The Terraform Import Adapter includes a custom HCL parser that handles basic Ter
 **Test Suite Enhancements:**
 - Real Terraform file creation and parsing validation
 - Temporary file management with automatic cleanup
-- Comprehensive resource mapping verification
+- Resource mapping verification
 - Error handling and edge case testing
 
 #### Recent Improvements
@@ -475,7 +475,7 @@ The Terraform Import Adapter includes a custom HCL parser that handles basic Ter
 - **Validation**: Ensures imported configurations meet Chiral's intent schema requirements
 - **Migration Metadata**: Includes migration strategy and compliance validation settings
 - **Multi-Cloud Ready**: Imported configurations can be used to generate artifacts for any supported cloud
-- **Comprehensive Testing**: Test suite validates actual HCL parsing and resource mapping with real Terraform files
+- **Testing**: Test suite validates actual HCL parsing and resource mapping with real Terraform files
 
 #### Limitations
 
@@ -514,7 +514,7 @@ chiral migrate -s ./pulumi-project -p aws --iac-tool pulumi
 
 #### FedRAMP and GovRAMP Compliance
 
-Chiral provides comprehensive compliance validation for federal and state government cloud requirements:
+Chiral provides compliance validation for federal and state government cloud requirements:
 
 **Supported Frameworks:**
 - **FedRAMP**: Low, Moderate, High impact levels
@@ -575,7 +575,7 @@ For detailed compliance guidance, see **[FEDRAMP_GOVRAMP_COMPLIANCE.md](docs/FED
 
 #### Healthcare Compliance (HIPAA, HITRUST CSF, HITECH)
 
-Chiral provides comprehensive compliance validation for healthcare data protection requirements:
+Chiral provides compliance validation for healthcare data protection requirements:
 
 **Supported Frameworks:**
 - **HIPAA**: Low, Moderate, High impact levels (Health Insurance Portability and Accountability Act)
@@ -762,7 +762,7 @@ chiral migrate -s terraform/ -p aws --terraform-bridge
 chiral migrate -s pulumi-project/ -p aws --pulumi-bridge --iac-tool pulumi
 ```
 
-### Comprehensive Documentation
+### Documentation
 
 For detailed documentation of all enhanced features including migration workflows, troubleshooting guides, and integration examples, see **[ENHANCED_FEATURES.md](./ENHANCED_FEATURES.md)**.
 
@@ -1010,7 +1010,7 @@ Chiral takes a different approach to multi-cloud infrastructure management compa
 
 ### Developer Experience
 - **Intent-first coding**: Write business requirements, not cloud-specific APIs
-- **Built-in validation**: Automatic syntax checking and type safety
+- **Type safety**: TypeScript type validation
 - **Framework handles complexity**: You focus on "what", Chiral handles "how" across clouds
 
 ---

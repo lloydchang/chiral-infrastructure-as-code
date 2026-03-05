@@ -38,7 +38,7 @@ console.log('Imported Chiral System:', chiralSystem);
 
 - **Stateless Generation**: Generate native cloud artifacts without intermediate state
 - **Migration Metadata**: Preserve migration strategy and compliance settings
-- **Production Ready**: 96.5% test coverage with comprehensive integration tests
+- **Production Ready**: 96.5% test coverage with integration tests
 
 ## Supported Resources
 
@@ -149,7 +149,7 @@ const nestedBlockRegex = /(\w+)\s*\{([^}]*)\}/g;
 
 ### Test Suite Enhancements
 
-The adapter includes comprehensive test coverage:
+The adapter includes test coverage:
 
 ```typescript
 describe('TerraformImportAdapter', () => {

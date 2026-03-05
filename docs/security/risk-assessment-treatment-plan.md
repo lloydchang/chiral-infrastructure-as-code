@@ -64,7 +64,7 @@ Risk assessment methodology based on ISO/IEC 27005:
 ## Monitoring and Review
 
 - Quarterly risk assessments
-- Annual comprehensive review
+- Annual review
 - Continuous monitoring via SIEM
 
 ## Approval

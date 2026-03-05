@@ -2,7 +2,7 @@
 
 ## Overview
 
-Chiral provides comprehensive SOC (Service Organization Control) compliance validation for all levels and audit types. This document details the implementation of SOC 1, SOC 2, and SOC 3 compliance frameworks with both Type 1 and Type 2 audit support.
+Chiral includes validation patterns for SOC (Service Organization Control) compliance frameworks. This document details the implementation patterns for SOC 1, SOC 2, and SOC 3 compliance frameworks with both Type 1 and Type 2 audit support.
 
 ## SOC Frameworks Supported
 
@@ -139,7 +139,7 @@ chiral validate -c chiral.config.ts --compliance soc3 --audit-type type2
 ### SOC 1 Requirements
 
 #### Common Requirements (Type 1 & Type 2)
-- ✅ Comprehensive audit logging
+- ✅ Audit logging
 - ✅ High availability (minimum 2 nodes in production)
 - ✅ Encryption at rest for financial data
 - ✅ Region specification for data residency
@@ -158,7 +158,7 @@ chiral validate -c chiral.config.ts --compliance soc3 --audit-type type2
 ### SOC 2 Requirements
 
 #### Common Requirements (Type 1 & Type 2)
-- ✅ Comprehensive audit logging (Security)
+- ✅ Audit logging (Security)
 - ✅ Encryption at rest (Security)
 - ✅ High availability (Availability)
 - ✅ Adequate database storage (Processing Integrity)
@@ -236,7 +236,7 @@ chiral validate -c chiral.config.ts --compliance soc3 --audit-type type2
 ## Testing
 
 ### Unit Tests
-Comprehensive test suite validates all SOC compliance scenarios:
+Test suite validates SOC compliance scenarios:
 
 ```bash
 # Run all compliance tests
@@ -261,7 +261,7 @@ npm test -- --testNamePattern="SOC 3 Compliance"
 ### Configuration Recommendations
 1. **Always specify regions** for all cloud providers
 2. **Use organization-specific CIDR ranges** instead of defaults
-3. **Implement comprehensive security controls** for production environments
+3. **Implement security controls** for production environments
 4. **Configure adequate retention policies** for audit logs
 5. **Enable high availability** with minimum 2 nodes in production
 
@@ -312,7 +312,7 @@ chiral compile -c chiral.config.ts -o dist
 
 ## Migration Support
 
-Chiral supports SOC compliance validation during infrastructure migration:
+SOC compliance validation can be used during infrastructure migration:
 
 ```bash
 # Validate compliance during Terraform migration
@@ -328,10 +328,3 @@ chiral validate -c chiral.config.ts --compliance soc2 --audit-type type2
 - [AICPA SOC Reporting](https://www.aicpa.org/interestareas/frc/assuranceadvisoryservices/soc.html)
 - [SOC 2 Trust Services Criteria](https://www.aicpa.org/interestareas/frc/assuranceadvisoryservices/downloadabledocuments/soc-2-reporting-on-an-organizations-controls.html)
 - [SOC 3 General Use Reports](https://www.aicpa.org/interestareas/frc/assuranceadvisoryservices/soc-3-reporting.html)
-
-## Support
-
-For questions about SOC compliance implementation:
-- Review the test suite in `src/__tests__/validation.test.ts`
-- Check the validation logic in `src/validation.ts`
-- Consult the configuration schema in `src/intent/index.ts`

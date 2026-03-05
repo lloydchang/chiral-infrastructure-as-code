@@ -244,7 +244,6 @@ npx ts-node src/main.ts import -s deployment.bicep -p azure -o config.ts
 **Community Support**:
 - Review migration examples in the repository
 - Check GitHub issues for similar migration scenarios
-- Consider professional services for complex enterprise migrations
 
 ## Migration Roadmap
 

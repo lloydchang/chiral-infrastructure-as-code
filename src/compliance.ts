@@ -275,7 +275,7 @@ export function validateNISTHighCompliance(config: any): ValidationResult {
 
   // IR-4 - Incident Handling
   if (!config.compliance?.securityControls?.incidentResponse) {
-    issues.push('NIST HIGH: IR-4 - Comprehensive incident response required');
+    issues.push('NIST HIGH: IR-4 - Incident response required');
   }
 
   // AC-6 - Least Privilege

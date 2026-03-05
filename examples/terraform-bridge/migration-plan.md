@@ -161,7 +161,7 @@ npx chiral import --terraform-state ./terraform.tfstate --provider aws --analyze
 - **IAM Role Optimization**: Least privilege access patterns
 - **Network Security**: Implement proper security groups
 - **Encryption at Rest**: Ensure all data encrypted
-- **Audit Logging**: Comprehensive logging and monitoring
+- **Audit Logging**: Logging and monitoring
 
 ## 📚 Training and Documentation
 

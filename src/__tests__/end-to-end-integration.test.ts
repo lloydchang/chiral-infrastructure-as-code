@@ -187,10 +187,10 @@ resource aks 'Microsoft.ContainerService/managedClusters@2023-05-01' = {
 
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors).toContain('Invalid network CIDR format');
-      expect(result.errors).toContain('Kubernetes version must be in format x.y');
-      expect(result.errors).toContain('minNodes must be positive');
-      expect(result.errors).toContain('maxNodes must be greater than minNodes');
+      expect(result.errors).toContain('Valid network CIDR is required (e.g., 10.0.0.0/16)');
+      expect(result.errors).toContain('Valid Kubernetes version is required (e.g., 1.29, 1.30)');
+      expect(result.errors).toContain('Minimum nodes must be at least 1');
+      expect(result.errors).toContain('Maximum nodes must be greater than or equal to minimum nodes');
     });
   });
 

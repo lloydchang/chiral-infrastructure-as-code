@@ -165,7 +165,7 @@ export class MigrationPlaybookGenerator {
       {
         id: 'validate',
         title: 'Post-Migration Validation',
-        description: 'Run comprehensive validation of migrated infrastructure',
+        description: 'Run validation of migrated infrastructure',
         commands: [
           `chiral validate -c ${config.outputPath} --compliance soc2`,
           `# Run generated validation script`,

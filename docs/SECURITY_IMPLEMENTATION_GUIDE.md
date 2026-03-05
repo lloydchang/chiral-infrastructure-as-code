@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide provides detailed implementation instructions for the comprehensive security and compliance framework integrated into Chiral Infrastructure as Code, covering ISO/IEC 27001:2022, ISO/IEC 27017, ISO/IEC 27018, and other major compliance frameworks.
+This guide provides implementation instructions for the security and compliance framework integrated into Chiral Infrastructure as Code, covering ISO/IEC 27001:2022, ISO/IEC 27017, ISO/IEC 27018, and other major compliance frameworks.
 
 ## Quick Start
 
@@ -492,4 +492,3 @@ For security compliance issues:
 - Review the compliance report for detailed violations
 - Check the implementation guide for missing controls
 - Consult the ISO standards documentation
-- Contact the security team for assistance

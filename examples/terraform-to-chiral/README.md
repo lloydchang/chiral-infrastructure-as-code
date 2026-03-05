@@ -1,6 +1,6 @@
 # Terraform to Chiral Migration Guide
 
-This directory provides a comprehensive guide for migrating from Terraform to the Chiral pattern, specifically addressing the state management challenges that make Terraform problematic at scale.
+This directory provides a guide for migrating from Terraform to the Chiral pattern, specifically addressing the state management challenges that make Terraform problematic at scale.
 
 ## Why Migrate from Terraform?
 

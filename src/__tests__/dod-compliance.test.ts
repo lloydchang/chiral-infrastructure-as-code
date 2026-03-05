@@ -67,7 +67,7 @@ describe('DoD Compliance Tests', () => {
       const result = checkCompliance(testConfig, 'dod-il2' as ComplianceFramework);
       
       expect(result.compliant).toBe(false);
-      expect(result.violations).toContain('DoD IL2: Comprehensive audit logging required');
+      expect(result.violations).toContain('DoD IL2: Audit logging required');
       expect(result.recommendations).toContain('Enable detailed audit logging for all resources and access');
     });
 
@@ -277,7 +277,7 @@ describe('DoD Compliance Tests', () => {
       
       levels.forEach(level => {
         const result = checkCompliance(testConfig, level as ComplianceFramework);
-        expect(result.violations).toContain(`DoD ${level.split('-')[1].toUpperCase()}: Comprehensive audit logging required`);
+        expect(result.violations).toContain(`DoD ${level.split('-')[1].toUpperCase()}: Audit logging required`);
       });
     });
   });

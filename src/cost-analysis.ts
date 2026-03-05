@@ -181,7 +181,7 @@ export class InfracostAnalyzer {
           Type: 'AWS::EC2::Instance',
           Properties: {
             InstanceType: this.getAWSInstanceType(config.adfs.size),
-            ImageId: this.getWindowsAMI(config.adfs.windowsVersion)
+            ImageId: this.getWindowsAMI()
           }
         }
       }
@@ -374,25 +374,57 @@ resource "google_compute_instance" "adfs" {
 
   private static getFallbackAWSPricing(config: ChiralSystem, region: string, currency: string): CostEstimate {
     const breakdown = this.getFallbackAWSBreakdown(config);
-    const totalMonthlyCost = Object.values(breakdown).reduce((sum, cat) => sum + cat.total, 0);
+    const totalMonthlyCost = Object.values(breakdown).reduce((sum: number, cat: any) => sum + cat.total, 0);
 
     return {
       provider: 'aws',
       totalMonthlyCost,
       currency,
       breakdown,
-      recommendations: ['Install Infracost for more accurate AWS pricing'],
-      warnings: ['Using fallback pricing - install Infracost for accurate costs']
+      recommendations: ['Install infracost for more accurate AWS pricing'],
+      warnings: ['Using fallback pricing - install infracost for accurate costs']
     };
   }
 
-  private static getFallbackAWSBreakdown(config: ChiralSystem): CostBreakdown {
-    return {
-      compute: { kubernetes: config.k8s.maxNodes * 145, vm: 95, total: 0 },
-      storage: { database: config.postgres.storageGb * 0.23 + 55, vmDisk: 18, total: 0 },
-      network: { dataTransfer: 0, loadBalancer: 0, total: 0 },
-      other: { management: 0, monitoring: 0, total: 0 }
+  private static getAWSInstanceType(size: string): string {
+    const sizeMap: { [key: string]: string } = {
+      'small': 't3.small',
+      'medium': 't3.medium',
+      'large': 't3.large'
     };
+    return sizeMap[size] || 't3.small';
+  }
+
+  private static getRDSInstanceClass(size: string): string {
+    const sizeMap: { [key: string]: string } = {
+      'small': 'db.t3.small',
+      'medium': 'db.t3.medium',
+      'large': 'db.m5.large'
+    };
+    return sizeMap[size] || 'db.t3.small';
+  }
+
+  private static getWindowsAMI(config: ChiralSystem): string {
+    // Return a placeholder AMI - in real implementation this would be region-specific
+    return 'ami-0c02fb55956c7d316'; // Windows Server 2019
+  }
+
+  private static getGCPMachineType(size: string): string {
+    const sizeMap: { [key: string]: string } = {
+      'small': 'e2-small',
+      'medium': 'e2-medium',
+      'large': 'n1-standard-2'
+    };
+    return sizeMap[size] || 'e2-small';
+  }
+
+  private static getCloudSQLTier(size: string): string {
+    const sizeMap: { [key: string]: string } = {
+      'small': 'db-g1-small',
+      'medium': 'db-custom-2-4096',
+      'large': 'db-custom-4-8192'
+    };
+    return sizeMap[size] || 'db-g1-small';
   }
 }
 
@@ -1045,6 +1077,46 @@ export class GCPCostAnalyzer {
       warnings.push(`High actual monthly cost: $${totalMonthlyCost.toFixed(2)}`);
     }
 
+    return {
+      provider: 'gcp',
+      totalMonthlyCost,
+      currency,
+      breakdown,
+      recommendations,
+      warnings
+    };
+  }
+}
+
+// =================================================================
+// AZURE COST ANALYSIS EQUIVALENTS
+// =================================================================
+
+export class AzureCostAnalyzer {
+  private static readonly AZURE_CLI = 'az';
+  private static readonly AZURE_COST_CLI = 'azure-cost-cli';
+
+  static isAvailable(): boolean {
+    try {
+      execSync(`${this.AZURE_CLI} --version`, { stdio: 'ignore' });
+      return true;
+    } catch {
+      try {
+        execSync(`${this.AZURE_COST_CLI} --version`, { stdio: 'ignore' });
+        return true;
+      } catch {
+        return false;
+      }
+    }
+  }
+
+  static isAzureCostCliAvailable(): boolean {
+    try {
+      execSync(`${this.AZURE_COST_CLI} --version`, { stdio: 'ignore' });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   static async getAzurePricing(config: ChiralSystem, options: CostAnalysisOptions = {}): Promise<CostEstimate> {
@@ -1072,14 +1144,21 @@ export class GCPCostAnalyzer {
       warnings: ['Using fallback pricing - install azure-cost-cli for accurate costs']
     };
   }
+
+  static async analyzeAzureCosts(subscriptionId: string, options: CostAnalysisOptions = {}): Promise<CostEstimate> {
+    if (!this.isAzureCostCliAvailable()) {
+      throw new Error('azure-cost-cli not available. Install with: npm install -g azure-cost-cli');
+    }
+
+    // Placeholder for actual azure-cost-cli integration
+    return this.getAzurePricing({} as ChiralSystem, options);
+  }
 }
-*/
 
 // =================================================================
 // MULTI-CLOUD COST COMPARISON
 // =================================================================
 
-// ... (rest of the code remains the same)
 export class CostAnalyzer {
   static async compareCosts(config: ChiralSystem, options: CostAnalysisOptions = {}): Promise<CostComparison> {
     const [awsEstimate, azureEstimate, gcpEstimate] = await Promise.all([
@@ -1089,7 +1168,7 @@ export class CostAnalyzer {
     ]);
 
     const estimates = { aws: awsEstimate, azure: azureEstimate, gcp: gcpEstimate };
-    
+
     const costs = [
       { provider: 'aws' as const, cost: awsEstimate.totalMonthlyCost },
       { provider: 'azure' as const, cost: azureEstimate.totalMonthlyCost },
@@ -1124,10 +1203,10 @@ export class CostAnalyzer {
 
   static generateCostReport(comparison: CostComparison, options: CostAnalysisOptions = {}): string {
     const { cheapest, mostExpensive, estimates } = comparison;
-    
+
     let report = `\n📊 Cost Analysis Report\n`;
     report += `${'='.repeat(50)}\n\n`;
-    
+
     report += `💰 **Summary**\n`;
     report += `Cheapest: ${cheapest.provider.toUpperCase()} ($${cheapest.cost.toFixed(2)}/month)\n`;
     report += `Most Expensive: ${mostExpensive.provider.toUpperCase()} ($${mostExpensive.cost.toFixed(2)}/month)\n`;
@@ -1142,12 +1221,12 @@ export class CostAnalyzer {
         report += `  Storage: $${estimate.breakdown.storage.total.toFixed(2)}\n`;
         report += `  Network: $${estimate.breakdown.network.total.toFixed(2)}\n`;
         report += `  Other: $${estimate.breakdown.other.total.toFixed(2)}\n`;
-        
+
         if (estimate.recommendations.length > 0) {
           report += `  Recommendations:\n`;
           estimate.recommendations.forEach(rec => report += `    • ${rec}\n`);
         }
-        
+
         if (estimate.warnings.length > 0) {
           report += `  Warnings:\n`;
           estimate.warnings.forEach(warn => report += `    ⚠️  ${warn}\n`);
@@ -1158,20 +1237,18 @@ export class CostAnalyzer {
     return report;
   }
 }
-*/
 
 // =================================================================
 // COST OPTIMIZATION RECOMMENDATIONS
 // =================================================================
 
-/*
 export class CostOptimizer {
   static analyzeConfiguration(config: ChiralSystem): string[] {
     const recommendations: string[] = [];
 
     // Kubernetes optimization
     if (config.k8s.maxNodes > 10 && config.environment === 'dev') {
-      recommendations.push('Development environment: Consider reducing max nodes from ' + 
+      recommendations.push('Development environment: Consider reducing max nodes from ' +
         `${config.k8s.maxNodes} to 3-5 for cost savings`);
     }
 
@@ -1181,7 +1258,7 @@ export class CostOptimizer {
 
     // Database optimization
     if (config.postgres.storageGb > 500 && config.environment === 'dev') {
-      recommendations.push('Development database: Consider reducing storage from ' + 
+      recommendations.push('Development database: Consider reducing storage from ' +
         `${config.postgres.storageGb}GB to 100-200GB`);
     }
 
@@ -1198,7 +1275,7 @@ export class CostOptimizer {
 
     // This would analyze the config and suggest alternatives
     // For now, return some example suggestions
-    
+
     if (config.environment === 'dev') {
       alternatives.push({
         provider: 'GCP',
@@ -1218,4 +1295,3 @@ export class CostOptimizer {
     return alternatives;
   }
 }
-*/

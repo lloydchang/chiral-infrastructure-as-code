@@ -8,15 +8,15 @@ This guide covers implementing HIPAA, HITRUST CSF, and HITECH compliance require
 
 ### HIPAA (Health Insurance Portability and Accountability Act)
 
-HIPAA sets the standard for protecting sensitive patient health information. Chiral supports three implementation levels:
+HIPAA sets the standard for protecting sensitive patient health information with three implementation levels:
 
 - **HIPAA Low**: Basic HIPAA requirements for small healthcare applications
 - **HIPAA Moderate**: Enhanced controls for medium-risk healthcare systems
-- **HIPAA High**: Comprehensive controls for critical patient care systems
+- **HIPAA High**: Advanced controls for critical patient care systems
 
 ### HITRUST CSF (Health Information Trust Alliance Common Security Framework)
 
-HITRUST CSF provides a comprehensive security framework specifically designed for healthcare organizations:
+HITRUST CSF provides a security framework specifically designed for healthcare organizations:
 
 - **HITRUST CSF Low**: Basic healthcare security controls
 - **HITRUST CSF Moderate**: Enhanced controls for healthcare data processing
@@ -28,7 +28,7 @@ HITECH strengthens HIPAA requirements and adds breach notification provisions:
 
 - **HITECH Low**: Basic breach prevention requirements
 - **HITECH Moderate**: Enhanced breach detection and notification
-- **HITECH High**: Comprehensive breach prevention and rapid response
+- **HITECH High**: Advanced breach prevention and rapid response
 
 ## Key Compliance Requirements
 
@@ -40,14 +40,14 @@ HITECH strengthens HIPAA requirements and adds breach notification provisions:
 - **Network Security**: Proper network segmentation and access controls
 
 #### 2. Audit and Monitoring
-- **Comprehensive Audit Logging**: All access to PHI must be logged
+- **Audit Logging**: All access to PHI must be logged
 - **Access Controls**: Role-based access to healthcare systems
 - **Monitoring**: Real-time monitoring of healthcare data access
 
 #### 3. High Availability
 - **Redundancy**: Multiple nodes for production healthcare systems
 - **Backup and Recovery**: Regular backups and tested recovery procedures
-- **Disaster Recovery**: Comprehensive disaster recovery planning
+- **Disaster Recovery**: Disaster recovery planning
 
 #### 4. Data Residency
 - **Geographic Controls**: PHI must remain within specified geographic boundaries
@@ -129,7 +129,7 @@ export const hitrustModerateConfig: ChiralSystem = {
   postgres: {
     engineVersion: '15',
     size: 'medium',
-    storageGb: 50                // Minimum 50GB for HITRUST Moderate
+    storageGb: 50                // Recommended minimum for moderate-risk healthcare systems
   }
 };
 ```
@@ -227,7 +227,7 @@ if (!hitechResult.compliant) {
 ### 2. Data Protection
 - Enable encryption at rest for all data stores
 - Enable encryption in transit for all communications
-- Implement comprehensive audit logging
+- Implement audit logging
 
 ### 3. High Availability
 - Use minimum 2 nodes for production systems
@@ -240,7 +240,7 @@ if (!hitechResult.compliant) {
 - Size clusters appropriately for expected load
 
 ### 5. Monitoring and Alerting
-- Implement comprehensive monitoring for healthcare systems
+- Implement monitoring for healthcare systems
 - Set up alerts for unusual access patterns
 - Regular security audits and penetration testing
 
@@ -255,7 +255,7 @@ if (!hitechResult.compliant) {
 **Fix**: Enable `encryptionAtRest: true` in compliance configuration
 
 ### 3. Insufficient Audit Logging
-**Violation**: Comprehensive audit logging not enabled
+**Violation**: Audit logging not enabled
 **Fix**: Enable `auditLogging: true` in compliance configuration
 
 ### 4. Inadequate High Availability
@@ -307,6 +307,4 @@ describe('HIPAA High Compliance', () => {
 
 ## Conclusion
 
-Chiral provides comprehensive support for healthcare compliance frameworks with automated validation and enforcement. By following this guide and using the built-in compliance checking capabilities, healthcare organizations can ensure their infrastructure meets HIPAA, HITRUST CSF, and HITECH requirements while maintaining the benefits of multi-cloud deployments.
-
-For additional support or questions about healthcare compliance implementation, refer to the main Chiral documentation or contact the compliance team.
+Chiral includes validation patterns for healthcare compliance frameworks. Organizations can use these patterns for infrastructure that meets HIPAA, HITRUST CSF, and HITECH requirements while maintaining the benefits of multi-cloud deployments.

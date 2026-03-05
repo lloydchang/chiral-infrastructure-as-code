@@ -51,7 +51,7 @@ chiral import -s main.tf -p aws -o chiral.config.ts
 - **Value Type Support**: String, numeric, array, and boolean value extraction
 - **Nested Block Handling**: Support for complex resource configurations
 - **Error Recovery**: Graceful handling of malformed HCL files
-- **Test Validation**: Comprehensive test suite with real Terraform file parsing
+- **Test Validation**: Test suite with real Terraform file parsing
 
 **Technical Implementation:**
 - **Parsing Strategy**: Line-by-line analysis with brace counting for block detection
@@ -172,7 +172,7 @@ Chiral provides a **complete Terraform import workflow** that enables migration 
 - **Complete HCL Parser**: Parse Terraform `.tf` files and extract resource definitions
 - **Resource Mapping**: Convert AWS/Azure/GCP resources to Chiral intent
 - **Progressive Migration**: Stateless generation with migration metadata
-- **Production Ready**: 96.5% test coverage with comprehensive integration tests
+- **Production Ready**: 96.5% test coverage with integration tests
 
 #### Quick Start
 ```typescript
@@ -196,9 +196,13 @@ const chiralSystem = await TerraformImportAdapter.importFromTerraform({
 3. **Complete Import**: Generate full ChiralSystem with migration metadata
 
 #### Test Coverage
-- **Unit Tests**: 14/14 tests passing
-- **Integration Tests**: 5/8 tests passing (complex HCL parsing limitations)
-- **Overall Success Rate**: 96.5%
+- **Unit Tests**: 175/181 tests passing (~96.7% pass rate)
+- **Failing Test Suites**: 5 test suites with issues requiring fixes
+  - `end-to-end-integration.test.ts`: Validation failures in large configuration handling
+  - `security-penetration.test.ts`: Security validation logic issues (missing violation detection)
+  - Additional suites with integration and edge case failures
+- **Terraform Import Adapter**: 14/14 tests passing ✅
+- **Overall Success Rate**: Core functionality validated, some edge cases need resolution
 
 #### Technical Implementation
 
@@ -211,7 +215,7 @@ const chiralSystem = await TerraformImportAdapter.importFromTerraform({
 **Enhanced Test Suite:**
 - Real Terraform file creation and parsing validation
 - Temporary file management with automatic cleanup
-- Comprehensive resource mapping verification
+- Resource mapping verification
 - Error handling and edge case testing
 
 **Recent Improvements:**
@@ -253,7 +257,7 @@ chiral import -s source.file -p aws -o chiral.config.ts
 ```
 
 #### `chiral migrate`
-Comprehensive migration with analysis
+Migration with analysis
 ```bash
 chiral migrate -s source -p aws --iac-tool terraform --strategy progressive
 ```
@@ -352,7 +356,7 @@ chiral terraform-provider --example
 ### Developer Experience
 - **Intent-Driven**: Focus on business requirements, not cloud specifics
 - **Multi-Format Import**: Migrate from any IaC tool
-- **Rich Analysis**: Comprehensive migration guidance and cost analysis
+- **Rich Analysis**: Migration guidance and cost analysis
 
 ## Integration Examples
 
@@ -467,4 +471,4 @@ chiral validate -c chiral.config.ts
 
 ## Contributing
 
-This enhanced Chiral implementation provides a comprehensive solution for multi-cloud infrastructure management with advanced migration capabilities. The architecture emphasizes stateless generation, cost optimization, and operational excellence while maintaining compatibility with existing IaC ecosystems.
+This enhanced Chiral implementation provides a solution for multi-cloud infrastructure management with advanced migration capabilities. The architecture emphasizes stateless generation, cost optimization, and operational excellence while maintaining compatibility with existing IaC ecosystems.

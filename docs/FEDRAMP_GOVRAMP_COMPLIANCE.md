@@ -1,22 +1,22 @@
 # FedRAMP and GovRAMP Compliance Guide
 
-This document provides comprehensive guidance on implementing FedRAMP and GovRAMP compliance using Chiral Infrastructure as Code.
+This document provides guidance on implementing FedRAMP and GovRAMP compliance using Chiral Infrastructure as Code.
 
 ## Overview
 
-Chiral provides built-in compliance validation for federal and state government cloud requirements through the FedRAMP (Federal Risk and Authorization Management Program) and GovRAMP (formerly StateRAMP) frameworks.
+Chiral includes validation patterns for federal and state government cloud requirements through the FedRAMP (Federal Risk and Authorization Management Program) and GovRAMP (formerly StateRAMP) frameworks.
 
 ## Supported Compliance Frameworks
 
 ### FedRAMP Levels
 - **FedRAMP Low**: Basic federal security controls for low-impact systems
 - **FedRAMP Moderate**: Enhanced security controls for moderate-impact systems  
-- **FedRAMP High**: Comprehensive security controls for high-impact systems
+- **FedRAMP High**: Advanced security controls for high-impact systems
 
 ### GovRAMP Levels
 - **GovRAMP Low**: Basic state/local government security controls
 - **GovRAMP Moderate**: Enhanced security controls for state systems
-- **GovRAMP High**: Comprehensive security controls for critical state systems
+- **GovRAMP High**: Advanced security controls for critical state systems
 
 ## Compliance Requirements
 
@@ -32,7 +32,7 @@ compliance: {
 ```
 
 #### Audit Logging
-Comprehensive audit logging is mandatory for all compliance levels and includes:
+Audit logging is mandatory for all compliance levels and includes:
 - API access logs
 - Configuration changes
 - Security events
@@ -239,7 +239,7 @@ chiral validate -c config.ts --compliance govramp-high --deployment-check --cost
 - Regular access reviews
 
 ### Monitoring and Logging
-- Comprehensive audit trails
+- Audit trails
 - Security event monitoring
 - Log retention policies
 - Tamper-evident log storage
@@ -364,11 +364,3 @@ chiral --config config.ts
 - [AWS FedRAMP Compliance](https://aws.amazon.com/compliance/fedramp/)
 - [Azure Government Compliance](https://azure.microsoft.com/en-us/global-infrastructure/government/)
 - [Google Cloud Government](https://cloud.google.com/government)
-
-## Support
-
-For compliance-related questions or issues:
-1. Review this documentation
-2. Check validation output for specific requirements
-3. Consult cloud provider compliance documentation
-4. Contact your compliance officer for organization-specific requirements

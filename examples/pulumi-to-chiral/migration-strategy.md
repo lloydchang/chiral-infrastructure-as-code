@@ -1,6 +1,6 @@
 # Pulumi to Chiral Migration Strategy
 
-This document provides a comprehensive strategy for transitioning from Pulumi's state management to Chiral's stateless architecture.
+This document provides a strategy for transitioning from Pulumi's state management to Chiral's stateless architecture.
 
 ## 📋 Pre-Migration Assessment
 
@@ -161,7 +161,7 @@ npx chiral import --source ./Pulumi.yaml --provider aws --analyze-only
 - **IAM Role Optimization**: Least privilege access patterns
 - **Network Security**: Implement proper security groups
 - **Encryption at Rest**: Ensure all data encrypted
-- **Audit Logging**: Comprehensive logging and monitoring
+- **Audit Logging**: Logging and monitoring
 
 ## 📚 Training and Documentation
 

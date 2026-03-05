@@ -385,7 +385,7 @@ const inferRegion = (resources: any[], provider: string): { aws?: string; azure?
 };
 
 const buildChiralSystemFromResources = (resources: any[], provider: string, stackName?: string): ChiralSystem => {
-  // Enhanced resource mapping with better error handling and comprehensive type support
+  // Enhanced resource mapping with better error handling and type support
   const warnings: string[] = [];
   const unmappableResources: string[] = [];
 

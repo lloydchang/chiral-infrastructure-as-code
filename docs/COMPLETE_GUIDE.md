@@ -125,7 +125,7 @@ interface ChiralSystem {
       gcp?: string;             // GCP region for data residency
     };
     encryptionAtRest?: boolean;    // Require encryption at rest
-    auditLogging?: boolean;       // Enable comprehensive audit logging
+    auditLogging?: boolean;       // Enable audit logging
   };
 }
 ```
@@ -394,7 +394,7 @@ export const optimizedProdConfig = {
 
 ### Migration Assessment
 
-Chiral provides comprehensive migration analysis:
+Chiral provides migration analysis:
 
 ```bash
 # Analyze existing infrastructure
@@ -679,7 +679,7 @@ export const iso27001Config = {
 
 #### FedRAMP Compliance
 
-Chiral supports all three FedRAMP impact levels: Low, Moderate, and High.
+FedRAMP includes three impact levels: Low, Moderate, and High.
 
 ##### FedRAMP Low Impact
 
@@ -746,7 +746,7 @@ export const fedrampHighConfig = {
 
 #### GovRAMP Compliance (formerly StateRAMP)
 
-GovRAMP provides compliance standards for state and local government agencies. Chiral supports GovRAMP across all impact levels.
+GovRAMP provides compliance standards for state and local government agencies across all impact levels.
 
 ##### GovRAMP Low Impact
 
@@ -1050,7 +1050,7 @@ export const secureConfig = {
   },
   compliance: {
     encryptionAtRest: true,           // Encrypt all data
-    auditLogging: true              // Enable comprehensive logging
+    auditLogging: true              // Enable logging
   }
 };
 ```
@@ -1183,4 +1183,4 @@ if (driftResult.hasDrift) {
 
 ---
 
-**Chiral Infrastructure as Code Complete Guide** - Comprehensive documentation for stateless multi-cloud infrastructure generation that enables teams to escape traditional IaC complexity while preserving expertise and enabling gradual migration to modern cloud-native practices.
+**Chiral Infrastructure as Code Complete Guide** - Documentation for stateless multi-cloud infrastructure generation that enables teams to escape traditional IaC complexity while preserving expertise and enabling gradual migration to modern cloud-native practices.

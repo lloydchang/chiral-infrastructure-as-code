@@ -1,6 +1,6 @@
 // File: src/security-compliance.ts
 
-// Comprehensive ISO/IEC 27001:2022, ISO/IEC 27017, and ISO/IEC 27018 Security Compliance Framework
+// ISO/IEC 27001:2022, ISO/IEC 27017, and ISO/IEC 27018 Security Compliance Framework
 
 import { ChiralSystem, ComplianceFramework } from './intent';
 
@@ -100,7 +100,7 @@ export class SecurityComplianceEngine {
   private complianceHistory: Map<string, SecurityComplianceResult[]> = new Map();
 
   /**
-   * Comprehensive security compliance assessment
+   * Security compliance assessment
    */
   async assessCompliance(
     config: ChiralSystem,
@@ -195,10 +195,10 @@ export class SecurityComplianceEngine {
         category: 'policy',
         control: 'A.12.4.1',
         title: 'Event logging required',
-        description: 'Comprehensive audit logging is required for security monitoring',
+        description: 'Audit logging is required for security monitoring',
         impact: 'Security events cannot be detected or investigated',
         affectedResources: ['all'],
-        remediation: 'Enable comprehensive audit logging across all systems',
+        remediation: 'Enable audit logging across all systems',
         evidence: 'Missing audit logging configuration'
       });
     }
@@ -320,18 +320,33 @@ export class SecurityComplianceEngine {
       });
     }
 
-    // Annex A.18 - Compliance
-    if (!config.compliance?.securityControls?.complianceMonitoring) {
+    // Annex A.14 - System Acquisition, Development and Maintenance
+    if (config.environment === 'prod' && config.postgres && config.postgres.storageGb < 50) {
       violations.push({
-        id: 'ISO27001-A.18.1.1',
+        id: 'ISO27001-A.14.2.5',
         severity: 'medium',
-        category: 'policy',
-        control: 'A.18.1.1',
-        title: 'Compliance monitoring missing',
-        description: 'Compliance monitoring procedures are not implemented',
-        impact: 'Compliance violations may go undetected',
-        affectedResources: ['all'],
-        remediation: 'Implement compliance monitoring procedures'
+        category: 'technical',
+        control: 'A.14.2.5',
+        title: 'Insufficient storage capacity for production',
+        description: 'Production databases require adequate storage capacity for performance and compliance',
+        impact: 'Performance degradation and potential data integrity issues',
+        affectedResources: ['database'],
+        remediation: 'Increase database storage to at least 50GB for production workloads'
+      });
+    }
+
+    // Annex A.9 - Access Control (MFA check)
+    if (config.environment === 'prod' && config.compliance?.securityControls?.mfaRequired === false) {
+      violations.push({
+        id: 'ISO27001-A.9.2.1',
+        severity: 'high',
+        category: 'technical',
+        control: 'A.9.2.1',
+        title: 'Multi-factor authentication disabled in production',
+        description: 'Production environments require multi-factor authentication for all administrative access',
+        impact: 'Increased risk of unauthorized access to production systems',
+        affectedResources: ['authentication', 'access-control'],
+        remediation: 'Enable multi-factor authentication for all production administrative access'
       });
     }
 
@@ -394,10 +409,10 @@ export class SecurityComplianceEngine {
         category: 'technical',
         control: 'Cloud Monitoring',
         title: 'Cloud service monitoring missing',
-        description: 'Comprehensive cloud service monitoring is not implemented',
+        description: 'Cloud service monitoring is not implemented',
         impact: 'Security issues in cloud services may go undetected',
         affectedResources: ['all'],
-        remediation: 'Implement comprehensive cloud service monitoring'
+        remediation: 'Implement cloud service monitoring'
       });
     }
 
@@ -850,10 +865,10 @@ export class SecurityComplianceEngine {
         category: 'privacy',
         control: 'Privacy Notice',
         title: 'Privacy notice missing',
-        description: 'CCPA requires comprehensive privacy notices to consumers',
+        description: 'CCPA requires privacy notices to consumers',
         impact: 'Non-compliance with CCPA transparency requirements',
         affectedResources: ['all'],
-        remediation: 'Provide comprehensive privacy notices to consumers'
+        remediation: 'Provide privacy notices to consumers'
       });
     }
 

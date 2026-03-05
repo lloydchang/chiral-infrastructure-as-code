@@ -222,7 +222,7 @@ export function checkCompliance(
     
     // Common SOC 1 requirements
     if (!config.compliance?.auditLogging) {
-      violations.push('SOC 1: Comprehensive audit logging required for financial controls');
+      violations.push('SOC 1: Audit logging required for financial controls');
       recommendations.push('Enable detailed audit logging for access and changes to financial systems');
     }
 
@@ -289,7 +289,7 @@ export function checkCompliance(
     // Common SOC 2 requirements
     // Security: Protect against unauthorized access
     if (!config.compliance?.auditLogging) {
-      violations.push('SOC 2 Security: Comprehensive audit logging required');
+      violations.push('SOC 2 Security: Audit logging required');
       recommendations.push('Enable detailed audit logging for security monitoring');
     }
 
@@ -473,7 +473,7 @@ export function checkCompliance(
 
     if (config.compliance?.cloudSpecificControls?.cloudMonitoring === false) {
       violations.push('ISO 27017: Cloud service monitoring required');
-      recommendations.push('Implement comprehensive cloud service monitoring');
+      recommendations.push('Implement cloud service monitoring');
     }
 
     if (config.compliance?.cloudSpecificControls?.cloudBackup === false) {
@@ -637,7 +637,7 @@ export function checkCompliance(
 
     if (!config.compliance?.privacyControls?.privacyNotices) {
       violations.push('CCPA: Privacy notice required');
-      recommendations.push('Provide comprehensive privacy notices to consumers');
+      recommendations.push('Provide privacy notices to consumers');
     }
 
     if (!config.compliance?.consentManagement) {
@@ -663,7 +663,7 @@ export function checkCompliance(
     }
 
     if (!config.compliance?.auditLogging) {
-      violations.push(`FedRAMP ${level.toUpperCase()}: Comprehensive audit logging required`);
+      violations.push(`FedRAMP ${level.toUpperCase()}: Audit logging required`);
       recommendations.push('Enable detailed audit logging for all resources');
     }
 
@@ -717,7 +717,7 @@ export function checkCompliance(
     }
 
     if (!config.compliance?.auditLogging) {
-      violations.push(`GovRAMP ${level.toUpperCase()}: Comprehensive audit logging required`);
+      violations.push(`GovRAMP ${level.toUpperCase()}: Audit logging required`);
       recommendations.push('Enable detailed audit logging for all resources');
     }
 
@@ -821,7 +821,7 @@ export function checkCompliance(
     }
 
     if (config.compliance?.auditLogging === false) {
-      violations.push(`HIPAA ${level.toUpperCase()}: Comprehensive audit logging required for PHI access`);
+      violations.push(`HIPAA ${level.toUpperCase()}: Audit logging required for PHI access`);
       recommendations.push('Enable detailed audit logging for all PHI access and modifications');
     }
 
@@ -862,7 +862,7 @@ export function checkCompliance(
     }
 
     if (!config.compliance?.auditLogging) {
-      violations.push(`HITRUST CSF ${level.toUpperCase()}: Comprehensive audit logging required`);
+      violations.push(`HITRUST CSF ${level.toUpperCase()}: Audit logging required`);
       recommendations.push('Implement detailed audit logging for all system activities');
     }
 
@@ -980,7 +980,7 @@ export function checkCompliance(
     }
 
     if (!config.compliance?.auditLogging) {
-      violations.push(`DoD ${level.toUpperCase()}: Comprehensive audit logging required`);
+      violations.push(`DoD ${level.toUpperCase()}: Audit logging required`);
       recommendations.push('Enable detailed audit logging for all resources and access');
     }
 
@@ -1183,8 +1183,8 @@ function isValidAWSRegion(region: string): boolean {
 
 function isValidAzureRegion(region: string): boolean {
   const validRegions = [
-    'East US', 'West US', 'Central US', 'North Europe', 'West Europe',
-    'East Asia', 'Southeast Asia', 'Australia East'
+    'eastus', 'westus', 'centralus', 'northeurope', 'westeurope',
+    'eastasia', 'southeastasia', 'australiaeast'
   ];
   return validRegions.includes(region);
 }
