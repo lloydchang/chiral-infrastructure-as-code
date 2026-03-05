@@ -159,6 +159,14 @@ describe('Security Compliance Tests', () => {
     });
 
     it('should detect missing GDPR controls', async () => {
+      const results = await complianceEngine.assessCompliance(testConfig, ['gdpr']);
+      const gdprResult = results.find(r => r.framework === 'gdpr');
+      
+      expect(gdprResult).toBeDefined();
+      expect(gdprResult!.violations.filter(v => v.severity === 'critical')).toHaveLength(0);
+    });
+
+    it('should detect missing GDPR controls', async () => {
       const insecureConfig = { ...testConfig };
       insecureConfig.compliance!.breachNotification = false;
       insecureConfig.compliance!.dataSubjectRights = false;

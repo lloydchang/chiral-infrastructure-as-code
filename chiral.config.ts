@@ -9,7 +9,7 @@ import { ChiralSystem } from './src/intent';
 export const config: ChiralSystem = {
   projectName: 'identity-platform',
   environment: 'prod',
-  networkCidr: '10.0.0.0/16',
+  networkCidr: '10.100.0.0/16',
 
   // Optional: Configure regions for each cloud (defaults will be used if not specified)
   region: {
@@ -31,7 +31,7 @@ export const config: ChiralSystem = {
   },
 
   postgres: {
-    engineVersion: '18.3',
+    engineVersion: '15',
     size: 'large', // Resolves to db.m5.large (AWS) / Standard_D4s_v3 (Azure) / db-custom-2-4096 (GCP)
     storageGb: 100
   },
