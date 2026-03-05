@@ -189,9 +189,9 @@ export const RegionalMetadata: Record<string, RegionMetadata> = {
         large: ['n1-standard-2'],
       },
       databaseClasses: {
-        small: ['db-f1-micro'],
-        medium: ['db-g1-small'],
-        large: ['db-custom-2-4096'],
+        small: ['db-g1-small'],
+        medium: ['db-custom-2-4096'],
+        large: ['db-custom-4-8192'],
       },
       pricingTier: 'standard',
     },

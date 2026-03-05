@@ -31,7 +31,7 @@ export const HardwareMap = {
     },
     k8s: {
       small: 't3.small',
-      medium: 't3.large',
+      medium: 't3.medium',
       large: 'm5.large'
     }
   } as CloudSkuMap,
@@ -56,12 +56,12 @@ export const HardwareMap = {
 
   gcp: {
     db: {
-      small: 'db-f1-micro',
-      medium: 'db-g1-small',
-      large: 'db-custom-2-4096'
+      small: 'db-g1-small',
+      medium: 'db-custom-2-4096',
+      large: 'db-custom-4-8192'
     },
     vm: {
-      small: 'e2-micro',
+      small: 'e2-small',
       medium: 'e2-medium',
       large: 'n1-standard-2'
     },

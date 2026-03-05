@@ -19,11 +19,11 @@ describe('HardwareMap', () => {
     });
 
     it('should map medium VM size correctly', () => {
-      expect(HardwareMap.aws.vm.medium).toBe('t3.large');
+      expect(HardwareMap.aws.vm.medium).toBe('t3.medium');
     });
 
     it('should map large VM size correctly', () => {
-      expect(HardwareMap.aws.vm.large).toBe('m5.xlarge');
+      expect(HardwareMap.aws.vm.large).toBe('t3.large');
     });
 
     it('should map small k8s node size correctly', () => {
@@ -31,7 +31,7 @@ describe('HardwareMap', () => {
     });
 
     it('should map medium k8s node size correctly', () => {
-      expect(HardwareMap.aws.k8s.medium).toBe('t3.large');
+      expect(HardwareMap.aws.k8s.medium).toBe('t3.medium');
     });
 
     it('should map large k8s node size correctly', () => {
@@ -79,19 +79,19 @@ describe('HardwareMap', () => {
 
   describe('GCP mappings', () => {
     it('should map small database size correctly', () => {
-      expect(HardwareMap.gcp.db.small).toBe('db-f1-micro');
+      expect(HardwareMap.gcp.db.small).toBe('db-g1-small');
     });
 
     it('should map medium database size correctly', () => {
-      expect(HardwareMap.gcp.db.medium).toBe('db-g1-small');
+      expect(HardwareMap.gcp.db.medium).toBe('db-custom-2-4096');
     });
 
     it('should map large database size correctly', () => {
-      expect(HardwareMap.gcp.db.large).toBe('db-custom-2-4096');
+      expect(HardwareMap.gcp.db.large).toBe('db-custom-4-8192');
     });
 
     it('should map small VM size correctly', () => {
-      expect(HardwareMap.gcp.vm.small).toBe('e2-micro');
+      expect(HardwareMap.gcp.vm.small).toBe('e2-small');
     });
 
     it('should map medium VM size correctly', () => {
