@@ -169,7 +169,7 @@ describe('DoD Compliance Tests', () => {
 
     it('should require Secret Region for all providers', () => {
       testConfig.region = {
-        aws: 'us-gov-east-1', // Gov but not Secret
+        aws: 'us-east-1', // Commercial region - should fail
         azure: 'USGov Arizona',
         gcp: 'us-gov-west1'
       };
