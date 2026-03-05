@@ -1444,7 +1444,7 @@ program
   .command('validate')
   .description('Validate Chiral configuration for deployment readiness')
   .requiredOption('-c, --config <path>', 'Path to chiral config file')
-  .option('--compliance <framework>', 'Compliance framework to check', 'none')
+  .option('--compliance <framework>', 'Compliance framework to check (none, soc2, iso27001, hipaa, fedramp-low, fedramp-moderate, fedramp-high, govramp-low, govramp-moderate, govramp-high)', 'none')
   .action(async (options) => {
     const configPath = path.resolve(options.config);
     let framework: ComplianceFramework = options.compliance;

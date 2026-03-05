@@ -527,6 +527,17 @@ chiral cost-analyze --provider azure --subscription "my-sub"
 ```bash
 # Validate configuration and compliance
 chiral validate -c chiral.config.ts --compliance soc2
+
+# FedRAMP and GovRAMP compliance validation
+chiral validate -c chiral.config.ts --compliance fedramp-low
+chiral validate -c chiral.config.ts --compliance fedramp-moderate
+chiral validate -c chiral.config.ts --compliance fedramp-high
+chiral validate -c chiral.config.ts --compliance govramp-low
+chiral validate -c chiral.config.ts --compliance govramp-moderate
+chiral validate -c chiral.config.ts --compliance govramp-high
+
+# Full compliance and deployment readiness check
+chiral validate -c chiral.config.ts --compliance fedramp-moderate --deployment-check
 ```
 
 **Terraform Provider:**

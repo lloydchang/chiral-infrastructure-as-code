@@ -1,6 +1,7 @@
 // Enhanced compliance validation for ISO 27001:2022, 27017, 27018
 
 import { ValidationResult } from './validation';
+import { CloudSecurityMonitor, monitorAwsSecurity, monitorAzureSecurity, monitorGcpSecurity } from './cloud-security-monitoring';
 export function validateISO27001Compliance(config: any): ValidationResult {
   const issues: string[] = [];
 
@@ -46,13 +47,6 @@ export function validateISO27001Compliance(config: any): ValidationResult {
 
 export function validateISO27017Compliance(config: any): ValidationResult {
   const issues: string[] = [];
-  const monitor = new CloudSecurityMonitor({
-    enabled: true,
-    alertThresholds: { failedLogins: 5, unusualActivity: 10, configChanges: 3 },
-    logRetentionDays: 365,
-    realTimeMonitoring: true,
-    complianceMonitoring: true
-  });
 
   // Cloud shared responsibility checks
   if (!config.compliance?.sharedResponsibility) {
@@ -64,28 +58,23 @@ export function validateISO27017Compliance(config: any): ValidationResult {
     issues.push('Data residency controls not implemented');
   }
 
-  // Cloud-specific monitoring
-  if (config.region?.aws) {
-    monitorAwsSecurity(config, monitor);
-  }
-  if (config.region?.azure) {
-    monitorAzureSecurity(config, monitor);
-  }
-  if (config.region?.gcp) {
-    monitorGcpSecurity(config, monitor);
+  // Cloud-specific controls
+  if (!config.compliance?.cloudSpecificControls?.cloudProviderAssessment) {
+    issues.push('Cloud provider assessment required');
   }
 
-  // Check for monitoring alerts
-  const alerts = monitor.getRecentAlerts(1); // Last hour
-  if (alerts.length > 0) {
-    issues.push(`${alerts.length} security alerts detected in cloud environment`);
+  if (!config.compliance?.cloudSpecificControls?.cloudConfigurationManagement) {
+    issues.push('Cloud configuration management required');
+  }
+
+  if (!config.compliance?.cloudSpecificControls?.cloudMonitoring) {
+    issues.push('Cloud service monitoring required');
   }
 
   return {
     valid: issues.length === 0,
     errors: issues,
     warnings: [],
-    monitoringReport: monitor.generateSecurityReport(),
     recommendations: []
   };
 }

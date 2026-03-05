@@ -796,18 +796,23 @@ export function checkCompliance(
   if (framework.startsWith('nist-')) {
     const level = framework.split('-')[1]; // 'low', 'moderate', 'high'
 
-    if (level === 'low') {
-      const nistResult = validateNISTLowCompliance(config);
-      violations.push(...nistResult.errors);
-      recommendations.push(...nistResult.recommendations);
-    } else if (level === 'moderate') {
-      const nistResult = validateNISTModerateCompliance(config);
-      violations.push(...nistResult.errors);
-      recommendations.push(...nistResult.recommendations);
-    } else if (level === 'high') {
-      const nistResult = validateNISTHighCompliance(config);
-      violations.push(...nistResult.errors);
-      recommendations.push(...nistResult.recommendations);
+    // Basic NIST requirements (simplified)
+    if (!config.compliance?.encryptionAtRest) {
+      violations.push(`NIST ${level.toUpperCase()}: Encryption at rest required`);
+      recommendations.push('Enable encryption at rest for all data stores');
+    }
+
+    if (!config.compliance?.auditLogging) {
+      violations.push(`NIST ${level.toUpperCase()}: Audit logging required`);
+      recommendations.push('Enable comprehensive audit logging');
+    }
+
+    if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 2) {
+      violations.push(`NIST ${level.toUpperCase()}: High availability required for production`);
+      recommendations.push('Deploy at least 2 nodes for fault tolerance');
+    }
+
+    // Level-specific requirements
     if (level === 'moderate' || level === 'high') {
       if (!config.compliance?.securityControls?.mfaRequired) {
         violations.push(`NIST ${level.toUpperCase()}: Multi-factor authentication required`);
