@@ -421,18 +421,18 @@ resource "google_compute_instance" "adfs" {
   // Helper methods for resource type mapping
   private static getAWSInstanceType(size: string): string {
     const sizeMap: { [key: string]: string } = {
-      'small': 't3.medium',
+      'small': 't3.small',
       'medium': 't3.large',
-      'large': 't3.xlarge'
+      'large': 'm5.xlarge'
     };
     return sizeMap[size] || 't3.large';
   }
 
   private static getRDSInstanceClass(size: string): string {
     const sizeMap: { [key: string]: string } = {
-      'small': 'db.t3.medium',
-      'medium': 'db.t3.large',
-      'large': 'db.t3.xlarge'
+      'small': 'db.t3.small',
+      'medium': 'db.t3.medium',
+      'large': 'db.m5.large'
     };
     return sizeMap[size] || 'db.t3.large';
   }
@@ -447,18 +447,18 @@ resource "google_compute_instance" "adfs" {
 
   private static getGCPMachineType(size: string): string {
     const sizeMap: { [key: string]: string } = {
-      'small': 'e2-medium',
-      'medium': 'e2-standard-2',
-      'large': 'e2-standard-4'
+      'small': 'e2-micro',
+      'medium': 'e2-medium',
+      'large': 'n1-standard-2'
     };
     return sizeMap[size] || 'e2-standard-2';
   }
 
   private static getCloudSQLTier(size: string): string {
     const sizeMap: { [key: string]: string } = {
-      'small': 'db-g1-small',
-      'medium': 'db-n1-standard-2',
-      'large': 'db-n1-standard-4'
+      'small': 'db-f1-micro',
+      'medium': 'db-g1-small',
+      'large': 'db-n1-standard-2'
     };
     return sizeMap[size] || 'db-n1-standard-2';
   }
@@ -786,18 +786,18 @@ resource "aws_instance" "adfs" {
 
   private static getAWSInstanceType(size: string): string {
     const sizeMap: { [key: string]: string } = {
-      'small': 't3.medium',
+      'small': 't3.small',
       'medium': 't3.large',
-      'large': 't3.xlarge'
+      'large': 'm5.xlarge'
     };
     return sizeMap[size] || 't3.large';
   }
 
   private static getAWSDBInstanceClass(size: string): string {
     const sizeMap: { [key: string]: string } = {
-      'small': 'db.t3.medium',
-      'medium': 'db.t3.large',
-      'large': 'db.t3.xlarge'
+      'small': 'db.t3.small',
+      'medium': 'db.t3.medium',
+      'large': 'db.m5.large'
     };
     return sizeMap[size] || 'db.t3.large';
   }

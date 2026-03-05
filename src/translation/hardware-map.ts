@@ -20,30 +20,30 @@ interface CloudSkuMap {
 export const HardwareMap = {
   aws: {
     db: {
-      small: 'db.t3.medium',
+      small: 'db.t3.small',
       large: 'db.m5.large'
     },
     vm: {
-      small: 't3.large',
+      small: 't3.small',
       large: 'm5.xlarge'
     },
     k8s: {
-      small: 't3.medium',
+      small: 't3.small',
       large: 'm5.large'
     }
   } as CloudSkuMap,
 
   azure: {
     db: {
-      small: 'Standard_B2s',
+      small: 'Standard_B1s',
       large: 'Standard_D4s_v3'
     },
     vm: {
-      small: 'Standard_D2s_v3',
+      small: 'Standard_B1s',
       large: 'Standard_D4s_v3'
     },
     k8s: {
-      small: 'Standard_D2s_v3',
+      small: 'Standard_B2s',
       large: 'Standard_D4s_v3'
     }
   } as CloudSkuMap,
@@ -54,11 +54,11 @@ export const HardwareMap = {
       large: 'db-custom-2-4096'
     },
     vm: {
-      small: 'e2-medium',
+      small: 'e2-micro',
       large: 'n1-standard-2'
     },
     k8s: {
-      small: 'e2-medium',
+      small: 'e2-small',
       large: 'n1-standard-2'
     }
   } as CloudSkuMap

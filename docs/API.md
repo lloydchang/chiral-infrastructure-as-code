@@ -222,7 +222,7 @@ interface AzureBicepOptions {
 - Idempotency fixes for known Bicep issues
 - What-if analysis support
 
-#### GCP Terraform Adapter (`declarative/gcp-terraform.ts`)
+#### Google Cloud Infrastructure Manager Terraform Adapter (`declarative/gcp-terraform.ts`)
 
 ```typescript
 export class GcpTerraformAdapter {

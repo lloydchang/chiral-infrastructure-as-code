@@ -31,17 +31,17 @@ export const config: ChiralSystem = {
     version: '1.35',
     minNodes: 1,
     maxNodes: 3,
-    size: 'small' // Resolves to t3.medium (AWS) / Standard_D2s_v3 (Azure) / e2-medium (GCP)
+    size: 'small' // Resolves to t3.small (AWS) / Standard_B2s (Azure) / e2-small (GCP)
   },
   
   postgres: {
     engineVersion: '18.3',
-    size: 'small', // Resolves to db.t3.medium (AWS) / Standard_B2s (Azure) / db-f1-micro (GCP)
+    size: 'small', // Resolves to db.t3.small (AWS) / Standard_B1s (Azure) / db-f1-micro (GCP)
     storageGb: 20
   },
   
   adfs: {
-    size: 'small', // Resolves to t3.large (AWS) / Standard_D2s_v3 (Azure) / e2-medium (GCP)
+    size: 'small', // Resolves to t3.small (AWS) / Standard_B1s (Azure) / e2-micro (GCP)
     windowsVersion: '11 26H2 Build 26300.7877'
   }
 };
@@ -600,7 +600,7 @@ Chiral takes a different approach to multi-cloud infrastructure management compa
 
 **Ideal**: CDK-equivalent tools (TypeScript/Python-based, construct libraries)
 
-### Declarative Approaches (Azure Bicep, GCP Terraform)
+### Declarative Approaches (Azure Bicep, Google Cloud Infrastructure Manager Terraform)
 **Purpose**: Generate native declarative artifacts optimized for each cloud
 
 **Characteristics**:

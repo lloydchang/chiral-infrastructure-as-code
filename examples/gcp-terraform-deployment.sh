@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# GCP Terraform Deployment Script with State Management Best Practices
+# Google Cloud Infrastructure Manager Terraform Deployment Script with State Management Best Practices
 # This script demonstrates safe Terraform deployment for Chiral-generated GCP infrastructure
 
 set -e  # Exit on any error
@@ -11,7 +11,7 @@ TERRAFORM_FILE="gcp-deployment.tf"
 PROJECT_NAME="your-gcp-project-id"  # Replace with your GCP project ID
 BUCKET_NAME="your-terraform-state-bucket"  # Replace with your GCS bucket for state
 
-echo "🚀 Starting Chiral GCP Terraform Deployment"
+echo "🚀 Starting Chiral Google Cloud Infrastructure Manager Terraform Deployment"
 echo "==========================================="
 
 # Change to the directory containing the generated Terraform file

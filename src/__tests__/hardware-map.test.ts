@@ -3,7 +3,7 @@ import { HardwareMap } from '../translation/hardware-map';
 describe('HardwareMap', () => {
   describe('AWS mappings', () => {
     it('should map small database size correctly', () => {
-      expect(HardwareMap.aws.db.small).toBe('db.t3.medium');
+      expect(HardwareMap.aws.db.small).toBe('db.t3.small');
     });
 
     it('should map large database size correctly', () => {
@@ -11,7 +11,7 @@ describe('HardwareMap', () => {
     });
 
     it('should map small VM size correctly', () => {
-      expect(HardwareMap.aws.vm.small).toBe('t3.large');
+      expect(HardwareMap.aws.vm.small).toBe('t3.small');
     });
 
     it('should map large VM size correctly', () => {
@@ -19,7 +19,7 @@ describe('HardwareMap', () => {
     });
 
     it('should map small k8s node size correctly', () => {
-      expect(HardwareMap.aws.k8s.small).toBe('t3.medium');
+      expect(HardwareMap.aws.k8s.small).toBe('t3.small');
     });
 
     it('should map large k8s node size correctly', () => {
@@ -29,7 +29,7 @@ describe('HardwareMap', () => {
 
   describe('Azure mappings', () => {
     it('should map small database size correctly', () => {
-      expect(HardwareMap.azure.db.small).toBe('Standard_B2s');
+      expect(HardwareMap.azure.db.small).toBe('Standard_B1s');
     });
 
     it('should map large database size correctly', () => {
@@ -37,7 +37,7 @@ describe('HardwareMap', () => {
     });
 
     it('should map small VM size correctly', () => {
-      expect(HardwareMap.azure.vm.small).toBe('Standard_D2s_v3');
+      expect(HardwareMap.azure.vm.small).toBe('Standard_B1s');
     });
 
     it('should map large VM size correctly', () => {
@@ -45,7 +45,7 @@ describe('HardwareMap', () => {
     });
 
     it('should map small k8s node size correctly', () => {
-      expect(HardwareMap.azure.k8s.small).toBe('Standard_D2s_v3');
+      expect(HardwareMap.azure.k8s.small).toBe('Standard_B2s');
     });
 
     it('should map large k8s node size correctly', () => {
@@ -63,7 +63,7 @@ describe('HardwareMap', () => {
     });
 
     it('should map small VM size correctly', () => {
-      expect(HardwareMap.gcp.vm.small).toBe('e2-medium');
+      expect(HardwareMap.gcp.vm.small).toBe('e2-micro');
     });
 
     it('should map large VM size correctly', () => {
@@ -71,7 +71,7 @@ describe('HardwareMap', () => {
     });
 
     it('should map small k8s node size correctly', () => {
-      expect(HardwareMap.gcp.k8s.small).toBe('e2-medium');
+      expect(HardwareMap.gcp.k8s.small).toBe('e2-small');
     });
 
     it('should map large k8s node size correctly', () => {

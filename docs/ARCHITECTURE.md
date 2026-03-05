@@ -26,7 +26,7 @@ Chiral Infrastructure as Code is a **stateless multi-cloud infrastructure genera
 ### Key Differentiators
 
 - **Stateless Generation**: No .tfstate files or remote state backends
-- **Multi-Cloud Output**: Single config → AWS CDK, Azure Bicep, GCP Terraform
+- **Multi-Cloud Output**: Single config → AWS CDK, Azure Bicep, Google Cloud Infrastructure Manager Terraform
 - **Familiar Syntax**: Terraform provider interface for team adoption
 - **Cost Intelligence**: Real-time cost comparison and optimization
 - **Compliance-First**: Built-in SOC 2, ISO 27001, HIPAA, FedRAMP checks
