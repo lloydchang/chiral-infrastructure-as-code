@@ -36,7 +36,7 @@ describe('Import Mappings', () => {
     });
 
     it('maps GCP DB tiers correctly', () => {
-      expect(mapDbClassToWorkloadSize('db-f1-micro', 'gcp')).toBe('small');
+      expect(mapDbClassToWorkloadSize('db-g1-small', 'gcp')).toBe('small');
       expect(mapDbClassToWorkloadSize('db-custom-2-4096', 'gcp')).toBe('medium');
       expect(mapDbClassToWorkloadSize('db-custom-4-8192', 'gcp')).toBe('large');
     });
