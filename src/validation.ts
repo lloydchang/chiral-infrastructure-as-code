@@ -23,7 +23,7 @@ export interface DriftDetectionResult {
 }
 
 export interface ComplianceCheck {
-  framework: 'soc2' | 'iso27001' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'govramp-low' | 'govramp-moderate' | 'govramp-high' | 'hitrust-low' | 'hitrust-moderate' | 'hitrust-high' | 'hitech-low' | 'hitech-moderate' | 'hitech-high' | 'hipaa-low' | 'hipaa-moderate' | 'hipaa-high' | 'nist-low' | 'nist-moderate' | 'nist-high' | 'none';
+  framework: 'soc1' | 'soc2' | 'soc3' | 'iso27001' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'govramp-low' | 'govramp-moderate' | 'govramp-high' | 'hitrust-low' | 'hitrust-moderate' | 'hitrust-high' | 'hitech-low' | 'hitech-moderate' | 'hitech-high' | 'hipaa-low' | 'hipaa-moderate' | 'hipaa-high' | 'nist-low' | 'nist-moderate' | 'nist-high' | 'none';
   compliant: boolean;
   violations: string[];
   recommendations: string[];
@@ -237,19 +237,6 @@ export function checkCompliance(
     }
   }
 
-  // HIPAA compliance checks
-  if (framework === 'hipaa') {
-    // Check for data protection measures
-    if (config.networkCidr.startsWith('10.0.0.0/16')) {
-      violations.push('HIPAA: Default network ranges may not meet data protection requirements');
-      recommendations.push('Use private network ranges with proper segmentation');
-    }
-
-    if (config.environment === 'prod' && !config.region) {
-      violations.push('HIPAA: Production workloads must specify regions for data residency');
-      recommendations.push('Specify compliant regions for healthcare data');
-    }
-  }
 
   // FedRAMP compliance checks
   if (framework.startsWith('fedramp-')) {
@@ -352,49 +339,6 @@ export function checkCompliance(
     }
   }
 
-  // HITRUST CSF compliance checks
-  if (framework.startsWith('hitrust-')) {
-    const level = framework.split('-')[1]; // 'low', 'moderate', 'high'
-
-    // Common checks for all HITRUST levels - based on healthcare security framework
-    if (!config.compliance?.encryptionAtRest) {
-      violations.push(`HITRUST CSF ${level.toUpperCase()}: Encryption at rest required`);
-      recommendations.push('Enable encryption at rest for all data stores');
-    }
-
-    if (!config.compliance?.auditLogging) {
-      violations.push(`HITRUST CSF ${level.toUpperCase()}: Comprehensive audit logging required`);
-      recommendations.push('Enable detailed audit logging for all resources');
-    }
-
-    if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 2) {
-      violations.push(`HITRUST CSF ${level.toUpperCase()}: Production environments must have high availability`);
-      recommendations.push('Deploy at least 2 nodes for fault tolerance');
-    }
-
-    // HITRUST specific: endpoint protection and data residency
-    if (!config.region) {
-      violations.push(`HITRUST CSF ${level.toUpperCase()}: Region specification required for data residency`);
-      recommendations.push('Specify regions for all cloud providers');
-    }
-
-    // Level-specific checks
-    if (level === 'moderate' || level === 'high') {
-      // Moderate and High require stricter controls for healthcare data
-      if (config.postgres && config.postgres.storageGb < 50 && config.environment === 'prod') {
-        violations.push(`HITRUST CSF ${level.toUpperCase()}: Production databases must have minimum 50GB storage`);
-        recommendations.push('Increase database storage for healthcare data retention');
-      }
-    }
-
-    if (level === 'high') {
-      // High impact additional requirements for healthcare
-      if (config.k8s && config.k8s.maxNodes > 10) {
-        violations.push('HITRUST CSF HIGH: Large clusters require enhanced security monitoring');
-        recommendations.push('Implement advanced security monitoring for large healthcare clusters');
-      }
-    }
-  }
 
   // HITECH compliance checks
   if (framework.startsWith('hitech-')) {
@@ -615,7 +559,7 @@ export function checkCompliance(
 // DEPLOYMENT READINESS CHECKS
 // =================================================================
 
-export async function checkDeploymentReadiness(config: ChiralSystem): Promise<{
+async function checkDeploymentReadiness(config: ChiralSystem): Promise<{
   ready: boolean;
   blockers: string[];
   warnings: string[];
@@ -797,5 +741,3 @@ function getFallbackCostEstimation(config: ChiralSystem): number {
   
   return baseCost;
 }
-
-export { validateChiralConfig, checkDeploymentReadiness, checkCompliance };
