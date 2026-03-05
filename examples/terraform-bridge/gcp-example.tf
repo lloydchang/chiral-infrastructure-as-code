@@ -9,7 +9,7 @@ terraform {
 
 # Variables
 variable "adfs_service_password" {
-  description = "ADFS service account password"
+  description = "ADFS service account password - CHANGE THIS IN PRODUCTION"
   type        = string
   sensitive   = true
 }
