@@ -15,7 +15,7 @@
   "scripts": {
     "build": "tsc",
     "compile": "ts-node src/main.ts",
-    "test": "NODE_OPTIONS=\"--no-warnings\" jest",
+    "test": "NODE_OPTIONS=\"--no-warnings\" jest --no-watch",
     "test:watch": "NODE_OPTIONS=\"--no-warnings\" jest --watch",
     "test:coverage": "NODE_OPTIONS=\"--no-warnings\" jest --coverage",
     "cdk": "cdk",

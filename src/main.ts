@@ -1962,7 +1962,7 @@ async function compareApproaches(resourceCount: number, teamSize: number, comple
   console.log(`\nChiral Approach:`);
   console.log(`   Premium Fees: $0.00`);
   console.log(`   Operational Overhead: $${chiralOperationalCost.toFixed(2)} (${chiralOperationalOverhead} hours)`);
-  console.log(`   Total Monthly Cost: $${totalChiralCost.toFixed(2)}`);
+  console.log(`   Chiral Cost: $${totalChiralCost.toFixed(2)}`);
   
   const monthlySavings = totalTerraformCost - totalChiralCost;
   const annualSavings = monthlySavings * 12;

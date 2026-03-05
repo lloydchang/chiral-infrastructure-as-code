@@ -34,22 +34,27 @@ static async parseTerraformFiles(sourcePath: string, provider: 'aws' | 'azure' |
 - `aws_db_instance` → DatabaseIntent (engine, version, storage, instance class)
 - `aws_instance` → AdfsIntent (instance type mapping)
 - `aws_vpc` → Network settings (CIDR blocks)
+- **Dynamic provider parameter** enables flexible mapping logic
 
 **Azure Resource Mapping**:
 - `azurerm_kubernetes_cluster` → KubernetesIntent
 - `azurerm_postgresql_flexible_server` → DatabaseIntent
 - `azurerm_windows_virtual_machine` → AdfsIntent
 - `azurerm_virtual_network` → Network settings
+- **Dynamic provider parameter** enables flexible mapping logic
 
 **GCP Resource Mapping**:
 - `google_container_cluster` → KubernetesIntent
 - `google_sql_database_instance` → DatabaseIntent
 - `google_compute_instance` → AdfsIntent
 - `google_compute_network` → Network settings
+- **Dynamic provider parameter** enables flexible mapping logic
 
 **Instance Type Mapping**:
 - Uses `mapInstanceTypeToWorkloadSize()` and `mapDbClassToWorkloadSize()`
+- **Dynamic provider parameter** passed to all mapping functions
 - Converts cloud-specific instance types to Chiral workload sizes (small/medium/large)
+- **Flexible architecture** supports provider-specific mapping logic
 
 ### 3. Complete Import Workflow
 
