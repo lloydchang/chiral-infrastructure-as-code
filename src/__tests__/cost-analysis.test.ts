@@ -88,7 +88,10 @@ describe('Cost Analysis', () => {
         const originalMethod = AzureCostAnalyzer.isAzureCostCliAvailable;
         AzureCostAnalyzer.isAzureCostCliAvailable = jest.fn().mockReturnValue(true);
         
-        const estimate = await AzureCostAnalyzer.analyzeAzureCosts('subscription-id', {});
+        const estimate = await AzureCostAnalyzer.analyzeAzureCosts('subscription-id', {
+          region: 'eastus',
+          includeRecommendations: true
+        });
         
         expect(estimate.provider).toBe('azure');
         expect(estimate.totalMonthlyCost).toBeGreaterThan(0);

@@ -1182,8 +1182,29 @@ export class AzureCostAnalyzer {
       throw new Error('azure-cost-cli not available. Install with: npm install -g azure-cost-cli');
     }
 
-    // Placeholder for actual azure-cost-cli integration
-    return this.getAzurePricing({} as ChiralSystem, options);
+    // Use mock config for cost analysis - in real implementation this would fetch actual usage
+    const mockConfig: ChiralSystem = {
+      projectName: 'azure-analysis',
+      environment: 'prod',
+      networkCidr: '10.0.0.0/16',
+      k8s: {
+        version: '1.29',
+        minNodes: 2,
+        maxNodes: 5,
+        size: 'medium'
+      },
+      postgres: {
+        engineVersion: '15',
+        size: 'medium',
+        storageGb: 100
+      },
+      adfs: {
+        size: 'medium',
+        windowsVersion: '2022'
+      }
+    };
+
+    return this.getAzurePricing(mockConfig, options);
   }
 }
 
