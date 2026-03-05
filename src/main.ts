@@ -1275,12 +1275,12 @@ program
         
         if (estimate.recommendations.length > 0) {
           console.log(`\n💡 Recommendations:`);
-          estimate.recommendations.forEach(rec => console.log(`   • ${rec}`));
+          estimate.recommendations.forEach((rec: string) => console.log(`   • ${rec}`));
         }
         
         if (estimate.warnings.length > 0) {
           console.log(`\n⚠️  Warnings:`);
-          estimate.warnings.forEach(warn => console.log(`   • ${warn}`));
+          estimate.warnings.forEach((warn: string) => console.log(`   • ${warn}`));
         }
       } else {
         // Multi-cloud comparison

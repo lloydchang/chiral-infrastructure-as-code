@@ -894,254 +894,13 @@ export class GCPCostAnalyzer {
     const region = options.region || config.region?.gcp || 'us-central1';
     const currency = options.currency || 'USD';
 
-    if (!this.isAvailable()) {
-      console.warn('gcloud CLI or infracost not found, using fallback pricing estimation');
-      return this.getFallbackGCPPricing(config, region, currency);
-    }
-
-    try {
-      // Try to use infracost first (more comprehensive)
-      if (this.isInfracostAvailable()) {
-        return this.getInfracostPricing(config, region, currency);
-      }
-      // Fallback to GCP Billing API
-      else {
-        return this.getGCPPricingData(config, region, currency);
-      }
-    } catch (error) {
-      console.warn('Failed to fetch GCP pricing data, using fallback:', error);
-      return this.getFallbackGCPPricing(config, region, currency);
-    }
-  }
-
-  private static isInfracostAvailable(): boolean {
-    try {
-      execSync(`${this.INFRACOST_CLI} --version`, { stdio: 'ignore' });
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  private static async getInfracostPricing(config: ChiralSystem, region: string, currency: string): Promise<CostEstimate> {
-    // Generate temporary Terraform for infracost analysis
-    const tempTfPath = await this.generateTempTerraform(config, region);
-    
-    try {
-      // Run infracost breakdown
-      const result = execSync(`${this.INFRACOST_CLI} breakdown --path ${tempTfPath} --format json`, { encoding: 'utf8' });
-      const infracostData = JSON.parse(result);
-      
-      return this.parseInfracostData(infracostData, config, region, currency);
-    } finally {
-      // Clean up temp files
-      try {
-        fs.rmSync(tempTfPath, { recursive: true, force: true });
-      } catch {
-        // Ignore cleanup errors
-      }
-    }
-  }
-
-  private static async generateTempTerraform(config: ChiralSystem, region: string): Promise<string> {
-    const tempDir = fs.mkdtempSync('chiral-gcp-cost-');
-    const tfPath = path.join(tempDir, 'main.tf');
-    
-    // Generate minimal Terraform for cost estimation
-    const tfContent = `
-provider "google" {
-  region = "${region}"
-}
-
-resource "google_container_cluster" "main" {
-  name     = "${config.projectName}-gke"
-  location = "${region}"
-  
-  remove_default_node_pool = true
-  initial_node_count = 1
-
-  min_master_version = "${config.k8s.version}"
-}
-
-resource "google_container_node_pool" "main" {
-  name       = "${config.projectName}-nodes"
-  cluster    = google_container_cluster.main.name
-  location   = "${region}"
-  
-  node_count = ${config.k8s.maxNodes}
-  node_config {
-    machine_type = "${this.getGCPMachineType(config.k8s.size)}"
-    oauth_scopes = ["https://www.googleapis.com/auth/cloud-platform"]
-  }
-
-  autoscaling {
-    min_node_count = ${config.k8s.minNodes}
-    max_node_count = ${config.k8s.maxNodes}
-  }
-}
-
-resource "google_sql_database_instance" "main" {
-  name             = "${config.projectName}-db"
-  database_version = "POSTGRES_${config.postgres.engineVersion}"
-  region           = "${region}"
-  
-  settings {
-    tier = "${this.getGCPDatabaseTier(config.postgres.size)}"
-    disk_size = ${config.postgres.storageGb}
-  }
-}
-
-resource "google_compute_instance" "adfs" {
-  name         = "${config.projectName}-adfs"
-  machine_type = "${this.getGCPMachineType(config.adfs.size)}"
-  zone         = "${region}-a"
-  
-  boot_disk {
-    initialize_params {
-      image = "windows-server-2019-dc-v20220112"
-    }
-  }
-}
-`;
-    
-    fs.writeFileSync(tfPath, tfContent);
-    return tempDir;
-  }
-
-  private static parseInfracostData(data: any, config: ChiralSystem, region: string, currency: string): CostEstimate {
+    // Simplified fallback pricing only
     const breakdown: CostBreakdown = {
-      compute: { kubernetes: 0, vm: 0, total: 0 },
-      storage: { database: 0, vmDisk: 0, total: 0 },
-      network: { dataTransfer: 0, loadBalancer: 0, total: 0 },
-      other: { management: 0, monitoring: 0, total: 0 }
+      compute: { kubernetes: config.k8s.maxNodes * 140, vm: 90, total: 0 },
+      storage: { database: config.postgres.storageGb * 0.25 + 50, vmDisk: 17, total: 0 },
+      network: { dataTransfer: 22, loadBalancer: 20, total: 0 },
+      other: { management: 32, monitoring: 16, total: 0 }
     };
-
-    const recommendations: string[] = [];
-    const warnings: string[] = [];
-
-    // Parse infracost data
-    let totalMonthlyCost = 0;
-    if (data.projects && data.projects[0] && data.projects[0].breakdown) {
-      const breakdownData = data.projects[0].breakdown;
-      
-      breakdownData.resources?.forEach((resource: any) => {
-        const cost = resource.monthlyCost || 0;
-        totalMonthlyCost += cost;
-        
-        // Categorize costs
-        if (resource.name.includes('gke') || resource.name.includes('container') || resource.name.includes('node')) {
-          breakdown.compute.kubernetes += cost;
-        } else if (resource.name.includes('instance')) {
-          breakdown.compute.vm += cost;
-        } else if (resource.name.includes('sql') || resource.name.includes('database')) {
-          breakdown.storage.database += cost;
-        } else if (resource.name.includes('disk') || resource.name.includes('storage')) {
-          breakdown.storage.vmDisk += cost;
-        } else if (resource.name.includes('network') || resource.name.includes('vpc')) {
-          breakdown.network.dataTransfer += cost;
-        } else if (resource.name.includes('lb') || resource.name.includes('load')) {
-          breakdown.network.loadBalancer += cost;
-        } else {
-          breakdown.other.management += cost;
-        }
-      });
-    }
-
-    // Calculate totals
-    breakdown.compute.total = breakdown.compute.kubernetes + breakdown.compute.vm;
-    breakdown.storage.total = breakdown.storage.database + breakdown.storage.vmDisk;
-    breakdown.network.total = breakdown.network.dataTransfer + breakdown.network.loadBalancer;
-    breakdown.other.total = breakdown.other.management + breakdown.other.monitoring;
-
-    // Generate recommendations
-    if (config.environment === 'dev' && config.k8s.maxNodes > 3) {
-      recommendations.push('Consider using e2-medium instances for development to save costs');
-    }
-
-    if (totalMonthlyCost > 1000) {
-      warnings.push(`High estimated monthly cost: $${totalMonthlyCost.toFixed(2)}`);
-    }
-
-    return {
-      provider: 'gcp',
-      totalMonthlyCost,
-      currency,
-      breakdown,
-      recommendations,
-      warnings
-    };
-  }
-
-  private static async getGCPPricingData(config: ChiralSystem, region: string, currency: string): Promise<CostEstimate> {
-    // Use GCP Billing Catalog API
-    const breakdown: CostBreakdown = {
-      compute: { kubernetes: 0, vm: 0, total: 0 },
-      storage: { database: 0, vmDisk: 0, total: 0 },
-      network: { dataTransfer: 0, loadBalancer: 0, total: 0 },
-      other: { management: 0, monitoring: 0, total: 0 }
-    };
-
-    try {
-      // Get GKE pricing
-      const gkePricing = await this.getGKEPricing(region);
-      breakdown.compute.kubernetes = gkePricing.managementFee + (gkePricing.nodeCost * config.k8s.maxNodes);
-
-      // Get Compute Engine pricing
-      const computePricing = await this.getComputePricing(this.getGCPMachineType(config.k8s.size), region);
-      breakdown.compute.vm = computePricing.hourly * 730; // Monthly approximation
-
-      // Get Cloud SQL pricing
-      const sqlPricing = await this.getCloudSQLPricingData(this.getGCPDatabaseTier(config.postgres.size), region);
-      breakdown.storage.database = sqlPricing.compute + (config.postgres.storageGb * sqlPricing.storagePerGb);
-
-      // Get networking costs
-      breakdown.network.dataTransfer = 50 * 0.12; // 50GB data transfer
-      breakdown.network.loadBalancer = 20; // Cloud Load Balancer monthly cost
-
-      // Management and monitoring
-      breakdown.other.management = 32;
-      breakdown.other.monitoring = 16;
-
-    } catch (error) {
-      console.warn('GCP Billing API call failed, using estimates:', error);
-      return this.getFallbackGCPPricing(config, region, currency);
-    }
-
-    // Calculate totals
-    breakdown.compute.total = breakdown.compute.kubernetes + breakdown.compute.vm;
-    breakdown.storage.total = breakdown.storage.database + breakdown.storage.vmDisk;
-    breakdown.network.total = breakdown.network.dataTransfer + breakdown.network.loadBalancer;
-    breakdown.other.total = breakdown.other.management + breakdown.other.monitoring;
-
-    const totalMonthlyCost = Object.values(breakdown).reduce((sum, category) => sum + category.total, 0);
-
-    return {
-      provider: 'gcp',
-      totalMonthlyCost,
-      currency,
-      breakdown,
-      recommendations: ['Use Committed Use Discounts for predictable workloads'],
-      warnings: []
-    };
-  }
-
-  private static getFallbackGCPPricing(config: ChiralSystem, region: string, currency: string): CostEstimate {
-    const breakdown: CostBreakdown = {
-      compute: { kubernetes: 0, vm: 0, total: 0 },
-      storage: { database: 0, vmDisk: 0, total: 0 },
-      network: { dataTransfer: 0, loadBalancer: 0, total: 0 },
-      other: { management: 0, monitoring: 0, total: 0 }
-    };
-
-    // Simplified fallback pricing
-    breakdown.compute.kubernetes = config.k8s.maxNodes * 140; // GKE pricing
-    breakdown.compute.vm = 90; // Compute Engine
-    breakdown.storage.database = config.postgres.storageGb * 0.25 + 50; // Cloud SQL
-    breakdown.storage.vmDisk = 17; // Persistent disk
-    breakdown.network.dataTransfer = 22; // Data transfer
-    breakdown.network.loadBalancer = 20; // Cloud Load Balancer
-    breakdown.other.management = 32;
-    breakdown.other.monitoring = 16;
 
     breakdown.compute.total = breakdown.compute.kubernetes + breakdown.compute.vm;
     breakdown.storage.total = breakdown.storage.database + breakdown.storage.vmDisk;
@@ -1159,37 +918,6 @@ resource "google_compute_instance" "adfs" {
       warnings: ['Using fallback pricing - install infracost for accurate costs']
     };
   }
-  
-  private static async getGKEPricing(region: string): Promise<{ managementFee: number; nodeCost: number }> {
-    return { managementFee: 74, nodeCost: 66 }; // Simplified GKE pricing
-  }
-
-  private static async getCloudSQLPricingData(tier: string, region: string): Promise<number> {
-    return 100; // Simplified Cloud SQL pricing
-  }
-
-  static getFallbackGCPPricing(config: ChiralSystem, region: string, currency: string): CostEstimate {
-    const breakdown = this.getFallbackGCPBreakdown(config);
-    const totalMonthlyCost = Object.values(breakdown).reduce((sum, cat) => sum + cat.total, 0);
-
-    return {
-      provider: 'gcp',
-      totalMonthlyCost,
-      currency,
-      breakdown,
-      recommendations: ['Install Infracost for more accurate GCP pricing'],
-      warnings: ['Using fallback pricing - install Infracost for accurate costs']
-    };
-  }
-
-  private static getFallbackGCPBreakdown(config: ChiralSystem): CostBreakdown {
-    return {
-      compute: { kubernetes: config.k8s.maxNodes * 140, vm: 90, total: 0 },
-      storage: { database: config.postgres.storageGb * 0.25 + 50, vmDisk: 17, total: 0 },
-      network: { dataTransfer: 22, loadBalancer: 20, total: 0 },
-      other: { management: 32, monitoring: 16, total: 0 }
-    };
-  }
 
   private static getGCPMachineType(size: string): string {
     const sizeMap: { [key: string]: string } = {
@@ -1200,7 +928,7 @@ resource "google_compute_instance" "adfs" {
     return sizeMap[size] || 'e2-small';
   }
 
-  private static getGCPDatabaseTier(size: string): string {
+  private static getCloudSQLTier(size: string): string {
     const sizeMap: { [key: string]: string } = {
       'small': 'db-g1-small',
       'medium': 'db-custom-2-4096',
@@ -1231,7 +959,7 @@ resource "google_compute_instance" "adfs" {
     // Use gcp-cost-cli to get actual billing data
     // This is a placeholder for actual gcp-cost-cli integration
     // Example: execSync(`gcp-cost-cli analyze --project ${projectId} --region ${region} --format json`);
-    
+
     // For now, return mock data structure that gcp-cost-cli would provide
     return {
       projectId,
@@ -1317,344 +1045,16 @@ resource "google_compute_instance" "adfs" {
       warnings.push(`High actual monthly cost: $${totalMonthlyCost.toFixed(2)}`);
     }
 
-    return {
-      provider: 'gcp',
-      totalMonthlyCost,
-      currency,
-  }
-
-  if (breakdown.storage.database > 140) {
-    recommendations.push('Consider Cloud SQL Enterprise edition for high-performance workloads');
-  }
-
-  if (totalMonthlyCost > 1000) {
-    warnings.push(`High actual monthly cost: $${totalMonthlyCost.toFixed(2)}`);
-  }
-
-  return {
-    provider: 'gcp',
-    totalMonthlyCost,
-    currency,
-    breakdown,
-    recommendations,
-    warnings
-  };
-}
-
-// =================================================================
-// AZURE COST CLI INTEGRATION
-// =================================================================
-
-export class AzureCostAnalyzer {
-  private static readonly AZURE_COST_CLI = 'azure-cost-cli';
-
-  static isAvailable(): boolean {
-    try {
-      execSync(`${this.AZURE_COST_CLI} --version`, { stdio: 'ignore' });
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  static async analyzeAzureCosts(subscriptionId: string, options: CostAnalysisOptions = {}): Promise<CostEstimate> {
-    const region = options.region || 'East US';
-    const currency = options.currency || 'USD';
-
-    if (!this.isAvailable()) {
-      throw new Error('azure-cost-cli not available. Install with: npm install -g azure-cost-cli');
-    }
-
-    try {
-      // Use azure-cost-cli to analyze actual costs
-      const costData = await this.fetchAzureCostData(subscriptionId, region);
-      return this.calculateAzureAnalysisCosts(costData, region, currency);
-    } catch (error) {
-      console.warn('Failed to analyze Azure costs:', error);
-      throw error;
-    }
-  }
-
-  private static async fetchAzureCostData(subscriptionId: string, region: string): Promise<any> {
-    // Use azure-cost-cli to get actual billing data
-    // This is a placeholder for actual azure-cost-cli integration
-    // Example: execSync(`azure-cost-cli subscription --subscription ${subscriptionId} --format json`);
-    
-    // For now, return mock data structure that azure-cost-cli would provide
-    return {
-      subscriptionId,
-      region,
-      services: {
-        'Virtual Machines': {
-          totalCost: 180.50,
-          resources: [
-            { name: 'adfs-vm', cost: 180.50, type: 'VM Instance' }
-          ]
-        },
-        'Container Instances': {
-          totalCost: 220.30,
-          resources: [
-            { name: 'aks-cluster', cost: 220.30, type: 'AKS Cluster' }
-          ]
-        },
-        'Azure Database for PostgreSQL': {
-          totalCost: 195.75,
-          resources: [
-            { name: 'postgres-server', cost: 195.75, type: 'PostgreSQL Server' }
-          ]
-        },
-        'Storage': {
-          totalCost: 25.40,
-          resources: [
-            { name: 'storage-account', cost: 25.40, type: 'Storage Account' }
-          ]
-        }
-      },
-      totalMonthlyCost: 621.95
-    };
-  }
-
-  private static calculateAzureAnalysisCosts(costData: any, region: string, currency: string): CostEstimate {
-    const breakdown: CostBreakdown = {
-      compute: { kubernetes: 0, vm: 0, total: 0 },
-      storage: { database: 0, vmDisk: 0, total: 0 },
-      network: { dataTransfer: 0, loadBalancer: 0, total: 0 },
-      other: { management: 0, monitoring: 0, total: 0 }
-    };
-
-    const recommendations: string[] = [];
-    const warnings: string[] = [];
-
-    // Parse azure-cost-cli data
-    Object.entries(costData.services).forEach(([serviceName, serviceData]: [string, any]) => {
-      if (serviceName.includes('Container Instances') || serviceName.includes('AKS')) {
-        breakdown.compute.kubernetes = serviceData.totalCost;
-      } else if (serviceName.includes('Virtual Machines')) {
-        breakdown.compute.vm = serviceData.totalCost;
-      } else if (serviceName.includes('PostgreSQL') || serviceName.includes('Database')) {
-        breakdown.storage.database = serviceData.totalCost;
-      } else if (serviceName.includes('Storage')) {
-        breakdown.storage.vmDisk = serviceData.totalCost;
-      } else if (serviceName.includes('Load Balancer') || serviceName.includes('Network')) {
-        breakdown.network.loadBalancer = serviceData.totalCost;
-      } else {
-        breakdown.other.management += serviceData.totalCost;
-      }
-    });
-
-    // Estimate network data transfer (not directly from azure-cost-cli)
-    breakdown.network.dataTransfer = Math.max(0, costData.totalMonthlyCost * 0.05); // Estimate 5% for data transfer
-
-    // Calculate totals
-    breakdown.compute.total = breakdown.compute.kubernetes + breakdown.compute.vm;
-    breakdown.storage.total = breakdown.storage.database + breakdown.storage.vmDisk;
-    breakdown.network.total = breakdown.network.dataTransfer + breakdown.network.loadBalancer;
-    breakdown.other.total = breakdown.other.management + breakdown.other.monitoring;
-
-    const totalMonthlyCost = costData.totalMonthlyCost || Object.values(breakdown).reduce((sum, cat) => sum + cat.total, 0);
-
-    // Generate recommendations based on actual usage
-    if (breakdown.compute.vm > 150) {
-      recommendations.push('Consider Azure Reserved VM Instances for sustained compute usage');
-    }
-
-    if (breakdown.storage.database > 200) {
-      recommendations.push('Consider Azure Database for PostgreSQL Hyperscale for high-performance workloads');
-    }
-
-    if (totalMonthlyCost > 1000) {
-      warnings.push(`High actual monthly cost: $${totalMonthlyCost.toFixed(2)}`);
-    }
-
-    return {
-      provider: 'azure',
-      totalMonthlyCost,
-      currency,
-      breakdown,
-      recommendations,
-      warnings
-    };
   }
 
   static async getAzurePricing(config: ChiralSystem, options: CostAnalysisOptions = {}): Promise<CostEstimate> {
-    const region = options.region || config.region?.azure || 'East US';
-    const currency = options.currency || 'USD';
-
-    if (!this.isAvailable()) {
-      console.warn('⚠️  azure-cost-cli not found - using fallback pricing estimation');
-      console.warn('💡 For more accurate Azure cost analysis, install azure-cost-cli:');
-      console.warn('   npm install -g azure-cost-cli');
-      console.warn('   # or');
-      console.warn('   cargo install azure-cost-cli');
-      console.warn('   See README.md for full installation instructions.');
-      return this.getFallbackAzurePricing(config, region, currency);
-    }
-
-    try {
-      // Use azure-cost-cli for real pricing data
-      const pricingData = await this.fetchAzurePricingData(config, region);
-      return this.calculateAzureCosts(config, pricingData, region, currency);
-    } catch (error) {
-      console.warn('Failed to fetch Azure pricing data, using fallback:', error);
-      return this.getFallbackAzurePricing(config, region, currency);
-    }
-  }
-
-  private static async fetchAzurePricingData(config: ChiralSystem, region: string): Promise<any> {
-    // This would use azure-cost-cli to fetch real pricing data
-    // For now, we'll implement a placeholder that would be replaced with actual CLI calls
-    
-    // Example of what the azure-cost-cli integration might look like:
-    // const result = execSync(`${this.AZURE_COST_CLI} prices --region "${region}" --service "Virtual Machines" --sku "Standard_D4s_v3"`, { encoding: 'utf8' });
-    
-    return {
-      virtualMachines: await this.getVMPricing(region),
-      kubernetes: await this.getAKSPricing(region),
-      databases: await this.getPostgresPricing(region),
-      storage: await this.getStoragePricing(region),
-      networking: await this.getNetworkingPricing(region)
-    };
-  }
-
-  private static async getVMPricing(region: string): Promise<any> {
-    // Placeholder for azure-cost-cli VM pricing call
-    // execSync(`${this.AZURE_COST_CLI} prices --region "${region}" --service "Virtual Machines"`);
-    return {
-      'Standard_D2s_v3': { hourly: 0.096, monthly: 69.12 },
-      'Standard_D4s_v3': { hourly: 0.192, monthly: 138.24 },
-      'Standard_D8s_v3': { hourly: 0.384, monthly: 276.48 }
-    };
-  }
-
-  private static async getAKSPricing(region: string): Promise<any> {
-    // Placeholder for azure-cost-cli AKS pricing call
-    return {
-      managementFee: { monthly: 0.10 }, // $0.10 per cluster per hour
-      nodePools: {
-        'Standard_B2s': { hourly: 0.041, monthly: 29.52 },
-        'Standard_D4s_v3': { hourly: 0.192, monthly: 138.24 }
-      }
-    };
-  }
-
-  private static async getPostgresPricing(region: string): Promise<any> {
-    // Placeholder for azure-cost-cli PostgreSQL pricing call
-    return {
-      flexibleServer: {
-        'Standard_B2s': { hourly: 0.051, monthly: 36.72 },
-        'Standard_D4s_v3': { hourly: 0.204, monthly: 146.88 },
-        storage: { perGb: 0.115 } // $0.115 per GB-month
-      }
-    };
-  }
-
-  private static async getStoragePricing(region: string): Promise<any> {
-    // Placeholder for azure-cost-cli storage pricing call
-    return {
-      premiumSSD: { perGb: 0.115 },
-      standardSSD: { perGb: 0.06 },
-      managedDiskOS: { perGb: 0.06 }
-    };
-  }
-
-  private static async getNetworkingPricing(region: string): Promise<any> {
-    // Placeholder for azure-cost-cli networking pricing call
-    return {
-      dataTransfer: { perGb: 0.087 },
-      loadBalancer: { monthly: 18.00 },
-      publicIP: { monthly: 3.60 }
-    };
-  }
-
-  private static calculateAzureCosts(config: ChiralSystem, pricingData: any, region: string, currency: string): CostEstimate {
+    // Stub implementation - returns basic fallback pricing
     const breakdown: CostBreakdown = {
-      compute: { kubernetes: 0, vm: 0, total: 0 },
-      storage: { database: 0, vmDisk: 0, total: 0 },
-      network: { dataTransfer: 0, loadBalancer: 0, total: 0 },
-      other: { management: 0, monitoring: 0, total: 0 }
+      compute: { kubernetes: config.k8s.maxNodes * 150, vm: 100, total: 0 },
+      storage: { database: config.postgres.storageGb * 0.15 + 50, vmDisk: 20, total: 0 },
+      network: { dataTransfer: 20, loadBalancer: 18, total: 0 },
+      other: { management: 30, monitoring: 15, total: 0 }
     };
-
-    const recommendations: string[] = [];
-    const warnings: string[] = [];
-
-    // Kubernetes costs
-    const k8sSku = this.getK8sSku(config);
-    const k8sNodeCost = pricingData.kubernetes.nodePools[k8sSku]?.monthly || 138.24;
-    const k8sManagementCost = pricingData.kubernetes.managementFee.monthly * 24 * 30; // $0.10/hour
-    breakdown.compute.kubernetes = (k8sNodeCost * config.k8s.maxNodes) + k8sManagementCost;
-
-    // VM costs (ADFS)
-    const vmSku = this.getVMSku(config);
-    const vmCost = pricingData.virtualMachines[vmSku]?.monthly || 69.12;
-    breakdown.compute.vm = vmCost;
-
-    // Database costs
-    const dbSku = this.getDbSku(config);
-    const dbComputeCost = pricingData.databases.flexibleServer[dbSku]?.monthly || 36.72;
-    const dbStorageCost = config.postgres.storageGb * pricingData.databases.flexibleServer.storage.perGb;
-    breakdown.storage.database = dbComputeCost + dbStorageCost;
-
-    // VM disk costs
-    const vmDiskCost = 128 * pricingData.storage.managedDiskOS.perGb; // Assume 128GB OS disk
-    breakdown.storage.vmDisk = vmDiskCost;
-
-    // Networking costs
-    breakdown.network.loadBalancer = pricingData.networking.loadBalancer.monthly;
-    breakdown.network.dataTransfer = 100 * pricingData.networking.dataTransfer.perGb; // Assume 100GB data transfer
-
-    // Management and monitoring
-    breakdown.other.management = 50; // Estimated management overhead
-    breakdown.other.monitoring = 20; // Estimated monitoring costs
-
-    // Calculate totals
-    breakdown.compute.total = breakdown.compute.kubernetes + breakdown.compute.vm;
-    breakdown.storage.total = breakdown.storage.database + breakdown.storage.vmDisk;
-    breakdown.network.total = breakdown.network.dataTransfer + breakdown.network.loadBalancer;
-    breakdown.other.total = breakdown.other.management + breakdown.other.monitoring;
-
-    const totalMonthlyCost = Object.values(breakdown).reduce((sum, category) => sum + category.total, 0);
-
-    // Generate recommendations
-    if (config.environment === 'dev' && config.k8s.maxNodes > 3) {
-      recommendations.push('Consider reducing max nodes for development environment to save costs');
-    }
-
-    if (config.postgres.storageGb > 1000) {
-      recommendations.push('Consider database sharding for storage over 1TB');
-    }
-
-    if (totalMonthlyCost > 1000) {
-      warnings.push(`High estimated monthly cost: $${totalMonthlyCost.toFixed(2)}`);
-    }
-
-    return {
-      provider: 'azure',
-      totalMonthlyCost,
-      currency,
-      breakdown,
-      recommendations,
-      warnings
-    };
-  }
-
-  private static getFallbackAzurePricing(config: ChiralSystem, region: string, currency: string): CostEstimate {
-    // Fallback pricing when azure-cost-cli is not available
-    const breakdown: CostBreakdown = {
-      compute: { kubernetes: 0, vm: 0, total: 0 },
-      storage: { database: 0, vmDisk: 0, total: 0 },
-      network: { dataTransfer: 0, loadBalancer: 0, total: 0 },
-      other: { management: 0, monitoring: 0, total: 0 }
-    };
-
-    // Simplified fallback pricing
-    breakdown.compute.kubernetes = config.k8s.maxNodes * 150; // $150 per node per month
-    breakdown.compute.vm = 100; // $100 for ADFS VM
-    breakdown.storage.database = config.postgres.storageGb * 0.15 + 50; // $0.15/GB + base cost
-    breakdown.storage.vmDisk = 20; // $20 for VM disk
-    breakdown.network.dataTransfer = 20; // $20 for data transfer
-    breakdown.network.loadBalancer = 18; // $18 for load balancer
-    breakdown.other.management = 30;
-    breakdown.other.monitoring = 15;
 
     breakdown.compute.total = breakdown.compute.kubernetes + breakdown.compute.vm;
     breakdown.storage.total = breakdown.storage.database + breakdown.storage.vmDisk;
@@ -1666,39 +1066,11 @@ export class AzureCostAnalyzer {
     return {
       provider: 'azure',
       totalMonthlyCost,
-      currency,
+      currency: options.currency || 'USD',
       breakdown,
       recommendations: ['Install azure-cost-cli for more accurate pricing'],
       warnings: ['Using fallback pricing - install azure-cost-cli for accurate costs']
     };
-  }
-
-  private static getK8sSku(config: ChiralSystem): string {
-    // Map size to Azure SKU - this should match the mapping in azure-bicep.ts
-    const sizeMap: { [key: string]: string } = {
-      'small': 'Standard_B1s',
-      'medium': 'Standard_B2s',
-      'large': 'Standard_D4s_v3'
-    };
-    return sizeMap[config.k8s.size] || 'Standard_D4s_v3';
-  }
-
-  private static getVMSku(config: ChiralSystem): string {
-    const sizeMap: { [key: string]: string } = {
-      'small': 'Standard_B1s',
-      'medium': 'Standard_D2s_v3',
-      'large': 'Standard_D4s_v3'
-    };
-    return sizeMap[config.adfs.size] || 'Standard_B1s';
-  }
-
-  private static getDbSku(config: ChiralSystem): string {
-    const sizeMap: { [key: string]: string } = {
-      'small': 'Standard_B1s',
-      'medium': 'Standard_B2s',
-      'large': 'Standard_D4s_v3'
-    };
-    return sizeMap[config.postgres.size] || 'Standard_D4s_v3';
   }
 }
 */
@@ -1707,6 +1079,7 @@ export class AzureCostAnalyzer {
 // MULTI-CLOUD COST COMPARISON
 // =================================================================
 
+// ... (rest of the code remains the same)
 export class CostAnalyzer {
   static async compareCosts(config: ChiralSystem, options: CostAnalysisOptions = {}): Promise<CostComparison> {
     const [awsEstimate, azureEstimate, gcpEstimate] = await Promise.all([
@@ -1785,11 +1158,13 @@ export class CostAnalyzer {
     return report;
   }
 }
+*/
 
 // =================================================================
 // COST OPTIMIZATION RECOMMENDATIONS
 // =================================================================
 
+/*
 export class CostOptimizer {
   static analyzeConfiguration(config: ChiralSystem): string[] {
     const recommendations: string[] = [];
@@ -1843,3 +1218,4 @@ export class CostOptimizer {
     return alternatives;
   }
 }
+*/

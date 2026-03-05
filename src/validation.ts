@@ -6,7 +6,7 @@ import { ChiralSystem, ComplianceFramework } from './intent';
 import * as fs from 'fs';
 import * as path from 'path';
 import { validateNISTHighCompliance } from './compliance';
-import { CostAnalyzer, AzureCostAnalyzer, CostOptimizer, CostAnalysisOptions } from './cost-analysis';
+import { CostAnalyzer, CostAnalysisOptions } from './cost-analysis';
 
 export interface ValidationResult {
   valid: boolean;
