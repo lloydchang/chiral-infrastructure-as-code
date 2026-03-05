@@ -26,12 +26,49 @@ import { validateChiralConfig, checkDeploymentReadiness, checkCompliance } from 
 import * as hcl2 from 'hcl2-parser';
 import * as yaml from 'js-yaml';
 
+// Import migration utilities
+import { MigrationWizard } from './migration/wizard';
+import { MigrationPlaybookGenerator } from './migration/playbooks';
+import { ValidationScriptGenerator } from './migration/validation-scripts';
+import { awsEksPostgresTemplate } from './migration/templates/aws-eks-postgres-template';
+import { TerraformImportAdapter } from './adapters/declarative/terraform-adapter';
+
 // =================================================================
 // IMPORT HELPERS
 // =================================================================
 const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 'gcp', stackName?: string): Promise<ChiralSystem> => {
   const ext = path.extname(sourcePath);
   let resources: any[] = [];
+
+  // Check if it's a directory (for Terraform directories)
+  try {
+    const stats = fs.statSync(sourcePath);
+    if (stats.isDirectory() && !ext) {
+      // Handle Terraform directory with our new Terraform Import Adapter
+      console.log(`🔍 Parsing Terraform directory: ${path.basename(sourcePath)}`);
+      
+      try {
+        const parsedResources = await TerraformImportAdapter.parseTerraformFiles(sourcePath, provider);
+        
+        // Convert to the format expected by buildChiralSystemFromResources
+        resources = parsedResources.map(resource => ({
+          type: resource.resourceType,
+          name: resource.resourceName,
+          values: resource.config
+        }));
+        
+        console.log(`✅ Extracted ${resources.length} resources from directory using Terraform Import Adapter`);
+        
+      } catch (error) {
+        console.error(`❌ Failed to parse Terraform directory with Terraform Import Adapter: ${error}`);
+        throw new Error(`Terraform directory parsing failed: ${error instanceof Error ? error.message : String(error)}`);
+      }
+      
+      return buildChiralSystemFromResources(resources, provider, stackName);
+    }
+  } catch (error) {
+    // Continue with file-based handling if stat fails
+  }
 
   if (ext === '.tfstate') {
     // Enhanced Terraform state file handling with corruption detection
@@ -94,88 +131,108 @@ const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 'gcp', 
     
   } else if (ext === '.tf') {
     console.log(`🔍 Parsing Terraform HCL file: ${path.basename(sourcePath)}`);
-
+    
+    // Use the new Terraform Import Adapter for better parsing
     try {
-      const content = fs.readFileSync(sourcePath, 'utf8');
-      const parsed = hcl2.parse(content);
+      const terraformDir = path.dirname(sourcePath);
+      const parsedResources = await TerraformImportAdapter.parseTerraformFiles(terraformDir, provider);
+      
+      // Convert to the format expected by buildChiralSystemFromResources
+      resources = parsedResources.map(resource => ({
+        type: resource.resourceType,
+        name: resource.resourceName,
+        values: resource.config
+      }));
+      
+      console.log(`✅ Extracted ${resources.length} resources from HCL using Terraform Import Adapter`);
+      
+    } catch (error) {
+      console.error(`❌ Failed to parse Terraform HCL file with Terraform Import Adapter: ${error}`);
+      console.error(`   Falling back to legacy parser...`);
+      
+      // Fallback to legacy parser
+      try {
+        const content = fs.readFileSync(sourcePath, 'utf8');
+        const parsed = hcl2.parse(content);
 
-      // Enhanced HCL resource extraction with module support
-      const extractResources = (hclData: any, modulePath: string[] = []): any[] => {
-        const resources: any[] = [];
+        // Enhanced HCL resource extraction with module support
+        const extractResources = (hclData: any, modulePath: string[] = []): any[] => {
+          const resources: any[] = [];
 
-        // Extract resources from current scope
-        if (hclData.resource) {
-          Object.entries(hclData.resource).forEach(([resourceType, resourceBlocks]: [string, any]) => {
-            Object.entries(resourceBlocks).forEach(([resourceName, resourceConfig]: [string, any]) => {
-              resources.push({
-                type: resourceType,
-                name: resourceName,
-                values: resourceConfig,
-                modulePath: modulePath.join('.')
+          // Extract resources from current scope
+          if (hclData.resource) {
+            Object.entries(hclData.resource).forEach(([resourceType, resourceBlocks]: [string, any]) => {
+              Object.entries(resourceBlocks).forEach(([resourceName, resourceConfig]: [string, any]) => {
+                resources.push({
+                  type: resourceType,
+                  name: resourceName,
+                  values: resourceConfig,
+                  modulePath: modulePath.join('.')
+                });
               });
             });
-          });
-        }
-
-        // Extract resources from modules (recursive)
-        if (hclData.module) {
-          Object.entries(hclData.module).forEach(([moduleName, moduleConfig]: [string, any]) => {
-            const moduleResources = extractResources(moduleConfig, [...modulePath, moduleName]);
-            resources.push(...moduleResources);
-          });
-        }
-
-        return resources;
-      };
-
-      resources = extractResources(parsed);
-
-      // Enhanced variable resolution
-      const resolveVariables = (config: any, variables: any = {}): any => {
-        if (typeof config === 'string' && config.startsWith('var.')) {
-          const varName = config.slice(4);
-          return variables[varName] || config;
-        }
-        if (Array.isArray(config)) {
-          return config.map(item => resolveVariables(item, variables));
-        }
-        if (typeof config === 'object' && config !== null) {
-          const resolved: any = {};
-          for (const [key, value] of Object.entries(config)) {
-            resolved[key] = resolveVariables(value, variables);
           }
-          return resolved;
-        }
-        return config;
-      };
 
-      // Apply variable resolution if variables.tf exists
-      const varFile = path.join(path.dirname(sourcePath), 'variables.tf');
-      let variables = {};
-      if (fs.existsSync(varFile)) {
-        try {
-          const varContent = fs.readFileSync(varFile, 'utf8');
-          const varParsed = hcl2.parse(varContent);
-          if (varParsed.variable) {
-            variables = varParsed.variable;
+          // Extract resources from modules (recursive)
+          if (hclData.module) {
+            Object.entries(hclData.module).forEach(([moduleName, moduleConfig]: [string, any]) => {
+              const moduleResources = extractResources(moduleConfig, [...modulePath, moduleName]);
+              resources.push(...moduleResources);
+            });
           }
-        } catch (error) {
-          console.warn(`⚠️  Could not parse variables.tf: ${error}`);
+
+          return resources;
+        };
+
+        resources = extractResources(parsed);
+
+        // Enhanced variable resolution
+        const resolveVariables = (config: any, variables: any = {}): any => {
+          if (typeof config === 'string' && config.startsWith('var.')) {
+            const varName = config.slice(4);
+            return variables[varName] || config;
+          }
+          if (Array.isArray(config)) {
+            return config.map(item => resolveVariables(item, variables));
+          }
+          if (typeof config === 'object' && config !== null) {
+            const resolved: any = {};
+            for (const [key, value] of Object.entries(config)) {
+              resolved[key] = resolveVariables(value, variables);
+            }
+            return resolved;
+          }
+          return config;
+        };
+
+        // Apply variable resolution if variables.tf exists
+        const varFile = path.join(path.dirname(sourcePath), 'variables.tf');
+        let variables = {};
+        if (fs.existsSync(varFile)) {
+          try {
+            const varContent = fs.readFileSync(varFile, 'utf8');
+            const varParsed = hcl2.parse(varContent);
+            if (varParsed.variable) {
+              variables = varParsed.variable;
+            }
+          } catch (error) {
+            console.warn(`⚠️  Could not parse variables.tf: ${error}`);
+          }
         }
+
+        // Resolve variables in resources
+        resources = resources.map(resource => ({
+          ...resource,
+          values: resolveVariables(resource.values, variables)
+        }));
+
+        console.log(`✅ Extracted ${resources.length} resources from HCL using legacy parser`);
+
+      } catch (fallbackError) {
+        console.error(`❌ Both Terraform Import Adapter and legacy parser failed: ${fallbackError}`);
+        console.error(`   Try: terraform validate && terraform fmt`);
+        throw new Error(`Invalid Terraform HCL syntax: ${fallbackError instanceof Error ? fallbackError.message : String(fallbackError)}`);
       }
-
-      // Resolve variables in resources
-      resources = resources.map(resource => ({
-        ...resource,
-        values: resolveVariables(resource.values, variables)
-      }));
-
-      console.log(`✅ Extracted ${resources.length} resources from HCL`);
-
-    } catch (error) {
-      console.error(`❌ Failed to parse Terraform HCL file: ${error}`);
-      console.error(`   Try: terraform validate && terraform fmt`);
-      throw new Error(`Invalid Terraform HCL syntax: ${error instanceof Error ? error.message : String(error)}`);
     }
   } else if (ext === '.yaml' || ext === '.yml' || ext === '.json') {
     const content = fs.readFileSync(sourcePath, 'utf8');
@@ -2163,6 +2220,275 @@ async function generateMigrationPlan(sourcePath: string, provider: string, strat
 
 // Export helper functions for testing
 export { analyzeTerraformSetup, analyzePulumiSetup, compareApproaches, getMigrationStrategyInfo, generateMigrationPlan };
+
+// Migration Wizard command
+program
+  .command('migration-wizard')
+  .description('Interactive migration wizard for complex Terraform/Pulumi setups')
+  .action(async () => {
+    try {
+      const wizard = new MigrationWizard();
+      const config = await wizard.start();
+
+      console.log('\n🎯 Migration Configuration Summary:');
+      console.log(`   Source: ${config.sourcePath}`);
+      console.log(`   Provider: ${config.provider}`);
+      console.log(`   Output: ${config.outputPath}`);
+      console.log(`   Strategy: ${config.strategy}`);
+
+      // Generate migration plan
+      const plan = MigrationWizard.generateMigrationPlan(config);
+      console.log('\n📋 Generated Migration Plan:');
+      console.log(plan);
+
+      // Ask if user wants to proceed
+      console.log('\n🚀 Ready to start migration?');
+      console.log('   Run: chiral migrate -s <source> -p <provider> --strategy <strategy>');
+
+    } catch (error) {
+      console.error(`❌ Migration wizard failed: ${error}`);
+      process.exit(1);
+    }
+  });
+
+// Migration Playbooks command
+program
+  .command('migration-playbook')
+  .description('Generate detailed migration playbooks with step-by-step instructions')
+  .requiredOption('-s, --source <path>', 'Path to IaC source')
+  .requiredOption('-p, --provider <provider>', 'Cloud provider: aws, azure, gcp')
+  .option('--strategy <strategy>', 'Migration strategy: greenfield, progressive, parallel', 'progressive')
+  .option('--iac-tool <tool>', 'IaC tool: terraform, pulumi', 'terraform')
+  .option('-o, --output <path>', 'Output path for playbook file')
+  .action(async (options) => {
+    const sourcePath = path.resolve(options.source);
+    const provider = options.provider as 'aws' | 'azure' | 'gcp';
+    const strategy = options.strategy as 'greenfield' | 'progressive' | 'parallel';
+    const iacTool = options.iacTool as 'terraform' | 'pulumi';
+
+    console.log(`\n📚 Generating Migration Playbook`);
+    console.log(`   Tool: ${iacTool.charAt(0).toUpperCase() + iacTool.slice(1)}`);
+    console.log(`   Provider: ${provider}`);
+    console.log(`   Strategy: ${strategy}`);
+
+    try {
+      const playbook = MigrationPlaybookGenerator.generateTerraformToChiralPlaybook({
+        provider,
+        strategy,
+        sourcePath,
+        outputPath: options.output || 'migration-playbook.md',
+        includeAdvanced: true
+      });
+
+      // Display playbook
+      console.log('\n' + '='.repeat(60));
+      console.log(`📋 ${playbook.title}`);
+      console.log('='.repeat(60));
+      console.log(`Description: ${playbook.description}`);
+      console.log(`Duration: ${playbook.estimatedDuration}`);
+      console.log(`Difficulty: ${playbook.difficulty}`);
+      console.log(`Steps: ${playbook.steps.length}`);
+
+      console.log('\n⚠️ Prerequisites:');
+      playbook.prerequisites.forEach(prereq => console.log(`   • ${prereq}`));
+
+      console.log('\n📋 Migration Steps:');
+      playbook.steps.forEach((step, index) => {
+        console.log(`   ${index + 1}. ${step.title}`);
+        console.log(`      ${step.description}`);
+        if (step.estimatedTime) console.log(`      ⏱️  ${step.estimatedTime}`);
+        if (step.critical) console.log(`      🚨 Critical step`);
+      });
+
+      console.log('\n🛟 Rollback Plan:');
+      playbook.rollbackPlan.forEach((step, index) => {
+        console.log(`   ${index + 1}. ${step.title}`);
+        console.log(`      ${step.description}`);
+      });
+
+      console.log('\n✅ Validation Steps:');
+      playbook.validationSteps.forEach(step => console.log(`   • ${step}`));
+
+      // Write playbook to file if requested
+      if (options.output) {
+        const playbookContent = `# ${playbook.title}
+
+${playbook.description}
+
+## Overview
+- **Duration**: ${playbook.estimatedDuration}
+- **Difficulty**: ${playbook.difficulty}
+- **Steps**: ${playbook.steps.length}
+
+## Prerequisites
+${playbook.prerequisites.map(p => `- ${p}`).join('\n')}
+
+## Migration Steps
+${playbook.steps.map((step, index) =>
+  `### ${index + 1}. ${step.title}
+${step.description}
+- **Time**: ${step.estimatedTime}
+- **Critical**: ${step.critical ? 'Yes' : 'No'}`
+).join('\n\n')}
+
+## Rollback Plan
+${playbook.rollbackPlan.map((step, index) =>
+  `### ${index + 1}. ${step.title}
+${step.description}
+- **Time**: ${step.estimatedTime}`
+).join('\n\n')}
+
+## Validation Steps
+${playbook.validationSteps.map(step => `- ${step}`).join('\n')}
+
+## Troubleshooting
+${playbook.troubleshooting.map(guide =>
+  `### ${guide.issue}
+**Symptoms:**
+${guide.symptoms.map(s => `- ${s}`).join('\n')}
+
+**Solution:** ${guide.solution}
+
+${guide.commands ? `**Commands:**
+${guide.commands.map(c => `\`\`\`bash\n${c}\n\`\`\``).join('\n')}` : ''}`
+).join('\n\n')}
+
+---
+*Generated by Chiral Migration Playbook Generator*
+`;
+
+        fs.writeFileSync(options.output, playbookContent);
+        console.log(`\n💾 Playbook saved to: ${options.output}`);
+      }
+
+    } catch (error) {
+      console.error(`❌ Playbook generation failed: ${error}`);
+      process.exit(1);
+    }
+  });
+
+// Validation Scripts command
+program
+  .command('validation-scripts')
+  .description('Generate post-migration validation scripts')
+  .requiredOption('-p, --provider <provider>', 'Cloud provider: aws, azure, gcp')
+  .requiredOption('-n, --project-name <name>', 'Project name')
+  .option('-e, --environment <env>', 'Environment (dev/prod)', 'prod')
+  .option('--include-connectivity', 'Include connectivity tests', true)
+  .option('--include-performance', 'Include performance tests', false)
+  .option('--include-security', 'Include security tests', true)
+  .option('-o, --output <path>', 'Output path for validation script', 'migration-validation.sh')
+  .action(async (options) => {
+    const provider = options.provider as 'aws' | 'azure' | 'gcp';
+    const projectName = options.projectName;
+    const environment = options.environment;
+
+    console.log(`\n🔍 Generating Validation Scripts`);
+    console.log(`   Provider: ${provider}`);
+    console.log(`   Project: ${projectName}`);
+    console.log(`   Environment: ${environment}`);
+
+    try {
+      const scriptConfig = {
+        provider,
+        projectName,
+        environment,
+        includeConnectivityTests: options.includeConnectivity,
+        includePerformanceTests: options.includePerformance,
+        includeSecurityTests: options.includeSecurity
+      };
+
+      const validationScript = ValidationScriptGenerator.generateValidationScript(scriptConfig);
+
+      // Write script to file
+      fs.writeFileSync(options.output, validationScript);
+      console.log(`\n✅ Validation script generated: ${options.output}`);
+      console.log(`   Run with: chmod +x ${options.output} && ./${options.output}`);
+
+      // Also display key sections
+      console.log('\n📋 Script includes:');
+      if (scriptConfig.includeConnectivityTests) console.log('   ✅ Connectivity tests');
+      if (scriptConfig.includePerformanceTests) console.log('   ✅ Performance tests');
+      if (scriptConfig.includeSecurityTests) console.log('   ✅ Security tests');
+      console.log('   ✅ Resource validation');
+      console.log('   ✅ Summary reporting');
+
+    } catch (error) {
+      console.error(`❌ Validation script generation failed: ${error}`);
+      process.exit(1);
+    }
+  });
+
+// Migration Templates command
+program
+  .command('migration-templates')
+  .description('Show available migration templates and examples')
+  .option('--list', 'List all available templates', false)
+  .option('--generate <template>', 'Generate specific template (aws-eks-postgres)')
+  .option('-o, --output <path>', 'Output path for generated template')
+  .action(async (options) => {
+    if (options.list) {
+      console.log('\n📋 Available Migration Templates:');
+      console.log('');
+      console.log('AWS Templates:');
+      console.log('  • aws-eks-postgres - Complete AWS EKS + PostgreSQL setup');
+      console.log('    Includes: EKS cluster, RDS PostgreSQL, VPC networking, ADFS');
+      console.log('');
+      console.log('Azure Templates:');
+      console.log('  • azure-aks-postgres - AKS + PostgreSQL flexible server');
+      console.log('  • azure-vm-adfs - Azure VM with ADFS');
+      console.log('');
+      console.log('GCP Templates:');
+      console.log('  • gcp-gke-postgres - GKE + Cloud SQL PostgreSQL');
+      console.log('  • gcp-compute-adfs - Compute Engine VM with ADFS');
+      console.log('');
+      console.log('Usage:');
+      console.log('  chiral migration-templates --generate aws-eks-postgres -o my-config.ts');
+      return;
+    }
+
+    if (options.generate) {
+      const template = options.generate;
+      let templateContent: string;
+
+      switch (template) {
+        case 'aws-eks-postgres':
+          templateContent = `import { ChiralSystem } from './src/intent';
+
+export const config: ChiralSystem = ${JSON.stringify(awsEksPostgresTemplate, null, 2)};`;
+          break;
+        default:
+          console.error(`❌ Unknown template: ${template}`);
+          console.log('   Run "chiral migration-templates --list" to see available templates');
+          process.exit(1);
+      }
+
+      const outputPath = options.output || `${template}-config.ts`;
+      fs.writeFileSync(outputPath, templateContent);
+
+      console.log(`\n✅ Template generated: ${outputPath}`);
+      console.log(`   Template: ${template}`);
+      console.log(`   Next steps:`);
+      console.log(`   1. Review and customize the configuration`);
+      console.log(`   2. Test with: chiral validate -c ${outputPath}`);
+      console.log(`   3. Generate artifacts: chiral compile -c ${outputPath}`);
+
+      return;
+    }
+
+    // Default: show usage
+    console.log('\n📚 Chiral Migration Templates');
+    console.log('');
+    console.log('Templates provide starting configurations for common infrastructure patterns.');
+    console.log('They include migration metadata and best practices.');
+    console.log('');
+    console.log('Commands:');
+    console.log('  chiral migration-templates --list          # List all templates');
+    console.log('  chiral migration-templates --generate <name> # Generate specific template');
+    console.log('');
+    console.log('Examples:');
+    console.log('  chiral migration-templates --generate aws-eks-postgres -o my-aws-config.ts');
+  });
 
 // Only parse CLI if not in test environment
 if (require.main === module && !process.env.JEST_WORKER_ID) {
