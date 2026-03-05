@@ -72,16 +72,56 @@ export function validateISO27018Compliance(config: any): ValidationResult {
   const issues: string[] = [];
 
   // Privacy controls
-  if (!config.privacy?.dataMinimization) {
-    issues.push('Data minimization not implemented');
+  if (!config.compliance?.privacyByDesign) {
+    issues.push('ISO 27018: Privacy by design principles required');
   }
 
-  if (!config.privacy?.consentManagement) {
-    issues.push('Consent management not configured');
+  if (!config.compliance?.dataMinimization) {
+    issues.push('ISO 27018: Data minimization principles required');
   }
 
-  if (!config.privacy?.breachNotification) {
-    issues.push('Breach notification procedures not defined');
+  if (!config.compliance?.purposeLimitation) {
+    issues.push('ISO 27018: Purpose limitation required');
+  }
+
+  if (!config.compliance?.consentManagement) {
+    issues.push('ISO 27018: Consent management required');
+  }
+
+  if (!config.compliance?.dataSubjectRights) {
+    issues.push('ISO 27018: Data subject rights support required');
+  }
+
+  if (!config.compliance?.breachNotification) {
+    issues.push('ISO 27018: Breach notification procedures required');
+  }
+
+  if (!config.compliance?.privacyImpactAssessment) {
+    issues.push('ISO 27018: Privacy impact assessments required');
+  }
+
+  if (!config.compliance?.privacyControls?.dataClassification) {
+    issues.push('ISO 27018: Data classification required');
+  }
+
+  if (!config.compliance?.privacyControls?.dataLossPrevention) {
+    issues.push('ISO 27018: Data loss prevention required');
+  }
+
+  if (!config.compliance?.privacyControls?.consentRecording) {
+    issues.push('ISO 27018: Consent recording required');
+  }
+
+  if (!config.compliance?.privacyControls?.dataSubjectRequests) {
+    issues.push('ISO 27018: Data subject request handling required');
+  }
+
+  if (!config.compliance?.privacyControls?.privacyAudits) {
+    issues.push('ISO 27018: Privacy audits required');
+  }
+
+  if (!config.compliance?.retentionPolicy?.piiRetentionDays) {
+    issues.push('ISO 27018: PII retention policy required');
   }
 
   return {
@@ -97,22 +137,22 @@ export function validateNISTLowCompliance(config: any): ValidationResult {
 
   // NIST Low Impact Baseline Controls
   // SC-28 - Protection of Information at Rest
-  if (!config.encryption?.atRest) {
+  if (!config.compliance?.encryptionAtRest) {
     issues.push('NIST LOW: SC-28 - Encryption at rest not enabled');
   }
 
   // AU-2 - Event Logging
-  if (!config.auditLogging) {
+  if (!config.compliance?.auditLogging) {
     issues.push('NIST LOW: AU-2 - Audit logging not configured');
   }
 
   // IA-2 - Identification and Authentication
-  if (!config.securityControls?.mfaRequired) {
+  if (!config.compliance?.securityControls?.mfaRequired) {
     issues.push('NIST LOW: IA-2 - Multi-factor authentication required');
   }
 
   // SC-8 - Transmission Confidentiality and Integrity
-  if (!config.encryption?.inTransit) {
+  if (!config.compliance?.encryptionInTransit) {
     issues.push('NIST LOW: SC-8 - Encryption in transit not enabled');
   }
 
@@ -129,42 +169,42 @@ export function validateNISTModerateCompliance(config: any): ValidationResult {
 
   // NIST Moderate Impact Baseline Controls (includes Low)
   // SC-28 - Protection of Information at Rest
-  if (!config.encryption?.atRest) {
+  if (!config.compliance?.encryptionAtRest) {
     issues.push('NIST MODERATE: SC-28 - Encryption at rest not enabled');
   }
 
   // AU-2 - Event Logging
-  if (!config.auditLogging) {
+  if (!config.compliance?.auditLogging) {
     issues.push('NIST MODERATE: AU-2 - Audit logging not configured');
   }
 
   // IA-2 - Identification and Authentication
-  if (!config.securityControls?.mfaRequired) {
+  if (!config.compliance?.securityControls?.mfaRequired) {
     issues.push('NIST MODERATE: IA-2 - Multi-factor authentication required');
   }
 
   // SC-8 - Transmission Confidentiality and Integrity
-  if (!config.encryption?.inTransit) {
+  if (!config.compliance?.encryptionInTransit) {
     issues.push('NIST MODERATE: SC-8 - Encryption in transit not enabled');
   }
 
   // AC-4 - Information Flow Enforcement
-  if (!config.securityControls?.networkSegmentation) {
+  if (!config.compliance?.securityControls?.networkSegmentation) {
     issues.push('NIST MODERATE: AC-4 - Network segmentation required');
   }
 
   // SI-2 - Flaw Remediation
-  if (!config.securityControls?.vulnerabilityManagement) {
+  if (!config.compliance?.securityControls?.vulnerabilityManagement) {
     issues.push('NIST MODERATE: SI-2 - Vulnerability management required');
   }
 
   // IR-4 - Incident Handling
-  if (!config.securityControls?.incidentResponse) {
+  if (!config.compliance?.securityControls?.incidentResponse) {
     issues.push('NIST MODERATE: IR-4 - Incident response procedures required');
   }
 
   // AU-11 - Audit Record Retention
-  if (!config.retentionPolicy?.auditLogRetentionDays || config.retentionPolicy.auditLogRetentionDays < 365) {
+  if (!config.compliance?.retentionPolicy?.auditLogRetentionDays || config.compliance.retentionPolicy.auditLogRetentionDays < 365) {
     issues.push('NIST MODERATE: AU-11 - Audit logs must be retained for at least 1 year');
   }
 
@@ -181,57 +221,57 @@ export function validateNISTHighCompliance(config: any): ValidationResult {
 
   // NIST High Impact Baseline Controls (includes Moderate)
   // SC-28 - Protection of Information at Rest
-  if (!config.encryption?.atRest) {
+  if (!config.compliance?.encryptionAtRest) {
     issues.push('NIST HIGH: SC-28 - Encryption at rest not enabled');
   }
 
   // AU-2 - Event Logging
-  if (!config.auditLogging) {
+  if (!config.compliance?.auditLogging) {
     issues.push('NIST HIGH: AU-2 - Audit logging not configured');
   }
 
   // IA-2 - Identification and Authentication
-  if (!config.securityControls?.mfaRequired) {
+  if (!config.compliance?.securityControls?.mfaRequired) {
     issues.push('NIST HIGH: IA-2 - Multi-factor authentication required');
   }
 
   // SC-8 - Transmission Confidentiality and Integrity
-  if (!config.encryption?.inTransit) {
+  if (!config.compliance?.encryptionInTransit) {
     issues.push('NIST HIGH: SC-8 - Encryption in transit not enabled');
   }
 
   // AC-4 - Information Flow Enforcement
-  if (!config.securityControls?.networkSegmentation) {
+  if (!config.compliance?.securityControls?.networkSegmentation) {
     issues.push('NIST HIGH: AC-4 - Advanced network segmentation required');
   }
 
   // SI-2 - Flaw Remediation
-  if (!config.securityControls?.vulnerabilityManagement) {
+  if (!config.compliance?.securityControls?.vulnerabilityManagement) {
     issues.push('NIST HIGH: SI-2 - Continuous vulnerability management required');
   }
 
   // IR-4 - Incident Handling
-  if (!config.securityControls?.incidentResponse) {
+  if (!config.compliance?.securityControls?.incidentResponse) {
     issues.push('NIST HIGH: IR-4 - Comprehensive incident response required');
   }
 
   // AC-6 - Least Privilege
-  if (!config.securityControls?.privilegedAccessManagement) {
+  if (!config.compliance?.securityControls?.privilegedAccessManagement) {
     issues.push('NIST HIGH: AC-6 - Privileged access management required');
   }
 
   // SI-3 - Malicious Code Protection
-  if (!config.securityControls?.malwareProtection) {
+  if (!config.compliance?.securityControls?.malwareProtection) {
     issues.push('NIST HIGH: SI-3 - Advanced malware protection required');
   }
 
   // SI-4 - Information System Monitoring
-  if (!config.securityControls?.securityMonitoring) {
+  if (!config.compliance?.securityControls?.securityMonitoring) {
     issues.push('NIST HIGH: SI-4 - Continuous security monitoring required');
   }
 
   // AU-11 - Audit Record Retention
-  if (!config.retentionPolicy?.auditLogRetentionDays || config.retentionPolicy.auditLogRetentionDays < 730) {
+  if (!config.compliance?.retentionPolicy?.auditLogRetentionDays || config.compliance.retentionPolicy.auditLogRetentionDays < 730) {
     issues.push('NIST HIGH: AU-11 - Audit logs must be retained for at least 2 years');
   }
 

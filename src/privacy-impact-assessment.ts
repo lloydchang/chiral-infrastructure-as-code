@@ -125,7 +125,7 @@ export function conductPrivacyImpactAssessment(system: any): PrivacyImpactAssess
         id: `mit-${risk.id}-cb`,
         riskId: risk.id,
         description: 'Implement data residency controls and transfer agreements',
-        implementationStatus: system.compliance?.dataResidency ? 'implemented' : 'planned',
+        implementationStatus: system.compliance?.dataResidency && Object.keys(system.compliance.dataResidency).length > 0 ? 'implemented' : 'planned',
         effectiveness: 'medium'
       });
     }

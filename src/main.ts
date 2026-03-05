@@ -93,33 +93,22 @@ const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 'gcp', 
       
       resources = state.resources || [];
       
-      // Enhanced security and compliance warnings
       console.log(`\n⚠️  TERRAFORM STATE IMPORT SECURITY ANALYSIS:`);
       console.log(`   🔒 SECURITY RISKS DETECTED:`);
       console.log(`     • Secrets in plain text: ${detectSensitiveData(stateContent) ? 'YES' : 'NO'}`);
       console.log(`     • IP addresses exposed: ${extractIPAddresses(state).length > 0 ? 'YES' : 'NO'}`);
       console.log(`     • Resource metadata exposed: ${resources.length} resources`);
-      console.log(`\n   📄 COMPLIANCE CONCERNS:`);
-      console.log(`     • SOC 2 violations: Potential unauthorized access to sensitive infrastructure data`);
-      console.log(`     • ISO 27001 violations: Inadequate protection of configuration information`);
-      console.log(`     • GDPR violations: Possible exposure of personal data in resource configurations`);
-      console.log(`\n   � OPERATIONAL RISKS:`);
-      console.log(`     • State corruption: ${state.serial ? `Serial #${state.serial}` : 'Unknown'} - may be inconsistent`);
-      console.log(`     • Lock contention: Multiple pipelines may corrupt this state file`);
-      console.log(`     • Recovery complexity: Manual intervention required if state becomes corrupted`);
-      console.log(`\n   💰 COST IMPACT:`);
+
+      console.log(`\n💰 COST IMPACT:`);
       console.log(`     • IBM Terraform Premium: $0.99/month per resource = $${(resources.length * 0.99).toFixed(2)}/month`);
-      console.log(`     • Annual cost: $${(resources.length * 0.99 * 12).toFixed(2)}/year`);
-      console.log(`     • Hidden costs: Backend storage, encryption, backup procedures, staff time`);
-      console.log(`\n   ✅ CHIRAL ADVANTAGE:`);
-      console.log(`     • Stateless generation eliminates ALL above risks`);
+
+      console.log(`\n✅ CHIRAL ADVANTAGE:`);
       console.log(`     • Zero state management costs and compliance violations`);
       console.log(`     • Native cloud integration for better security and reliability`);
-      console.log(`\n   � MIGRATION RECOMMENDATION:`);
+
+      console.log(`\n📋 MIGRATION RECOMMENDATION:`);
       console.log(`     • Import HCL configuration files instead of state files when possible`);
       console.log(`     • Sanitize state files to remove sensitive data before import`);
-      console.log(`     • Consider manual configuration for high-security environments`);
-      console.log(`     • See docs/MIGRATION.md for detailed migration guidance`);
       
     } catch (error) {
       console.error(`❌ ERROR: Failed to parse Terraform state file.`);
@@ -493,10 +482,6 @@ const buildChiralSystemFromResources = (resources: any[], provider: string, stac
   console.log(`   Compute: ${migrationAnalytics.resourceBreakdown.compute}`);
   console.log(`   Network: ${migrationAnalytics.resourceBreakdown.network}`);
   console.log(`   Other: ${migrationAnalytics.resourceBreakdown.other}`);
-
-  if (migrationAnalytics.confidence === 'Low') {
-    warnings.push('Low migration confidence detected. Consider breaking down your infrastructure into smaller, more manageable components.');
-  }
 
   // Enhanced inference with better property extraction
   const inferKubernetesVersion = (resources: any[]): string => {

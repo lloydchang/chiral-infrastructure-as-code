@@ -106,7 +106,7 @@ describe('ISO 27018 Compliance', () => {
     const config = { ...baseConfig, compliance: { ...baseConfig.compliance, dataMinimization: false } };
     const result = validateISO27018Compliance(config);
     expect(result.valid).toBe(false);
-    expect(result.errors).toContain('Data minimization not implemented');
+    expect(result.errors).toContain('ISO 27018: Data minimization principles required');
   });
 });
 
