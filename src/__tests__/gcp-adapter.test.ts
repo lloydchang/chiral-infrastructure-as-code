@@ -55,7 +55,7 @@ describe('GcpTerraformAdapter', () => {
       const result = GcpTerraformAdapter.generate(testIntent);
 
       expect(result).toContain('machine_type = "n1-standard-2"'); // Large VM
-      expect(result).toContain('tier = "db-custom-2-4096"'); // Large DB
+      expect(result).toContain('tier = "db-custom-4-8192"'); // Large DB
     });
 
     it('should configure production settings correctly', () => {

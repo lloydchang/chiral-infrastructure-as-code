@@ -65,11 +65,11 @@ describe('HardwareMap', () => {
     });
 
     it('should map small k8s node size correctly', () => {
-      expect(HardwareMap.azure.k8s.small).toBe('Standard_B2s');
+      expect(HardwareMap.azure.k8s.small).toBe('Standard_B1s');
     });
 
     it('should map medium k8s node size correctly', () => {
-      expect(HardwareMap.azure.k8s.medium).toBe('Standard_D2s_v3');
+      expect(HardwareMap.azure.k8s.medium).toBe('Standard_B2s');
     });
 
     it('should map large k8s node size correctly', () => {

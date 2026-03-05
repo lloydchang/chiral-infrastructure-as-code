@@ -48,8 +48,8 @@ export const HardwareMap = {
       large: 'Standard_D4s_v3'
     },
     k8s: {
-      small: 'Standard_B2s',
-      medium: 'Standard_D2s_v3',
+      small: 'Standard_B1s',
+      medium: 'Standard_B2s',
       large: 'Standard_D4s_v3'
     }
   } as CloudSkuMap,

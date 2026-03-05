@@ -4,8 +4,12 @@
 // Imports Terraform HCL configurations and converts them to Chiral intent
 // This is part of the migration FROM Terraform TO Chiral
 
+import * as fs from 'fs';
+import * as path from 'path';
+import * as hcl2 from 'hcl2-parser';
 import { ChiralSystem } from '../../intent';
 import { getRegionalHardwareMap } from '../../translation/hardware-map';
+import { mapInstanceTypeToWorkloadSize, mapDbClassToWorkloadSize, inferEnvironment, inferProjectName, inferNetworkCidr } from '../../translation/import-map';
 
 export interface TerraformImportConfig {
   provider: 'aws' | 'azure' | 'gcp';
@@ -23,15 +27,36 @@ export interface ParsedTerraformResource {
 
 export class TerraformImportAdapter {
   static async parseTerraformFiles(sourcePath: string, provider: 'aws' | 'azure' | 'gcp'): Promise<ParsedTerraformResource[]> {
-    // Parse Terraform .tf files and extract resource definitions
-    // This would be implemented with HCL parsing library
     const resources: ParsedTerraformResource[] = [];
     
-    // TODO: Implement HCL parsing logic
-    // - Read .tf files from sourcePath
-    // - Parse resource blocks
-    // - Extract resource types and configurations
-    // - Map to Chiral intent
+    try {
+      // Read all .tf files from sourcePath
+      const tfFiles = fs.readdirSync(sourcePath).filter((file: string) => file.endsWith('.tf'));
+      
+      for (const tfFile of tfFiles) {
+        const filePath = path.join(sourcePath, tfFile);
+        const content = fs.readFileSync(filePath, 'utf8');
+        
+        // Parse HCL content
+        const parsed = hcl2.parse(content);
+        
+        // Extract resource blocks
+        if (parsed.resource) {
+          for (const [resourceType, resourceBlock] of Object.entries(parsed.resource)) {
+            for (const [resourceName, config] of Object.entries(resourceBlock as any)) {
+              resources.push({
+                resourceType,
+                resourceName,
+                config,
+                depends_on: (config as any).depends_on || []
+              });
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.warn(`Warning: Failed to parse Terraform files from ${sourcePath}: ${error}`);
+    }
     
     return resources;
   }
