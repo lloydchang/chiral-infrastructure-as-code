@@ -50,6 +50,7 @@ export interface ChiralSystem {
   };
   terraform?: {
     backend?: {
+      type?: 's3' | 'gcs' | 'azurerm' | 'local';
       bucket: string;
       prefix?: string;
     };

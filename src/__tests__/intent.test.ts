@@ -110,11 +110,11 @@ describe('ChiralSystem Intent Schema', () => {
         projectName: 'test',
         environment: 'prod',
         networkCidr: '10.0.0.0/16',
-        k8s: { version: '1.29', minNodes: 2, maxNodes: 5, size: 'large' }, // Only 'small' | 'large'
+        k8s: { version: '1.29', minNodes: 2, maxNodes: 5, size: 'large' }, // 'small' | 'medium' | 'large'
         postgres: { engineVersion: '15', size: 'large', storageGb: 100 },
         adfs: { size: 'large', windowsVersion: '2022' }
       };
-      expect(validConfig.k8s.size).toMatch(/^(small|large)$/);
+      expect(validConfig.k8s.size).toMatch(/^(small|medium|large)$/);
     });
 
     it('should enforce Windows version types', () => {

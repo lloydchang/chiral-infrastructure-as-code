@@ -1261,11 +1261,11 @@ resource "google_compute_instance" "adfs" {
 
   private static getGCPDatabaseTier(size: string): string {
     const sizeMap: { [key: string]: string } = {
-      'small': 'db-f1-micro',
-      'medium': 'db-g1-small',
-      'large': 'db-custom-2-4096'
+      'small': 'db-g1-small',
+      'medium': 'db-custom-2-4096',
+      'large': 'db-custom-4-8192'
     };
-    return sizeMap[size] || 'db-f1-micro';
+    return sizeMap[size] || 'db-g1-small';
   }
 
   static async analyzeGCPCosts(projectId: string, options: CostAnalysisOptions = {}): Promise<CostEstimate> {

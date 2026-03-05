@@ -26,8 +26,8 @@ export const HardwareMap = {
     },
     vm: {
       small: 't3.small',
-      medium: 't3.large',
-      large: 'm5.xlarge'
+      medium: 't3.medium',
+      large: 't3.large'
     },
     k8s: {
       small: 't3.small',
