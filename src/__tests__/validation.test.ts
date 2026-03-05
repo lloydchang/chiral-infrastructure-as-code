@@ -169,6 +169,116 @@ describe('Compliance Checks', () => {
     });
   });
 
+  describe('Healthcare Compliance', () => {
+    it('should pass HIPAA Low with basic requirements', () => {
+      const config: ChiralSystem = {
+        projectName: 'healthcare-system',
+        environment: 'prod',
+        networkCidr: '192.168.0.0/16',
+        region: { aws: 'us-east-1' },
+        k8s: { version: '1.35', minNodes: 2, maxNodes: 5, size: 'medium' },
+        postgres: { engineVersion: '15', size: 'medium', storageGb: 50 },
+        adfs: { size: 'medium', windowsVersion: '2022' },
+        compliance: {
+          framework: 'hipaa-low',
+          encryptionAtRest: true,
+          auditLogging: true
+        }
+      };
+
+      const result = checkCompliance(config, 'hipaa-low');
+      expect(result.compliant).toBe(true);
+    });
+
+    it('should fail HIPAA High without data residency', () => {
+      const config: ChiralSystem = {
+        projectName: 'healthcare-system',
+        environment: 'prod',
+        networkCidr: '10.0.0.0/16',
+        k8s: { version: '1.35', minNodes: 2, maxNodes: 5, size: 'medium' },
+        postgres: { engineVersion: '15', size: 'medium', storageGb: 50 },
+        adfs: { size: 'small', windowsVersion: '2022' },
+        compliance: {
+          framework: 'hipaa-high',
+          encryptionAtRest: true,
+          auditLogging: true
+        }
+      };
+
+      const result = checkCompliance(config, 'hipaa-high');
+      expect(result.compliant).toBe(false);
+      expect(result.violations).toContain('HIPAA HIGH: Data residency requirements must be explicitly specified');
+    });
+
+    it('should pass HITRUST CSF Moderate with proper configuration', () => {
+      const config: ChiralSystem = {
+        projectName: 'healthcare-portal',
+        environment: 'prod',
+        networkCidr: '172.16.0.0/16',
+        region: { aws: 'us-east-1', azure: 'eastus' },
+        k8s: { version: '1.35', minNodes: 2, maxNodes: 8, size: 'medium' },
+        postgres: { engineVersion: '15', size: 'medium', storageGb: 50 },
+        adfs: { size: 'medium', windowsVersion: '2022' },
+        compliance: {
+          framework: 'hitrust-moderate',
+          encryptionAtRest: true,
+          auditLogging: true,
+          dataResidency: {
+            aws: 'us-east-1',
+            azure: 'eastus'
+          }
+        }
+      };
+
+      const result = checkCompliance(config, 'hitrust-moderate');
+      expect(result.compliant).toBe(true);
+    });
+
+    it('should fail HITRUST CSF High with insufficient nodes', () => {
+      const config: ChiralSystem = {
+        projectName: 'healthcare-critical',
+        environment: 'prod',
+        networkCidr: '192.168.0.0/16',
+        region: { aws: 'us-east-1' },
+        k8s: { version: '1.35', minNodes: 2, maxNodes: 5, size: 'medium' },
+        postgres: { engineVersion: '15', size: 'medium', storageGb: 100 },
+        adfs: { size: 'small', windowsVersion: '2022' },
+        compliance: {
+          framework: 'hitrust-high',
+          encryptionAtRest: true,
+          auditLogging: true
+        }
+      };
+
+      const result = checkCompliance(config, 'hitrust-high');
+      expect(result.compliant).toBe(false);
+      expect(result.violations).toContain('HITRUST CSF HIGH: Production environments require enhanced high availability');
+    });
+
+    it('should pass HITECH High with breach prevention controls', () => {
+      const config: ChiralSystem = {
+        projectName: 'ehr-system',
+        environment: 'prod',
+        networkCidr: '10.200.0.0/16',
+        region: { aws: 'us-east-1' },
+        k8s: { version: '1.35', minNodes: 3, maxNodes: 15, size: 'large' },
+        postgres: { engineVersion: '15', size: 'large', storageGb: 75 },
+        adfs: { size: 'large', windowsVersion: '2022' },
+        compliance: {
+          framework: 'hitech-high',
+          encryptionAtRest: true,
+          auditLogging: true,
+          dataResidency: {
+            aws: 'us-east-1'
+          }
+        }
+      };
+
+      const result = checkCompliance(config, 'hitech-high');
+      expect(result.compliant).toBe(true);
+    });
+  });
+
   describe('Existing Compliance Frameworks', () => {
     it('should still work with SOC2', () => {
       const config: ChiralSystem = {

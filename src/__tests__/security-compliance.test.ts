@@ -194,6 +194,7 @@ describe('Security Compliance Tests', () => {
     it('should detect missing PHI encryption in HIPAA', async () => {
       const insecureConfig = { ...testConfig };
       insecureConfig.compliance!.encryptionAtRest = false;
+      insecureConfig.compliance!.encryptionInTransit = false;
 
       const results = await complianceEngine.assessCompliance(insecureConfig, ['hipaa']);
       const hipaaResult = results.find(r => r.framework === 'hipaa');

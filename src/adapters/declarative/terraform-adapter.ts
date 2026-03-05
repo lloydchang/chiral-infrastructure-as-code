@@ -35,9 +35,21 @@ export interface ParsedTerraformResource {
 }
 
 export class TerraformImportAdapter {
+  private static readonly sensitivePatterns = [
+    /password\s*=\s*"[^"]*"/gi,
+    /secret\s*=\s*"[^"]*"/gi,
+    /api[_-]?key\s*=\s*"[^"]*"/gi,
+    /token\s*=\s*"[^"]*"/gi,
+    /private[_-]?key\s*=\s*"[^"]*"/gi,
+    /access[_-]?key\s*=\s*"[^"]*"/gi,
+    /AKIA[0-9A-Z]{16}/g,
+    /-----BEGIN\s+(RSA\s+)?PRIVATE\s+KEY-----/g
+  ];
+
   static async parseTerraformFiles(sourcePath: string, provider: 'aws' | 'azure' | 'gcp'): Promise<ParsedTerraformResource[]> {
     // Parse Terraform .tf files and extract resource definitions
     const resources: ParsedTerraformResource[] = [];
+    let securityWarnings: string[] = [];
     
     try {
       // Read all .tf files from sourcePath
@@ -46,6 +58,10 @@ export class TerraformImportAdapter {
       for (const tfFile of tfFiles) {
         const filePath = path.join(sourcePath, tfFile);
         const content = fs.readFileSync(filePath, 'utf8');
+        
+        // Security scan before parsing
+        const fileWarnings = this.detectSensitiveData(content, tfFile);
+        securityWarnings.push(...fileWarnings);
         
         // Simple line-by-line HCL parsing for basic resource blocks
         const lines = content.split('\n');
@@ -171,6 +187,19 @@ export class TerraformImportAdapter {
     }
     
     return intent;
+  }
+
+  private static detectSensitiveData(content: string, filename: string): string[] {
+    const warnings: string[] = [];
+    
+    for (const pattern of this.sensitivePatterns) {
+      const matches = content.match(pattern);
+      if (matches) {
+        warnings.push(`${filename}: Potential sensitive data detected - ${pattern.source}`);
+      }
+    }
+    
+    return warnings;
   }
 
   private static mapAwsResource(resource: ParsedTerraformResource, intent: Partial<ChiralSystem>, provider: 'aws' | 'azure' | 'gcp'): void {
