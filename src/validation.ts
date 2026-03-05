@@ -3,6 +3,7 @@
 // Enhanced validation and drift detection capabilities for Chiral
 
 import { ChiralSystem, ComplianceFramework } from './intent';
+import { validateISO27001Compliance, validateISO27017Compliance, validateISO27018Compliance } from './compliance';
 import * as fs from 'fs';
 import * as path from 'path';
 import { CostAnalyzer, AzureCostAnalyzer, CostOptimizer, CostAnalysisOptions } from './cost-analysis';
@@ -23,10 +24,11 @@ export interface DriftDetectionResult {
 }
 
 export interface ComplianceCheck {
-  framework: 'none' | 'soc2' | 'iso27001' | 'hipaa' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'govramp-low' | 'govramp-moderate' | 'govramp-high' | 'hitrust-low' | 'hitrust-moderate' | 'hitrust-high' | 'hitech-low' | 'hitech-moderate' | 'hitech-high' | 'hipaa-low' | 'hipaa-moderate' | 'hipaa-high';
+  framework: ComplianceFramework;
   compliant: boolean;
   violations: string[];
   recommendations: string[];
+  auditType?: 'type1' | 'type2';
 }
 
 // =================================================================
@@ -328,10 +330,25 @@ export function checkCompliance(
       recommendations.push('Enable encryption at rest for all data stores (ISO 27001 A.10.1.1)');
     }
 
+    if (!config.compliance?.encryptionInTransit) {
+      violations.push('ISO 27001: A.10.1.2 - Encryption in transit required for data protection');
+      recommendations.push('Enable encryption in transit for all communications (ISO 27001 A.10.1.2)');
+    }
+
     // Annex A.12 - Operations Security
     if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 2) {
       violations.push('ISO 27001: A.12.2.1 - Production environments must have redundancy controls');
       recommendations.push('Deploy at least 2 nodes for operational resilience (ISO 27001 A.12.2.1)');
+    }
+
+    if (!config.compliance?.securityControls?.backupAndRecovery) {
+      violations.push('ISO 27001: A.12.3.1 - Backup and recovery controls required');
+      recommendations.push('Implement backup and recovery procedures (ISO 27001 A.12.3.1)');
+    }
+
+    if (!config.compliance?.securityControls?.malwareProtection) {
+      violations.push('ISO 27001: A.12.2.1 - Malware protection controls required');
+      recommendations.push('Implement malware protection (ISO 27001 A.12.2.1)');
     }
 
     // Annex A.14 - System Acquisition
@@ -341,9 +358,213 @@ export function checkCompliance(
     }
 
     // Annex A.16 - Incident Management
-    if (config.environment === 'prod' && !config.compliance?.auditLogging) {
-      violations.push('ISO 27001: A.16.1.1 - Incident response requires comprehensive logging');
-      recommendations.push('Enable audit logging for incident detection (ISO 27001 A.16.1.1)');
+    if (config.environment === 'prod' && !config.compliance?.incidentResponse) {
+      violations.push('ISO 27001: A.16.1.1 - Incident response procedures required');
+      recommendations.push('Implement incident response procedures (ISO 27001 A.16.1.1)');
+    }
+
+    // Annex A.18 - Compliance
+    if (!config.compliance?.complianceMonitoring) {
+      violations.push('ISO 27001: A.18.1.1 - Compliance monitoring required');
+      recommendations.push('Implement compliance monitoring procedures (ISO 27001 A.18.1.1)');
+    }
+  }
+
+  // ISO 27017 cloud security compliance checks
+  if (framework === 'iso27017') {
+    // Cloud-specific controls
+    if (!config.compliance?.cloudSpecificControls?.sharedResponsibility) {
+      violations.push('ISO 27017: Shared responsibility model must be defined');
+      recommendations.push('Define shared responsibilities between cloud provider and customer');
+    }
+
+    if (!config.compliance?.cloudSpecificControls?.cloudProviderAssessment) {
+      violations.push('ISO 27017: Cloud provider assessment required');
+      recommendations.push('Conduct regular cloud provider security assessments');
+    }
+
+    if (!config.compliance?.cloudSpecificControls?.cloudConfigurationManagement) {
+      violations.push('ISO 27017: Cloud configuration management required');
+      recommendations.push('Implement cloud configuration management and monitoring');
+    }
+
+    if (!config.compliance?.cloudSpecificControls?.cloudMonitoring) {
+      violations.push('ISO 27017: Cloud service monitoring required');
+      recommendations.push('Implement comprehensive cloud service monitoring');
+    }
+
+    if (!config.compliance?.cloudSpecificControls?.cloudBackup) {
+      violations.push('ISO 27017: Cloud backup procedures required');
+      recommendations.push('Implement cloud data backup and recovery procedures');
+    }
+
+    if (!config.compliance?.cloudSpecificControls?.cloudDisasterRecovery) {
+      violations.push('ISO 27017: Cloud disaster recovery required');
+      recommendations.push('Implement cloud disaster recovery procedures');
+    }
+
+    if (!config.compliance?.cloudSpecificControls?.serviceLevelAgreements) {
+      violations.push('ISO 27017: Service level agreement monitoring required');
+      recommendations.push('Monitor and manage cloud service level agreements');
+    }
+
+    if (!config.compliance?.cloudSpecificControls?.cloudExitStrategy) {
+      violations.push('ISO 27017: Cloud exit strategy required');
+      recommendations.push('Define cloud service exit strategy and procedures');
+    }
+  }
+
+  // ISO 27018 privacy in cloud compliance checks
+  if (framework === 'iso27018') {
+    // Privacy-specific controls
+    if (!config.compliance?.privacyByDesign) {
+      violations.push('ISO 27018: Privacy by design principles required');
+      recommendations.push('Implement privacy by design in all systems and processes');
+    }
+
+    if (!config.compliance?.dataMinimization) {
+      violations.push('ISO 27018: Data minimization principles required');
+      recommendations.push('Implement data minimization practices');
+    }
+
+    if (!config.compliance?.purposeLimitation) {
+      violations.push('ISO 27018: Purpose limitation required');
+      recommendations.push('Implement purpose limitation controls');
+    }
+
+    if (!config.compliance?.consentManagement) {
+      violations.push('ISO 27018: Consent management required');
+      recommendations.push('Implement user consent management procedures');
+    }
+
+    if (!config.compliance?.dataSubjectRights) {
+      violations.push('ISO 27018: Data subject rights support required');
+      recommendations.push('Implement procedures to handle data subject rights');
+    }
+
+    if (!config.compliance?.breachNotification) {
+      violations.push('ISO 27018: Breach notification procedures required');
+      recommendations.push('Implement data breach notification procedures');
+    }
+
+    if (!config.compliance?.privacyImpactAssessment) {
+      violations.push('ISO 27018: Privacy impact assessments required');
+      recommendations.push('Conduct privacy impact assessments for all systems');
+    }
+
+    if (!config.compliance?.privacyControls?.dataClassification) {
+      violations.push('ISO 27018: Data classification required');
+      recommendations.push('Implement data classification for personal data');
+    }
+
+    if (!config.compliance?.privacyControls?.dataLossPrevention) {
+      violations.push('ISO 27018: Data loss prevention required');
+      recommendations.push('Implement data loss prevention controls');
+    }
+
+    if (!config.compliance?.privacyControls?.consentRecording) {
+      violations.push('ISO 27018: Consent recording required');
+      recommendations.push('Implement consent recording and tracking');
+    }
+
+    if (!config.compliance?.privacyControls?.dataSubjectRequests) {
+      violations.push('ISO 27018: Data subject request handling required');
+      recommendations.push('Implement procedures to handle data subject requests');
+    }
+
+    if (!config.compliance?.privacyControls?.privacyAudits) {
+      violations.push('ISO 27018: Privacy audits required');
+      recommendations.push('Conduct regular privacy audits');
+    }
+
+    if (!config.compliance?.retentionPolicy?.piiRetentionDays) {
+      violations.push('ISO 27018: PII retention policy required');
+      recommendations.push('Define and implement PII retention policies');
+    }
+  }
+
+  // ISO 27701 Privacy Information Management compliance checks
+  if (framework === 'iso27701') {
+    // Extended privacy controls
+    if (!config.compliance?.privacyByDesign) {
+      violations.push('ISO 27701: Privacy by design and by default required');
+      recommendations.push('Implement privacy by design and by default principles');
+    }
+
+    if (!config.compliance?.privacyImpactAssessment) {
+      violations.push('ISO 27701: Privacy impact assessment required');
+      recommendations.push('Conduct privacy impact assessments for all processing activities');
+    }
+
+    if (!config.compliance?.privacyControls?.privacyTraining) {
+      violations.push('ISO 27701: Privacy training required');
+      recommendations.push('Provide privacy training to all personnel');
+    }
+
+    if (!config.compliance?.crossBorderTransfer) {
+      violations.push('ISO 27701: Cross-border transfer controls required');
+      recommendations.push('Implement cross-border data transfer controls');
+    }
+  }
+
+  // GDPR compliance checks
+  if (framework === 'gdpr') {
+    if (!config.compliance?.privacyByDesign) {
+      violations.push('GDPR: Privacy by design and by default required');
+      recommendations.push('Implement privacy by design and by default principles');
+    }
+
+    if (!config.compliance?.consentManagement) {
+      violations.push('GDPR: Consent management required');
+      recommendations.push('Implement explicit consent management procedures');
+    }
+
+    if (!config.compliance?.dataSubjectRights) {
+      violations.push('GDPR: Data subject rights support required');
+      recommendations.push('Implement procedures for data subject rights (access, rectification, erasure)');
+    }
+
+    if (!config.compliance?.breachNotification) {
+      violations.push('GDPR: Breach notification within 72 hours required');
+      recommendations.push('Implement 72-hour breach notification procedures');
+    }
+
+    if (!config.compliance?.privacyImpactAssessment) {
+      violations.push('GDPR: Data protection impact assessment required');
+      recommendations.push('Conduct DPIAs for high-risk processing activities');
+    }
+
+    if (!config.compliance?.dataMinimization) {
+      violations.push('GDPR: Data minimization principle required');
+      recommendations.push('Implement data minimization practices');
+    }
+
+    if (!config.compliance?.retentionPolicy?.piiRetentionDays) {
+      violations.push('GDPR: Storage limitation principle required');
+      recommendations.push('Define and implement data retention policies');
+    }
+  }
+
+  // CCPA compliance checks
+  if (framework === 'ccpa') {
+    if (!config.compliance?.dataSubjectRights) {
+      violations.push('CCPA: Consumer rights support required');
+      recommendations.push('Implement procedures for consumer rights (know, delete, opt-out)');
+    }
+
+    if (!config.compliance?.privacyNotices) {
+      violations.push('CCPA: Privacy notice required');
+      recommendations.push('Provide comprehensive privacy notices to consumers');
+    }
+
+    if (!config.compliance?.consentManagement) {
+      violations.push('CCPA: Consent management for minors required');
+      recommendations.push('Implement consent management for minors under 16');
+    }
+
+    if (!config.compliance?.privacyControls?.dataLossPrevention) {
+      violations.push('CCPA: Data security required');
+      recommendations.push('Implement reasonable security procedures');
     }
   }
 

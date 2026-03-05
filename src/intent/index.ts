@@ -6,7 +6,7 @@
 
 export type EnvironmentTier = 'dev' | 'prod';
 export type WorkloadSize = 'small' | 'medium' | 'large';
-export type ComplianceFramework = 'none' | 'soc1' | 'soc2' | 'soc3' | 'iso27001' | 'hipaa' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'govramp-low' | 'govramp-moderate' | 'govramp-high' | 'hitrust-low' | 'hitrust-moderate' | 'hitrust-high' | 'hitech-low' | 'hitech-moderate' | 'hitech-high' | 'hipaa-low' | 'hipaa-moderate' | 'hipaa-high' | 'nist-low' | 'nist-moderate' | 'nist-high' | 'dod-il2' | 'dod-il4' | 'dod-il5' | 'dod-il6';
+export type ComplianceFramework = 'none' | 'soc1' | 'soc2' | 'soc3' | 'iso27001' | 'iso27017' | 'iso27018' | 'iso27701' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'govramp-low' | 'govramp-moderate' | 'govramp-high' | 'hitrust-low' | 'hitrust-moderate' | 'hitrust-high' | 'hitech-low' | 'hitech-moderate' | 'hitech-high' | 'hipaa-low' | 'hipaa-moderate' | 'hipaa-high' | 'nist-low' | 'nist-moderate' | 'nist-high' | 'dod-il2' | 'dod-il4' | 'dod-il5' | 'dod-il6' | 'gdpr' | 'ccpa' | 'lgpd' | 'pdpa';
 export type DeploymentStrategy = 'greenfield' | 'progressive' | 'parallel';
 
 export interface KubernetesIntent {
@@ -73,13 +73,64 @@ export interface ChiralSystem {
   // Compliance and data sovereignty settings
   compliance?: {
     framework?: ComplianceFramework; // Compliance framework requirements
+    frameworks?: ComplianceFramework[]; // Multiple compliance frameworks
     dataResidency?: {
       aws?: string; // AWS region for data residency
       azure?: string; // Azure region for data residency
       gcp?: string; // GCP region for data residency
     };
     encryptionAtRest?: boolean; // Require encryption at rest
+    encryptionInTransit?: boolean; // Require encryption in transit
     auditLogging?: boolean; // Enable comprehensive audit logging
+    privacyByDesign?: boolean; // Implement privacy by design principles
+    dataMinimization?: boolean; // Implement data minimization
+    purposeLimitation?: boolean; // Enforce purpose limitation
+    consentManagement?: boolean; // Manage user consent
+    dataSubjectRights?: boolean; // Support data subject rights
+    breachNotification?: boolean; // Enable breach notification procedures
+    privacyImpactAssessment?: boolean; // Conduct privacy impact assessments
+    crossBorderTransfer?: boolean; // Allow cross-border data transfers
+    retentionPolicy?: {
+      defaultRetentionDays?: number; // Default data retention period
+      piiRetentionDays?: number; // PII retention period
+      auditLogRetentionDays?: number; // Audit log retention period
+    };
+    securityControls?: {
+      mfaRequired?: boolean; // Require multi-factor authentication
+      privilegedAccessManagement?: boolean; // Enable PAM
+      networkSegmentation?: boolean; // Implement network segmentation
+      vulnerabilityManagement?: boolean; // Enable vulnerability scanning
+      malwareProtection?: boolean; // Enable malware protection
+      backupAndRecovery?: boolean; // Enable backup and recovery
+      disasterRecovery?: boolean; // Enable disaster recovery
+      businessContinuity?: boolean; // Enable business continuity
+      incidentResponse?: boolean; // Enable incident response
+      securityMonitoring?: boolean; // Enable security monitoring
+      complianceMonitoring?: boolean; // Enable compliance monitoring
+    };
+    privacyControls?: {
+      dataClassification?: boolean; // Enable data classification
+      dataLossPrevention?: boolean; // Enable DLP
+      anonymization?: boolean; // Enable data anonymization
+      pseudonymization?: boolean; // Enable data pseudonymization
+      consentRecording?: boolean; // Record user consent
+      privacyNotices?: boolean; // Manage privacy notices
+      dataSubjectRequests?: boolean; // Handle data subject requests
+      privacyTraining?: boolean; // Provide privacy training
+      privacyAudits?: boolean; // Conduct privacy audits
+    };
+    cloudSpecificControls?: {
+      sharedResponsibility?: boolean; // Define shared responsibilities
+      cloudProviderAssessment?: boolean; // Assess cloud providers
+      serviceLevelAgreements?: boolean; // Monitor SLAs
+      cloudExitStrategy?: boolean; // Define cloud exit strategy
+      multiCloudStrategy?: boolean; // Define multi-cloud strategy
+      cloudNativeSecurity?: boolean; // Use cloud-native security
+      cloudConfigurationManagement?: boolean; // Manage cloud configurations
+      cloudMonitoring?: boolean; // Monitor cloud services
+      cloudBackup?: boolean; // Backup cloud data
+      cloudDisasterRecovery?: boolean; // Cloud disaster recovery
+    };
   };
   
   // The Three Pillars

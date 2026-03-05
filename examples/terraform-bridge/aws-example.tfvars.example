@@ -6,6 +6,40 @@
 # These are DEMO values only! Replace with strong, unique passwords
 # in production. Never use these default values in real deployments.
 
+# Security configurations for ISO 27001/27017/27018 compliance
+compliance = {
+  encryption_at_rest = true
+  audit_logging = true
+  data_residency = true
+  data_minimization = true
+  consent_management = true
+  breach_notification = true
+  shared_responsibility = true
+}
+
+# Cloud security monitoring (ISO 27017)
+monitoring = {
+  enabled = true
+  log_retention_days = 365
+  alert_on_security_events = true
+}
+
+# Privacy controls (ISO 27018)
+privacy = {
+  data_classification_enabled = true
+  pii_encryption = true
+  access_logging = true
+  retention_policies = true
+}
+
+# Network security (ISO 27001 A.13)
+network_security = {
+  enable_firewall = true
+  enable_waf = true
+  enable_ddos_protection = true
+  network_segmentation = true
+}
+
 # Database Configuration
 db_username = "demo_user"
 db_password = "REPLACE_WITH_STRONG_DB_PASSWORD_123456789!"
