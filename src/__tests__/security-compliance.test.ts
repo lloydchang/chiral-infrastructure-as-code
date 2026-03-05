@@ -1,5 +1,5 @@
-import { SecurityComplianceEngine } from '../src/security-compliance';
-import { ChiralSystem } from '../src/intent';
+import { SecurityComplianceEngine } from '../security-compliance';
+import { ChiralSystem, ComplianceFramework } from '../intent';
 
 describe('Security Compliance Tests', () => {
   let complianceEngine: SecurityComplianceEngine;
@@ -12,7 +12,7 @@ describe('Security Compliance Tests', () => {
       environment: 'prod',
       networkCidr: '10.1.0.0/16',
       compliance: {
-        frameworks: ['iso27001', 'iso27017', 'iso27018', 'gdpr'],
+        frameworks: ['iso27001', 'iso27017', 'iso27018', 'gdpr'] as const,
         encryptionAtRest: true,
         encryptionInTransit: true,
         auditLogging: true,
@@ -171,7 +171,7 @@ describe('Security Compliance Tests', () => {
 
   describe('Multi-Framework Compliance', () => {
     it('should assess multiple frameworks simultaneously', async () => {
-      const frameworks = ['iso27001', 'iso27017', 'iso27018', 'gdpr'];
+      const frameworks: ComplianceFramework[] = ['iso27001', 'iso27017', 'iso27018', 'gdpr'];
       const results = await complianceEngine.assessCompliance(testConfig, frameworks);
       
       expect(results).toHaveLength(4);

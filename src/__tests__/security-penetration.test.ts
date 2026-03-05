@@ -1,5 +1,5 @@
-import { SecurityComplianceEngine } from '../src/security-compliance';
-import { ChiralSystem } from '../src/intent';
+import { SecurityComplianceEngine } from '../security-compliance';
+import { ChiralSystem, ComplianceFramework } from '../intent';
 
 describe('Security Penetration Tests', () => {
   let complianceEngine: SecurityComplianceEngine;
@@ -110,7 +110,7 @@ describe('Security Penetration Tests', () => {
       const results = await complianceEngine.assessCompliance(insecureConfig, ['iso27001']);
       const iso27001Result = results.find(r => r.framework === 'iso27001');
       
-      expect(iso27001Result!.violations.filter(v => v.category === 'technical')).toHaveLengthGreaterThan(0);
+      expect(iso27001Result!.violations.filter(v => v.category === 'technical').length).toBeGreaterThan(0);
     });
 
     it('should detect missing privileged access management', async () => {
@@ -120,7 +120,7 @@ describe('Security Penetration Tests', () => {
       const results = await complianceEngine.assessCompliance(insecureConfig, ['iso27001']);
       const iso27001Result = results.find(r => r.framework === 'iso27001');
       
-      expect(iso27001Result!.violations.filter(v => v.category === 'policy')).toHaveLengthGreaterThan(0);
+      expect(iso27001Result!.violations.filter(v => v.category === 'policy').length).toBeGreaterThan(0);
     });
   });
 
@@ -152,9 +152,9 @@ describe('Security Penetration Tests', () => {
       insecureConfig.compliance!.privacyByDesign = false;
 
       const results = await complianceEngine.assessCompliance(insecureConfig, ['iso27018']);
-      const iso27018Result = results.find(r => r.framework === 'iso27018');
+      const iso27018Result = results.find((r: any) => r.framework === 'iso27018');
       
-      expect(iso27018Result!.violations.filter(v => v.severity === 'critical')).toHaveLength(1);
+      expect(iso27018Result!.violations.filter((v: any) => v.severity === 'critical')).toHaveLength(1);
     });
 
     it('should detect missing consent management', async () => {
@@ -162,9 +162,9 @@ describe('Security Penetration Tests', () => {
       insecureConfig.compliance!.consentManagement = false;
 
       const results = await complianceEngine.assessCompliance(insecureConfig, ['iso27018']);
-      const iso27018Result = results.find(r => r.framework === 'iso27018');
+      const iso27018Result = results.find((r: any) => r.framework === 'iso27018');
       
-      expect(iso27018Result!.violations.filter(v => v.control.includes('Consent Management'))).toHaveLength(1);
+      expect(iso27018Result!.violations.filter((v: any) => v.control.includes('Consent Management'))).toHaveLength(1);
     });
 
     it('should detect missing data subject rights', async () => {
@@ -172,9 +172,9 @@ describe('Security Penetration Tests', () => {
       insecureConfig.compliance!.dataSubjectRights = false;
 
       const results = await complianceEngine.assessCompliance(insecureConfig, ['iso27018']);
-      const iso27018Result = results.find(r => r.framework === 'iso27018');
+      const iso27018Result = results.find((r: any) => r.framework === 'iso27018');
       
-      expect(iso27018Result!.violations.filter(v => v.control.includes('Data Subject Rights'))).toHaveLength(1);
+      expect(iso27018Result!.violations.filter((v: any) => v.control.includes('Data Subject Rights'))).toHaveLength(1);
     });
   });
 
@@ -184,9 +184,9 @@ describe('Security Penetration Tests', () => {
       insecureConfig.compliance!.securityControls!.backupAndRecovery = false;
 
       const results = await complianceEngine.assessCompliance(insecureConfig, ['iso27001']);
-      const iso27001Result = results.find(r => r.framework === 'iso27001');
+      const iso27001Result = results.find((r: any) => r.framework === 'iso27001');
       
-      expect(iso27001Result!.violations.filter(v => v.control.includes('A.12.3.1'))).toHaveLength(1);
+      expect(iso27001Result!.violations.filter((v: any) => v.control.includes('A.12.3.1'))).toHaveLength(1);
     });
 
     it('should detect missing incident response', async () => {
@@ -194,9 +194,9 @@ describe('Security Penetration Tests', () => {
       insecureConfig.compliance!.securityControls!.incidentResponse = false;
 
       const results = await complianceEngine.assessCompliance(insecureConfig, ['iso27001']);
-      const iso27001Result = results.find(r => r.framework === 'iso27001');
+      const iso27001Result = results.find((r: any) => r.framework === 'iso27001');
       
-      expect(iso27001Result!.violations.filter(v => v.control.includes('A.16.1.1'))).toHaveLength(1);
+      expect(iso27001Result!.violations.filter((v: any) => v.control.includes('A.16.1.1'))).toHaveLength(1);
     });
 
     it('should detect missing malware protection', async () => {
@@ -216,7 +216,7 @@ describe('Security Penetration Tests', () => {
       insecureConfig.compliance!.encryptionAtRest = false; // Critical violation
 
       const results = await complianceEngine.assessCompliance(insecureConfig, ['iso27001']);
-      const iso27001Result = results.find(r => r.framework === 'iso27001');
+      const iso27001Result = results.find((r: any) => r.framework === 'iso27001');
       
       expect(iso27001Result!.riskAssessment.riskScore).toBeGreaterThan(50);
       expect(iso27001Result!.riskAssessment.overallRisk).toBe('high');
@@ -228,7 +228,7 @@ describe('Security Penetration Tests', () => {
       insecureConfig.compliance!.auditLogging = false;
 
       const results = await complianceEngine.assessCompliance(insecureConfig, ['iso27001']);
-      const iso27001Result = results.find(r => r.framework === 'iso27001');
+      const iso27001Result = results.find((r: any) => r.framework === 'iso27001');
       
       expect(iso27001Result!.remediationPlan.length).toBeGreaterThan(0);
       expect(iso27001Result!.remediationPlan[0].status).toBe('pending');
@@ -255,9 +255,9 @@ describe('Security Penetration Tests', () => {
       insecureConfig.compliance!.cloudSpecificControls!.cloudExitStrategy = false;
 
       const results = await complianceEngine.assessCompliance(insecureConfig, ['iso27017']);
-      const iso27017Result = results.find(r => r.framework === 'iso27017');
+      const iso27017Result = results.find((r: any) => r.framework === 'iso27017');
       
-      expect(iso27017Result!.violations.filter(v => v.control.includes('Cloud Exit Strategy'))).toHaveLength(1);
+      expect(iso27017Result!.violations.filter((v: any) => v.control.includes('Cloud Exit Strategy'))).toHaveLength(1);
     });
   });
 });
