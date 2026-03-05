@@ -386,7 +386,7 @@ resource "google_compute_instance" "adfs" {
     };
   }
 
-  private static getFallbackGCPPricing(config: ChiralSystem, region: string, currency: string): CostEstimate {
+  static getFallbackGCPPricing(config: ChiralSystem, region: string, currency: string): CostEstimate {
     const breakdown = this.getFallbackGCPBreakdown(config);
     const totalMonthlyCost = Object.values(breakdown).reduce((sum, cat) => sum + cat.total, 0);
 
@@ -1193,6 +1193,40 @@ resource "google_compute_instance" "adfs" {
     };
   }
 
+  private static getFallbackGCPPricing(config: ChiralSystem, region: string, currency: string): CostEstimate {
+    const breakdown: CostBreakdown = {
+      compute: { kubernetes: 0, vm: 0, total: 0 },
+      storage: { database: 0, vmDisk: 0, total: 0 },
+      network: { dataTransfer: 0, loadBalancer: 0, total: 0 },
+      other: { management: 0, monitoring: 0, total: 0 }
+    };
+
+    // Simplified fallback pricing
+    breakdown.compute.kubernetes = config.k8s.maxNodes * 140; // GKE pricing
+    breakdown.compute.vm = 90; // Compute Engine
+    breakdown.storage.database = config.postgres.storageGb * 0.25 + 50; // Cloud SQL
+    breakdown.storage.vmDisk = 17; // Persistent disk
+    breakdown.network.dataTransfer = 22; // Data transfer
+    breakdown.network.loadBalancer = 20; // Cloud Load Balancer
+    breakdown.other.management = 32;
+    breakdown.other.monitoring = 16;
+
+    breakdown.compute.total = breakdown.compute.kubernetes + breakdown.compute.vm;
+    breakdown.storage.total = breakdown.storage.database + breakdown.storage.vmDisk;
+    breakdown.network.total = breakdown.network.dataTransfer + breakdown.network.loadBalancer;
+    breakdown.other.total = breakdown.other.management + breakdown.other.monitoring;
+
+    const totalMonthlyCost = Object.values(breakdown).reduce((sum, category) => sum + category.total, 0);
+
+    return {
+      provider: 'gcp',
+      totalMonthlyCost,
+      currency,
+      breakdown,
+      recommendations: ['Install infracost or gcloud CLI for more accurate pricing'],
+      warnings: ['Using fallback pricing - install infracost for accurate costs']
+    };
+  }
   
   private static async getGKEPricing(region: string): Promise<{ managementFee: number; nodeCost: number }> {
     return { managementFee: 74, nodeCost: 66 }; // Simplified GKE pricing
