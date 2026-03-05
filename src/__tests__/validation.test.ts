@@ -27,7 +27,6 @@ describe('Compliance Checks', () => {
       };
 
       const result = checkCompliance(config, 'iso27001');
-      console.log('ISO 27001 violations:', result.violations);
       expect(result.compliant).toBe(true);
       expect(result.violations).toHaveLength(0);
     });
@@ -70,6 +69,7 @@ describe('Compliance Checks', () => {
         compliance: {
           framework: 'iso27001',
           encryptionAtRest: true,
+          encryptionInTransit: true,
           auditLogging: true,
           securityControls: {
             backupAndRecovery: true,
@@ -174,13 +174,15 @@ describe('Compliance Checks', () => {
       const config: ChiralSystem = {
         projectName: 'test',
         environment: 'prod',
-        networkCidr: '10.0.0.0/16',
+        networkCidr: '192.168.0.0/16',
+        region: { aws: 'us-east-1', azure: 'East US', gcp: 'us-central1' },
         k8s: { version: '1.29', minNodes: 2, maxNodes: 5, size: 'large' },
         postgres: { engineVersion: '15', size: 'large', storageGb: 100 },
         adfs: { size: 'large', windowsVersion: '2022' },
         compliance: {
           framework: 'soc2',
           encryptionAtRest: true,
+          encryptionInTransit: true,
           auditLogging: true,
           securityControls: {
             networkSegmentation: true,
@@ -197,7 +199,7 @@ describe('Compliance Checks', () => {
       const config: ChiralSystem = {
         projectName: 'test',
         environment: 'prod',
-        networkCidr: '10.0.0.0/16',
+        networkCidr: '192.168.0.0/16',
         region: { aws: 'us-east-1', azure: 'East US', gcp: 'us-central1' },
         k8s: { version: '1.29', minNodes: 2, maxNodes: 5, size: 'large' },
         postgres: { engineVersion: '15', size: 'large', storageGb: 100 },
@@ -205,6 +207,7 @@ describe('Compliance Checks', () => {
         compliance: {
           framework: 'iso27001',
           encryptionAtRest: true,
+          encryptionInTransit: true,
           auditLogging: true,
           securityControls: {
             backupAndRecovery: true,
@@ -217,6 +220,80 @@ describe('Compliance Checks', () => {
 
       const result = checkCompliance(config, 'iso27001');
       expect(result.compliant).toBe(true);
+    });
+  });
+
+  describe('SOC 1 Compliance', () => {
+    it('should pass SOC 1 Type 1 with basic financial controls', () => {
+      const config: ChiralSystem = {
+        projectName: 'test',
+        environment: 'prod',
+        networkCidr: '10.1.0.0/16',
+        region: { aws: 'us-east-1', azure: 'East US', gcp: 'us-central1' },
+        k8s: { version: '1.29', minNodes: 2, maxNodes: 5, size: 'large' },
+        postgres: { engineVersion: '15', size: 'large', storageGb: 100 },
+        adfs: { size: 'large', windowsVersion: '2022' },
+        compliance: {
+          framework: 'soc1',
+          encryptionAtRest: true,
+          auditLogging: true,
+          securityControls: {
+            complianceMonitoring: true
+          }
+        }
+      };
+
+      const result = checkCompliance(config, 'soc1', 'type1');
+      expect(result.compliant).toBe(true);
+      expect(result.auditType).toBe('type1');
+    });
+
+    it('should pass SOC 2 Type 1 with trust services criteria', () => {
+      const config: ChiralSystem = {
+        projectName: 'test',
+        environment: 'prod',
+        networkCidr: '10.1.0.0/16',
+        region: { aws: 'us-east-1', azure: 'East US', gcp: 'us-central1' },
+        k8s: { version: '1.29', minNodes: 2, maxNodes: 5, size: 'large' },
+        postgres: { engineVersion: '15', size: 'large', storageGb: 100 },
+        adfs: { size: 'large', windowsVersion: '2022' },
+        compliance: {
+          framework: 'soc2',
+          encryptionAtRest: true,
+          auditLogging: true,
+          securityControls: {
+            networkSegmentation: true,
+            mfaRequired: true
+          }
+        }
+      };
+
+      const result = checkCompliance(config, 'soc2', 'type1');
+      expect(result.compliant).toBe(true);
+      expect(result.auditType).toBe('type1');
+    });
+
+    it('should pass SOC 3 Type 1 with simplified requirements', () => {
+      const config: ChiralSystem = {
+        projectName: 'test',
+        environment: 'prod',
+        networkCidr: '10.1.0.0/16',
+        region: { aws: 'us-east-1', azure: 'East US', gcp: 'us-central1' },
+        k8s: { version: '1.29', minNodes: 2, maxNodes: 5, size: 'large' },
+        postgres: { engineVersion: '15', size: 'large', storageGb: 100 },
+        adfs: { size: 'large', windowsVersion: '2022' },
+        compliance: {
+          framework: 'soc3',
+          encryptionAtRest: true,
+          securityControls: {
+            mfaRequired: true
+          }
+        }
+      };
+
+      const result = checkCompliance(config, 'soc3', 'type1');
+      expect(result.compliant).toBe(true);
+      expect(result.auditType).toBe('type1');
     });
   });
 });

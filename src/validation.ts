@@ -820,6 +820,11 @@ export function checkCompliance(
     if (level === 'high') {
       const nistResult = validateNISTHighCompliance(config);
       violations.push(...nistResult.errors);
+      // Add cost optimization recommendations
+      // const costOptimizations = CostOptimizer.analyzeConfiguration(config);
+      // recommendations.push(...costOptimizations);
+      const costOptimizations: string[] = []; // Temporary fix
+      recommendations.push(...costOptimizations);
       recommendations.push(...nistResult.recommendations);
     }
   }

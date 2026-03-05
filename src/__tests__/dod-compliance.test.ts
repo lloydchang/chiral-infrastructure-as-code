@@ -246,10 +246,10 @@ describe('DoD Compliance Tests', () => {
     it('should require high availability for production across all levels', () => {
       testConfig.k8s.minNodes = 1; // Single node
       
-      const il2Result = checkCompliance(testConfig, 'dod-il2');
-      const il4Result = checkCompliance(testConfig, 'dod-il4');
-      const il5Result = checkCompliance(testConfig, 'dod-il5');
-      const il6Result = checkCompliance(testConfig, 'dod-il6');
+      const il2Result = checkCompliance(testConfig, 'dod-il2' as ComplianceFramework);
+      const il4Result = checkCompliance(testConfig, 'dod-il4' as ComplianceFramework);
+      const il5Result = checkCompliance(testConfig, 'dod-il5' as ComplianceFramework);
+      const il6Result = checkCompliance(testConfig, 'dod-il6' as ComplianceFramework);
       
       expect(il2Result.violations).toContain('DoD IL2: Production environments must have high availability');
       expect(il4Result.violations).toContain('DoD IL4: Production environments must have high availability');
@@ -263,7 +263,7 @@ describe('DoD Compliance Tests', () => {
       const levels = ['dod-il2', 'dod-il4', 'dod-il5', 'dod-il6'] as const;
       
       levels.forEach(level => {
-        const result = checkCompliance(testConfig, level);
+        const result = checkCompliance(testConfig, level as ComplianceFramework);
         expect(result.violations).toContain(`DoD ${level.split('-')[1].toUpperCase()}: Encryption at rest required for defense data`);
       });
     });
@@ -274,7 +274,7 @@ describe('DoD Compliance Tests', () => {
       const levels = ['dod-il2', 'dod-il4', 'dod-il5', 'dod-il6'] as const;
       
       levels.forEach(level => {
-        const result = checkCompliance(testConfig, level);
+        const result = checkCompliance(testConfig, level as ComplianceFramework);
         expect(result.violations).toContain(`DoD ${level.split('-')[1].toUpperCase()}: Comprehensive audit logging required`);
       });
     });
