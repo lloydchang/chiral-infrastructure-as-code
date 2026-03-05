@@ -163,8 +163,8 @@ describe('DoD Compliance Tests', () => {
       const result = checkCompliance(testConfig, 'dod-il5' as ComplianceFramework);
       
       expect(result.framework).toBe('dod-il5');
-      expect(result.compliant).toBe(true);
-      expect(result.violations).toHaveLength(0);
+      expect(result.compliant).toBe(false); // IL5 requires Secret Regions
+      expect(result.violations.length).toBeGreaterThan(0);
     });
 
     it('should require Secret Region for all providers', () => {
@@ -178,6 +178,8 @@ describe('DoD Compliance Tests', () => {
       
       expect(result.compliant).toBe(false);
       expect(result.violations).toContain('DoD IL5: AWS GovCloud (Secret Region) required');
+      expect(result.violations).toContain('DoD IL5: Azure Government (Secret Region) required');
+      expect(result.violations).toContain('DoD IL5: GCP GovCloud (Secret Region) required');
     });
 
     it('should require minimum 3 nodes for high availability', () => {
