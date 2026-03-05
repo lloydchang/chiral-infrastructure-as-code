@@ -233,7 +233,7 @@ export class TerraformImportAdapter {
             intent.k8s!.maxNodes = pool.count;
           }
           if (pool.vm_size) {
-            intent.k8s!.size = mapInstanceTypeToWorkloadSize(pool.vm_size, 'azure');
+            intent.k8s!.size = mapInstanceTypeToWorkloadSize(pool.vm_size, provider);
           }
         }
         break;
