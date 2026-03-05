@@ -853,8 +853,7 @@ program
       console.error(`   to the line number reported in Step 1.`);
 
       console.error(`\n3. FIX: Correct the typo or syntax error inside the TypeScript backticks (\`).`);
-      console.error(`   Alternatively, copy the error message from Step 1 and provide it to your`);
-      console.error(`   AI Coding Agent's LLM (Large Language Model) to receive a corrected "azure-bicep.ts" file.`);
+      console.error(`   Check the Bicep documentation for syntax requirements and fix the issue manually.`);
 
       console.error(`\n4. RETRY: Run "npm run compile" again.`);
       console.error('='.repeat(60) + '\n');

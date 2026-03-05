@@ -465,7 +465,6 @@ chiral validate -c chiral.config.ts
 
 - **Additional IaC Formats**: CDK, ARM templates, Crossplane
 - **State Management**: Native cloud state services integration
-- **Advanced Cost Optimization**: AI-powered resource recommendations
 - **Compliance Automation**: Automated remediation suggestions
 - **Drift Detection**: Continuous configuration drift monitoring
 
