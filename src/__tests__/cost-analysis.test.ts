@@ -84,9 +84,9 @@ describe('Cost Analysis', () => {
       });
 
       it('should return cost analysis for Azure subscription', async () => {
-        // Mock the availability check to return true
-        const originalMethod = AzureCostAnalyzer.isAvailable;
-        AzureCostAnalyzer.isAvailable = jest.fn().mockReturnValue(true);
+        // Mock availability check to return true
+        const originalMethod = AzureCostAnalyzer.isAzureCostCliAvailable;
+        AzureCostAnalyzer.isAzureCostCliAvailable = jest.fn().mockReturnValue(true);
         
         const estimate = await AzureCostAnalyzer.analyzeAzureCosts('subscription-id', {});
         
@@ -98,7 +98,7 @@ describe('Cost Analysis', () => {
         expect(estimate.warnings).toBeDefined();
         
         // Restore original method
-        AzureCostAnalyzer.isAvailable = originalMethod;
+        AzureCostAnalyzer.isAzureCostCliAvailable = originalMethod;
       });
     });
   });
