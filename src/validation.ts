@@ -358,13 +358,13 @@ export function checkCompliance(
     }
 
     // Annex A.16 - Incident Management
-    if (config.environment === 'prod' && !config.compliance?.incidentResponse) {
+    if (config.environment === 'prod' && !config.compliance?.securityControls?.incidentResponse) {
       violations.push('ISO 27001: A.16.1.1 - Incident response procedures required');
       recommendations.push('Implement incident response procedures (ISO 27001 A.16.1.1)');
     }
 
     // Annex A.18 - Compliance
-    if (!config.compliance?.complianceMonitoring) {
+    if (!config.compliance?.securityControls?.complianceMonitoring) {
       violations.push('ISO 27001: A.18.1.1 - Compliance monitoring required');
       recommendations.push('Implement compliance monitoring procedures (ISO 27001 A.18.1.1)');
     }
@@ -552,7 +552,7 @@ export function checkCompliance(
       recommendations.push('Implement procedures for consumer rights (know, delete, opt-out)');
     }
 
-    if (!config.compliance?.privacyNotices) {
+    if (!config.compliance?.privacyControls?.privacyNotices) {
       violations.push('CCPA: Privacy notice required');
       recommendations.push('Provide comprehensive privacy notices to consumers');
     }

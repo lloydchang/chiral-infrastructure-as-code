@@ -132,9 +132,112 @@ export interface ChiralSystem {
       cloudDisasterRecovery?: boolean; // Cloud disaster recovery
     };
   };
-  
+
   // The Three Pillars
   k8s: KubernetesIntent;
   postgres: DatabaseIntent;
   adfs: AdfsIntent;
+}
+
+// Privacy Impact Assessment functionality
+export interface PrivacyImpactAssessment {
+  assessmentId: string;
+  assessmentDate: Date;
+  systemName: string;
+  dataFlows: DataFlow[];
+  risks: PrivacyRisk[];
+  mitigations: Mitigation[];
+  recommendations: string[];
+  approvalStatus: 'pending' | 'approved' | 'rejected';
+  assessor: string;
+}
+
+export interface DataFlow {
+  id: string;
+  source: string;
+  destination: string;
+  dataTypes: string[];
+  volume: 'low' | 'medium' | 'high';
+  sensitivity: 'public' | 'internal' | 'confidential' | 'restricted';
+  retentionPeriod: number;
+  crossBorder: boolean;
+  thirdParties: string[];
+}
+
+export interface PrivacyRisk {
+  id: string;
+  description: string;
+  likelihood: 'low' | 'medium' | 'high';
+  impact: 'low' | 'medium' | 'high';
+  riskLevel: 'low' | 'medium' | 'high';
+  dataFlows: string[];
+}
+
+export interface Mitigation {
+  id: string;
+  riskId: string;
+  description: string;
+  implementationStatus: 'planned' | 'implemented' | 'verified';
+  effectiveness: 'low' | 'medium' | 'high';
+}
+
+export function conductPrivacyImpactAssessment(system: ChiralSystem): PrivacyImpactAssessment {
+  const assessment: PrivacyImpactAssessment = {
+    assessmentId: `PIA-${Date.now()}`,
+    assessmentDate: new Date(),
+    systemName: system.projectName,
+    dataFlows: [],
+    risks: [],
+    mitigations: [],
+    recommendations: [],
+    approvalStatus: 'pending',
+    assessor: 'Chiral Platform'
+  };
+
+  // Analyze data flows
+  if (system.postgres) {
+    assessment.dataFlows.push({
+      id: 'db-flow-1',
+      source: 'Application',
+      destination: 'PostgreSQL Database',
+      dataTypes: ['user_data', 'personal_information'],
+      volume: system.environment === 'prod' ? 'high' : 'medium',
+      sensitivity: 'confidential',
+      retentionPeriod: system.compliance?.retentionPolicy?.piiRetentionDays || 2555,
+      crossBorder: system.region ? Object.keys(system.region).length > 1 : false,
+      thirdParties: ['Cloud Provider']
+    });
+  }
+
+  // Assess risks
+  assessment.dataFlows.forEach(flow => {
+    if (flow.sensitivity === 'confidential') {
+      assessment.risks.push({
+        id: `risk-${flow.id}`,
+        description: `Privacy risk for ${flow.dataTypes.join(', ')} processing`,
+        likelihood: 'medium',
+        impact: 'high',
+        riskLevel: 'medium',
+        dataFlows: [flow.id]
+      });
+    }
+  });
+
+  // Define mitigations
+  assessment.risks.forEach(risk => {
+    assessment.mitigations.push({
+      id: `mit-${risk.id}`,
+      riskId: risk.id,
+      description: 'Implement privacy controls and encryption',
+      implementationStatus: system.compliance?.encryptionAtRest ? 'implemented' : 'planned',
+      effectiveness: 'high'
+    });
+  });
+
+  // Recommendations
+  if (!system.compliance?.dataMinimization) {
+    assessment.recommendations.push('Implement data minimization');
+  }
+
+  return assessment;
 }
