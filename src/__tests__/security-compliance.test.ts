@@ -22,6 +22,8 @@ describe('Security Compliance Tests', () => {
         consentManagement: true,
         dataSubjectRights: true,
         breachNotification: true,
+        privacyImpactAssessment: true,
+        crossBorderTransfer: true,
         securityControls: {
           mfaRequired: true,
           privilegedAccessManagement: true,
@@ -154,6 +156,7 @@ describe('Security Compliance Tests', () => {
       const results = await complianceEngine.assessCompliance(testConfig, ['gdpr']);
       const gdprResult = results.find(r => r.framework === 'gdpr');
       
+      console.log('GDPR violations:', gdprResult!.violations);
       expect(gdprResult).toBeDefined();
       expect(gdprResult!.compliant).toBe(true);
       expect(gdprResult!.score).toBeGreaterThan(90);

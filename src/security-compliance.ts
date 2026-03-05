@@ -822,6 +822,7 @@ export class SecurityComplianceEngine {
     return violations;
   }
 
+
   /**
    * CCPA Assessment
    */

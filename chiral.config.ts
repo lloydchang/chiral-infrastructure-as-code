@@ -23,6 +23,13 @@ export const config: ChiralSystem = {
     subnetCidr: '10.0.1.0/24'  // Default: calculated from networkCidr (/16 -> /24)
   },
 
+  // Optional: Configure compliance settings
+  compliance: {
+    encryptionAtRest: true,
+    encryptionInTransit: true,
+    auditLogging: true
+  },
+
   k8s: {
     version: '1.35',
     minNodes: 2,
