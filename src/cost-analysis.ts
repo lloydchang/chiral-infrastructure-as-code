@@ -396,52 +396,6 @@ resource "google_compute_instance" "adfs" {
   }
 }
 
-  // Helper methods for resource type mapping
-  private static getAWSInstanceType(size: string): string {
-    const sizeMap: { [key: string]: string } = {
-      'small': 't3.small',
-      'medium': 't3.medium',
-      'large': 't3.large'
-    };
-    return sizeMap[size] || 't3.small';
-  }
-
-  private static getRDSInstanceClass(size: string): string {
-    const sizeMap: { [key: string]: string } = {
-      'small': 'db.t3.small',
-      'medium': 'db.t3.medium',
-      'large': 'db.m5.large'
-    };
-    return sizeMap[size] || 'db.t3.small';
-  }
-
-  private static getWindowsAMI(version: string): string {
-    const amiMap: { [key: string]: string } = {
-      '2019': 'ami-0b0a80e1a8ac3e362',
-      '2022': 'ami-0d3513f1e7c5a0e7c'
-    };
-    return amiMap[version] || amiMap['2022'];
-  }
-
-  private static getGCPMachineType(size: string): string {
-    const sizeMap: { [key: string]: string } = {
-      'small': 'e2-small',
-      'medium': 'e2-medium',
-      'large': 'n1-standard-2'
-    };
-    return sizeMap[size] || 'e2-small';
-  }
-
-  private static getCloudSQLTier(size: string): string {
-    const sizeMap: { [key: string]: string } = {
-      'small': 'db-g1-small',
-      'medium': 'db-custom-2-4096',
-      'large': 'db-custom-4-8192'
-    };
-    return sizeMap[size] || 'db-g1-small';
-  }
-}
-
 // =================================================================
 // AWS COST ANALYSIS EQUIVALENTS
 // =================================================================
@@ -1210,21 +1164,31 @@ resource "google_compute_instance" "adfs" {
     return { managementFee: 74, nodeCost: 66 }; // Simplified GKE pricing
   }
 
-  private static async getCloudSQLPricingData(tier: string, region: string): Promise<{ compute: number; storagePerGb: number }> {
-    const pricingMap: { [key: string]: { compute: number; storagePerGb: number } } = {
-      'db-g1-small': { compute: 25, storagePerGb: 0.17 },
-      'db-custom-2-4096': { compute: 100, storagePerGb: 0.17 }
-    };
-    return pricingMap[tier] || { compute: 25, storagePerGb: 0.17 };
+  private static async getCloudSQLPricingData(tier: string, region: string): Promise<number> {
+    return 100; // Simplified Cloud SQL pricing
   }
 
-  private static async getComputePricing(machineType: string, region: string): Promise<{ hourly: number }> {
-    const pricingMap: { [key: string]: number } = {
-      'e2-small': 0.052,
-      'e2-medium': 0.069,
-      'n1-standard-2': 0.133
+  static getFallbackGCPPricing(config: ChiralSystem, region: string, currency: string): CostEstimate {
+    const breakdown = this.getFallbackGCPBreakdown(config);
+    const totalMonthlyCost = Object.values(breakdown).reduce((sum, cat) => sum + cat.total, 0);
+
+    return {
+      provider: 'gcp',
+      totalMonthlyCost,
+      currency,
+      breakdown,
+      recommendations: ['Install Infracost for more accurate GCP pricing'],
+      warnings: ['Using fallback pricing - install Infracost for accurate costs']
     };
-    return { hourly: pricingMap[machineType] || 0.069 };
+  }
+
+  private static getFallbackGCPBreakdown(config: ChiralSystem): CostBreakdown {
+    return {
+      compute: { kubernetes: config.k8s.maxNodes * 140, vm: 90, total: 0 },
+      storage: { database: config.postgres.storageGb * 0.25 + 50, vmDisk: 17, total: 0 },
+      network: { dataTransfer: 22, loadBalancer: 20, total: 0 },
+      other: { management: 32, monitoring: 16, total: 0 }
+    };
   }
 
   private static getGCPMachineType(size: string): string {
@@ -1245,13 +1209,6 @@ resource "google_compute_instance" "adfs" {
     return sizeMap[size] || 'db-g1-small';
   }
 
-  static async analyzeGCPCosts(projectId: string, options: CostAnalysisOptions = {}): Promise<CostEstimate> {
-    const region = options.region || 'us-central1';
-    const currency = options.currency || 'USD';
-
-    if (!this.isGCPCostCliAvailable()) {
-      throw new Error('gcp-cost-cli not available. Install with: npm install -g gcp-cost-cli');
-    }
 
     try {
       // Use gcp-cost-cli to analyze actual costs
@@ -1361,6 +1318,20 @@ resource "google_compute_instance" "adfs" {
       recommendations,
       warnings
     };
+  }
+
+  static async analyzeGCPCosts(projectId: string, options: CostAnalysisOptions = {}): Promise<CostEstimate> {
+    const region = options.region || 'us-central1';
+    const currency = options.currency || 'USD';
+
+    try {
+      // Use gcp-cost-cli to analyze actual costs
+      const costData = await this.fetchGCPCostData(projectId, region);
+      return this.calculateGCPAnalysisCosts(costData, region, currency);
+    } catch (error) {
+      console.warn('Failed to analyze GCP costs:', error);
+      throw error;
+    }
   }
 }
 
