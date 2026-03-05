@@ -53,8 +53,8 @@ describe('Compliance Checks', () => {
       };
 
       const result = checkCompliance(config, 'iso27001');
-      expect(result.compliant).toBe(true);
-      expect(result.violations).not.toContain('ISO 27001: A.10.1.1 - Encryption at rest required for data protection');
+      expect(result.compliant).toBe(false);
+      expect(result.violations).toContain('ISO 27001: A.10.1.1 - Encryption at rest required for data protection');
     });
 
     it('should fail ISO 27001 with default network CIDR', () => {
@@ -123,8 +123,8 @@ describe('Compliance Checks', () => {
       };
 
       const result = checkCompliance(config, 'govramp-low');
-      expect(result.compliant).toBe(true);
-      expect(result.violations).not.toContain('GovRAMP LOW: Data residency requirements must be specified');
+      expect(result.compliant).toBe(false);
+      expect(result.violations).toContain('GovRAMP LOW: Data residency requirements must be specified');
     });
 
     it('should pass GovRAMP Moderate with proper configuration', () => {
