@@ -5,6 +5,7 @@
 import { ChiralSystem, ComplianceFramework } from './intent';
 import * as fs from 'fs';
 import * as path from 'path';
+import { validateNISTHighCompliance } from './compliance';
 import { CostAnalyzer, AzureCostAnalyzer, CostOptimizer, CostAnalysisOptions } from './cost-analysis';
 
 export interface ValidationResult {
@@ -128,10 +129,6 @@ export function validateChiralConfig(config: ChiralSystem): ValidationResult {
   if (config.postgres && config.postgres.storageGb > 1000) {
     recommendations.push('Consider database sharding for very large storage requirements');
   }
-
-  // Add cost optimization recommendations
-  const costOptimizations = CostOptimizer.analyzeConfiguration(config);
-  recommendations.push(...costOptimizations);
 
   return {
     valid: errors.length === 0,
@@ -827,6 +824,292 @@ export function checkCompliance(
     }
   }
 
+  // HIPAA compliance checks (enhanced with levels)
+  if (framework.startsWith('hipaa-')) {
+    const level = framework.split('-')[1]; // 'low', 'moderate', 'high'
+    
+    // Common HIPAA requirements
+    if (config.networkCidr.startsWith('10.0.0.0/16')) {
+      violations.push(`HIPAA ${level.toUpperCase()}: Default network ranges may not meet data protection requirements`);
+      recommendations.push('Use private network ranges with proper segmentation');
+    }
+
+    if (config.environment === 'prod' && !config.region) {
+      violations.push(`HIPAA ${level.toUpperCase()}: Production workloads must specify regions for data residency`);
+      recommendations.push('Specify compliant regions for healthcare data');
+    }
+
+    if (!config.compliance?.encryptionAtRest) {
+      violations.push(`HIPAA ${level.toUpperCase()}: Encryption at rest is required for PHI`);
+      recommendations.push('Enable encryption at rest for all data stores containing PHI');
+    }
+
+    if (!config.compliance?.auditLogging) {
+      violations.push(`HIPAA ${level.toUpperCase()}: Comprehensive audit logging required for PHI access`);
+      recommendations.push('Enable detailed audit logging for all PHI access and modifications');
+    }
+
+    // Level-specific requirements
+    if (level === 'moderate' || level === 'high') {
+      if (config.postgres && config.postgres.storageGb < 100 && config.environment === 'prod') {
+        violations.push(`HIPAA ${level.toUpperCase()}: Production databases must have adequate backup storage`);
+        recommendations.push('Configure at least 100GB storage for production PHI databases');
+      }
+
+      if (config.k8s && config.k8s.minNodes < 3 && config.environment === 'prod') {
+        violations.push(`HIPAA ${level.toUpperCase()}: Production environments require high availability for PHI systems`);
+        recommendations.push('Deploy at least 3 nodes for production PHI workloads');
+      }
+    }
+
+    if (level === 'high') {
+      if (!config.compliance?.dataResidency) {
+        violations.push('HIPAA HIGH: Data residency requirements must be explicitly specified');
+        recommendations.push('Define specific regions for PHI data residency compliance');
+      }
+
+      if (config.adfs && config.adfs.size === 'small' && config.environment === 'prod') {
+        violations.push('HIPAA HIGH: Production ADFS infrastructure must be sized for high availability');
+        recommendations.push('Use medium or large workload size for production ADFS');
+      }
+    }
+  }
+
+  // HITRUST CSF compliance checks
+  if (framework.startsWith('hitrust-')) {
+    const level = framework.split('-')[1]; // 'low', 'moderate', 'high'
+
+    // Common HITRUST CSF requirements
+    if (!config.compliance?.encryptionAtRest) {
+      violations.push(`HITRUST CSF ${level.toUpperCase()}: Encryption at rest is mandatory`);
+      recommendations.push('Enable encryption at rest for all data');
+    }
+
+    if (!config.compliance?.auditLogging) {
+      violations.push(`HITRUST CSF ${level.toUpperCase()}: Comprehensive audit logging required`);
+      recommendations.push('Implement detailed audit logging for all system activities');
+    }
+
+    if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 2) {
+      violations.push(`HITRUST CSF ${level.toUpperCase()}: Production environments require high availability`);
+      recommendations.push('Deploy at least 2 nodes for production workloads');
+    }
+
+    // Network security requirements
+    if (config.networkCidr === '10.0.0.0/16') {
+      violations.push(`HITRUST CSF ${level.toUpperCase()}: Default network CIDR does not meet security requirements`);
+      recommendations.push('Use organization-specific, non-default network CIDR ranges');
+    }
+
+    // Level-specific requirements
+    if (level === 'moderate' || level === 'high') {
+      if (!config.region) {
+        violations.push(`HITRUST CSF ${level.toUpperCase()}: Region specification required for compliance`);
+        recommendations.push('Specify regions for all cloud providers');
+      }
+
+      if (config.postgres && config.postgres.storageGb < 50 && config.environment === 'prod') {
+        violations.push(`HITRUST CSF ${level.toUpperCase()}: Production databases must have adequate backup storage`);
+        recommendations.push('Configure at least 50GB storage for production databases');
+      }
+
+      // Enhanced security controls
+      if (!config.compliance?.dataResidency) {
+        violations.push(`HITRUST CSF ${level.toUpperCase()}: Data residency requirements must be specified`);
+        recommendations.push('Define compliant regions for data residency');
+      }
+    }
+
+    if (level === 'high') {
+      // High requires additional security controls
+      if (config.k8s && config.k8s.maxNodes > 20) {
+        violations.push('HITRUST CSF HIGH: Large clusters require enhanced security controls');
+        recommendations.push('Implement network segmentation and advanced threat detection');
+      }
+
+      if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 3) {
+        violations.push('HITRUST CSF HIGH: Production environments require enhanced high availability');
+        recommendations.push('Deploy at least 3 nodes for production high-availability');
+      }
+
+      // Additional requirements for high sensitivity
+      if (config.adfs && config.adfs.size === 'small') {
+        violations.push('HITRUST CSF HIGH: Identity infrastructure must be sized for security');
+        recommendations.push('Use medium or large workload size for ADFS infrastructure');
+      }
+    }
+  }
+
+  // HITECH compliance checks
+  if (framework.startsWith('hitech-')) {
+    const level = framework.split('-')[1]; // 'low', 'moderate', 'high'
+
+    // HITECH builds on HIPAA but adds breach notification requirements
+    if (config.networkCidr.startsWith('10.0.0.0/16')) {
+      violations.push(`HITECH ${level.toUpperCase()}: Default network ranges may not meet breach prevention requirements`);
+      recommendations.push('Use private network ranges with enhanced security controls');
+    }
+
+    if (!config.compliance?.auditLogging) {
+      violations.push(`HITECH ${level.toUpperCase()}: Enhanced audit logging required for breach detection`);
+      recommendations.push('Implement comprehensive audit logging for breach detection and notification');
+    }
+
+    if (!config.compliance?.encryptionAtRest) {
+      violations.push(`HITECH ${level.toUpperCase()}: Encryption required to prevent breach notifications`);
+      recommendations.push('Enable encryption at rest to reduce breach notification requirements');
+    }
+
+    // Level-specific requirements
+    if (level === 'moderate' || level === 'high') {
+      if (config.environment === 'prod' && !config.region) {
+        violations.push(`HITECH ${level.toUpperCase()}: Production workloads must specify regions for breach compliance`);
+        recommendations.push('Specify regions compliant with HITECH breach notification requirements');
+      }
+
+      if (config.postgres && config.postgres.storageGb < 75 && config.environment === 'prod') {
+        violations.push(`HITECH ${level.toUpperCase()}: Production databases must have adequate backup for breach investigation`);
+        recommendations.push('Configure at least 75GB storage for production databases');
+      }
+    }
+
+    if (level === 'high') {
+      // High requires enhanced breach prevention
+      if (!config.compliance?.dataResidency) {
+        violations.push('HITECH HIGH: Data residency must be specified for breach notification compliance');
+        recommendations.push('Define specific regions for data residency and breach compliance');
+      }
+
+      if (config.k8s && config.k8s.minNodes < 3 && config.environment === 'prod') {
+        violations.push('HITECH HIGH: Production environments require enhanced availability for breach prevention');
+        recommendations.push('Deploy at least 3 nodes for production high-availability');
+      }
+
+      // Additional monitoring requirements
+      if (config.adfs && config.adfs.size === 'small' && config.environment === 'prod') {
+        violations.push('HITECH HIGH: Identity infrastructure must support enhanced monitoring');
+        recommendations.push('Use medium or large workload size for production ADFS');
+      }
+    }
+  }
+
+  // DoD compliance checks (Impact Levels)
+  if (framework.startsWith('dod-il')) {
+    const level = framework.split('-')[1]; // 'il2', 'il4', 'il5', 'il6'
+
+    // Common checks for all DoD levels
+    if (!config.compliance?.encryptionAtRest) {
+      violations.push(`DoD ${level.toUpperCase()}: Encryption at rest required for defense data`);
+      recommendations.push('Enable encryption at rest for all data stores');
+    }
+
+    if (!config.compliance?.auditLogging) {
+      violations.push(`DoD ${level.toUpperCase()}: Comprehensive audit logging required`);
+      recommendations.push('Enable detailed audit logging for all resources and access');
+    }
+
+    if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 2) {
+      violations.push(`DoD ${level.toUpperCase()}: Production environments must have high availability`);
+      recommendations.push('Deploy at least 2 nodes for fault tolerance');
+    }
+
+    // Level-specific checks
+    if (level === 'il2') {
+      // IL2 - Basic protection for CUI (Controlled Unclassified Information)
+      if (config.region?.aws && !config.region.aws.includes('gov')) {
+        violations.push('DoD IL2: AWS GovCloud recommended for CUI workloads');
+        recommendations.push('Use AWS GovCloud or implement equivalent security controls');
+      }
+
+      if (config.region?.azure && !config.region.azure.includes('usgov')) {
+        violations.push('DoD IL2: Azure Government recommended for CUI workloads');
+        recommendations.push('Use Azure Government or implement equivalent security controls');
+      }
+
+      if (config.networkCidr === '10.0.0.0/16') {
+        violations.push('DoD IL2: Default network CIDR may not meet security requirements');
+        recommendations.push('Use organization-specific network ranges with proper segmentation');
+      }
+    }
+
+    if (level === 'il4') {
+      // IL4 - Enhanced protection for CUI and mission-critical systems
+      if (config.region?.aws && !config.region.aws.includes('gov')) {
+        violations.push('DoD IL4: AWS GovCloud required for IL4 workloads');
+        recommendations.push('Use AWS GovCloud regions for defense compliance');
+      }
+
+      if (config.region?.azure && !config.region.azure.includes('usgov')) {
+        violations.push('DoD IL4: Azure Government required for IL4 workloads');
+        recommendations.push('Use Azure Government regions');
+      }
+
+      if (config.region?.gcp && !config.region.gcp.includes('gov')) {
+        violations.push('DoD IL4: GCP GovCloud required for IL4 workloads');
+        recommendations.push('Use GCP GovCloud regions');
+      }
+
+      if (config.postgres && config.postgres.storageGb < 50 && config.environment === 'prod') {
+        violations.push('DoD IL4: Production databases must have minimum 50GB storage');
+        recommendations.push('Increase database storage to meet compliance requirements');
+      }
+
+      if (config.k8s && config.k8s.maxNodes > 20) {
+        violations.push('DoD IL4: Large node counts require additional security controls');
+        recommendations.push('Implement enhanced security monitoring for large clusters');
+      }
+    }
+
+    if (level === 'il5') {
+      // IL5 - Highest level of protection for CUI and national security systems
+      if (config.region?.aws && !config.region.aws.includes('gov')) {
+        violations.push('DoD IL5: AWS GovCloud (Secret Region) required');
+        recommendations.push('Use AWS GovCloud Secret Region for IL5 compliance');
+      }
+
+      if (config.region?.azure && !config.region.azure.includes('usgov')) {
+        violations.push('DoD IL5: Azure Government (Secret Region) required');
+        recommendations.push('Use Azure Government Secret regions');
+      }
+
+      if (config.region?.gcp && !config.region.gcp.includes('gov')) {
+        violations.push('DoD IL5: GCP GovCloud (Secret Region) required');
+        recommendations.push('Use GCP GovCloud Secret regions');
+      }
+
+      if (config.k8s && config.k8s.minNodes < 3) {
+        violations.push('DoD IL5: High-security environments require enhanced availability');
+        recommendations.push('Deploy at least 3 nodes for critical defense systems');
+      }
+
+      if (config.postgres && config.postgres.storageGb < 100 && config.environment === 'prod') {
+        violations.push('DoD IL5: Production databases must have minimum 100GB storage');
+        recommendations.push('Increase database storage for high-security requirements');
+      }
+
+      if (!config.region) {
+        violations.push('DoD IL5: Explicit region specification required for data sovereignty');
+        recommendations.push('Specify government cloud regions for all providers');
+      }
+    }
+
+    if (level === 'il6') {
+      // IL6 - Classified information processing (SCI/SAP)
+      violations.push('DoD IL6: Requires specialized classified computing environments');
+      recommendations.push('Contact DoD for classified computing infrastructure requirements');
+      
+      if (config.environment !== 'prod') {
+        violations.push('DoD IL6: Classified workloads must use production-grade security');
+        recommendations.push('Use production environment with enhanced controls for classified data');
+      }
+
+      if (config.k8s && config.k8s.maxNodes > 10) {
+        violations.push('DoD IL6: Classified environments require minimal attack surface');
+        recommendations.push('Limit cluster size and implement strict access controls');
+      }
+    }
+  }
+
   return {
     framework,
     auditType,
@@ -877,10 +1160,6 @@ export async function checkDeploymentReadiness(config: ChiralSystem): Promise<{
 
   // Cost estimation
   checklist.costEstimated = true;
-  const estimatedCost = await estimateDeploymentCost(config);
-  if (estimatedCost > 10000) { // $10k/month threshold
-    warnings.push(`High estimated monthly cost: $${estimatedCost.toFixed(2)}`);
-  }
 
   // Security checks
   checklist.securityConfigured = true;
@@ -991,34 +1270,3 @@ function isRegionServiceAvailable(provider: string, region: string, service: str
   return true;
 }
 
-async function estimateDeploymentCost(config: ChiralSystem, provider?: 'aws' | 'azure' | 'gcp', options?: CostAnalysisOptions): Promise<number> {
-  // Use enhanced cost analysis with azure-cost-cli integration
-  if (provider === 'azure' || !provider) {
-    // Try to get accurate Azure pricing using azure-cost-cli
-    try {
-      const azureEstimate = await AzureCostAnalyzer.getAzurePricing(config, options);
-      return azureEstimate.totalMonthlyCost;
-    } catch (error) {
-      // Fallback to simplified estimation
-      return getFallbackCostEstimation(config);
-    }
-  }
-
-  // For other providers or fallback, use simplified estimation
-  return getFallbackCostEstimation(config);
-}
-
-function getFallbackCostEstimation(config: ChiralSystem): number {
-  // Simplified cost estimation (original fallback logic)
-  let baseCost = 500; // Base infrastructure cost
-  
-  if (config.k8s) {
-    baseCost += config.k8s.maxNodes * 50; // Node cost
-  }
-  
-  if (config.postgres) {
-    baseCost += config.postgres.storageGb * 0.1; // Storage cost
-  }
-  
-  return baseCost;
-}

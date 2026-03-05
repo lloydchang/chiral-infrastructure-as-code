@@ -512,6 +512,67 @@ chiral migrate -s ./pulumi-project -p aws --iac-tool pulumi
 - State file detection and security analysis
 - Resource complexity assessment
 
+#### FedRAMP and GovRAMP Compliance
+
+Chiral provides comprehensive compliance validation for federal and state government cloud requirements:
+
+**Supported Frameworks:**
+- **FedRAMP**: Low, Moderate, High impact levels
+- **GovRAMP**: Low, Moderate, High impact levels (formerly StateRAMP)
+
+**Key Compliance Features:**
+- Government cloud region validation (AWS GovCloud, Azure Government, GCP Government)
+- Encryption at rest and in transit requirements
+- Audit logging and monitoring controls
+- Data residency and sovereignty checks
+- High availability and disaster recovery requirements
+
+**Example FedRAMP Moderate Configuration:**
+```typescript
+export const config: ChiralSystem = {
+  projectName: 'federal-system',
+  environment: 'prod',
+  networkCidr: '10.1.0.0/16',
+  
+  region: {
+    aws: 'us-gov-east-1',      // GovCloud required
+    azure: 'usgovvirginia',    // Azure Government
+    gcp: 'us-gov-central1'     // GCP Government
+  },
+  
+  compliance: {
+    framework: 'fedramp-moderate',
+    encryptionAtRest: true,
+    auditLogging: true,
+    dataResidency: {
+      aws: 'us-gov-east-1',
+      azure: 'usgovvirginia',
+      gcp: 'us-gov-central1'
+    }
+  },
+  
+  k8s: {
+    version: '1.35',
+    minNodes: 2,               // High availability required
+    maxNodes: 5,
+    size: 'medium'
+  },
+  
+  postgres: {
+    engineVersion: '15',
+    size: 'medium',
+    storageGb: 100            // Minimum 50GB for Moderate
+  },
+  
+  adfs: {
+    size: 'medium',
+    windowsVersion: '2022'
+  }
+};
+```
+
+For detailed compliance guidance, see **[FEDRAMP_GOVRAMP_COMPLIANCE.md](docs/FEDRAMP_GOVRAMP_COMPLIANCE.md)**.
+
 #### Enhanced CLI Commands
 
 **Cost Analysis:**

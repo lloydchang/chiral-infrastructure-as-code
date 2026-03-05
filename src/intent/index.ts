@@ -6,7 +6,7 @@
 
 export type EnvironmentTier = 'dev' | 'prod';
 export type WorkloadSize = 'small' | 'medium' | 'large';
-export type ComplianceFramework = 'none' | 'soc1' | 'soc2' | 'soc3' | 'iso27001' | 'iso27017' | 'iso27018' | 'iso27701' | 'gdpr' | 'ccpa' | 'nist-low' | 'nist-moderate' | 'nist-high' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'govramp-low' | 'govramp-moderate' | 'govramp-high';
+export type ComplianceFramework = 'none' | 'soc1' | 'soc2' | 'soc3' | 'iso27001' | 'iso27017' | 'iso27018' | 'iso27701' | 'gdpr' | 'ccpa' | 'nist-low' | 'nist-moderate' | 'nist-high' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'govramp-low' | 'govramp-moderate' | 'govramp-high' | 'hipaa' | 'hipaa-low' | 'hipaa-moderate' | 'hipaa-high' | 'hitrust-low' | 'hitrust-moderate' | 'hitrust-high' | 'hitech-low' | 'hitech-moderate' | 'hitech-high';
 export type DeploymentStrategy = 'greenfield' | 'progressive' | 'parallel';
 
 export interface KubernetesIntent {
@@ -107,6 +107,7 @@ export interface ChiralSystem {
       incidentResponse?: boolean; // Enable incident response
       securityMonitoring?: boolean; // Enable security monitoring
       complianceMonitoring?: boolean; // Enable compliance monitoring
+      configurationManagement?: boolean; // Enable configuration management
     };
     privacyControls?: {
       dataClassification?: boolean; // Enable data classification
