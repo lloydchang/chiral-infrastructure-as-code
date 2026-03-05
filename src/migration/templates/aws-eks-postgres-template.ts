@@ -12,7 +12,7 @@ export const awsEksPostgresTemplate: ChiralSystem = {
 
   // Compliance settings
   compliance: {
-    framework: 'hipaa' as const,
+    framework: 'hipaa',
   },
 
   region: {

@@ -23,7 +23,7 @@ export interface DriftDetectionResult {
 }
 
 export interface ComplianceCheck {
-  framework: 'soc1' | 'soc2' | 'soc3' | 'iso27001' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'govramp-low' | 'govramp-moderate' | 'govramp-high' | 'hitrust-low' | 'hitrust-moderate' | 'hitrust-high' | 'hitech-low' | 'hitech-moderate' | 'hitech-high' | 'hipaa-low' | 'hipaa-moderate' | 'hipaa-high' | 'nist-low' | 'nist-moderate' | 'nist-high' | 'none';
+  framework: 'none' | 'soc2' | 'iso27001' | 'hipaa' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'govramp-low' | 'govramp-moderate' | 'govramp-high' | 'hitrust-low' | 'hitrust-moderate' | 'hitrust-high' | 'hitech-low' | 'hitech-moderate' | 'hitech-high' | 'hipaa-low' | 'hipaa-moderate' | 'hipaa-high';
   compliant: boolean;
   violations: string[];
   recommendations: string[];
@@ -195,7 +195,8 @@ export function detectDrift(
 
 export function checkCompliance(
   config: ChiralSystem,
-  framework: ComplianceCheck['framework'] = 'soc2'
+  framework: ComplianceFramework = 'soc2',
+  auditType?: 'type1' | 'type2'
 ): ComplianceCheck {
   const violations: string[] = [];
   const recommendations: string[] = [];
@@ -209,31 +210,140 @@ export function checkCompliance(
     };
   }
 
-  // SOC 2 compliance checks
-  if (framework === 'soc2') {
-    // Check for security configurations
+  // SOC 1 compliance checks (Financial Controls)
+  if (framework === 'soc1') {
+    // SOC 1 focuses on controls relevant to financial reporting
+    // Check for access controls, change management, and operational controls
+
+    if (!config.compliance?.auditLogging) {
+      violations.push('SOC 1: Comprehensive audit logging required for financial controls');
+      recommendations.push('Enable detailed audit logging for access and changes to financial systems');
+    }
+
     if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 2) {
-      violations.push('SOC 2: Production environments must have high availability');
-      recommendations.push('Deploy at least 2 nodes for production workloads');
+      violations.push('SOC 1: Production environments must have high availability for financial systems');
+      recommendations.push('Deploy at least 2 nodes for fault tolerance and continuity of financial operations');
+    }
+
+    if (!config.compliance?.encryptionAtRest) {
+      violations.push('SOC 1: Encryption at rest required for financial data protection');
+      recommendations.push('Enable encryption at rest for all data stores containing financial information');
+    }
+
+    if (!config.region) {
+      violations.push('SOC 1: Region specification required for data residency and compliance');
+      recommendations.push('Specify regions for all cloud providers to ensure financial data controls');
     }
 
     if (config.networkCidr === '10.0.0.0/16') {
-      violations.push('SOC 2: Default network CIDR may not meet security requirements');
-      recommendations.push('Use organization-specific network CIDR ranges');
+      violations.push('SOC 1: Default network CIDR may not meet financial controls requirements');
+      recommendations.push('Use organization-specific network ranges with proper segmentation for financial systems');
+    }
+  }
+
+  // SOC 2 compliance checks (Trust Services Criteria)
+  if (framework === 'soc2') {
+    // SOC 2 covers: Security, Availability, Processing Integrity, Confidentiality, Privacy
+
+    // Security: Protect against unauthorized access
+    if (!config.compliance?.auditLogging) {
+      violations.push('SOC 2 Security: Comprehensive audit logging required');
+      recommendations.push('Enable detailed audit logging for security monitoring');
+    }
+
+    if (!config.compliance?.encryptionAtRest) {
+      violations.push('SOC 2 Security: Encryption at rest required for data protection');
+      recommendations.push('Enable encryption at rest for all data stores');
+    }
+
+    // Availability: Ensure systems are available for operation
+    if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 2) {
+      violations.push('SOC 2 Availability: Production environments must have high availability');
+      recommendations.push('Deploy at least 2 nodes for fault tolerance');
+    }
+
+    // Processing Integrity: Ensure data is processed accurately
+    if (config.postgres && config.postgres.storageGb < 50 && config.environment === 'prod') {
+      violations.push('SOC 2 Processing Integrity: Production databases must have adequate storage for data integrity');
+      recommendations.push('Increase database storage to ensure processing integrity');
+    }
+
+    // Confidentiality: Protect sensitive information
+    if (config.networkCidr === '10.0.0.0/16') {
+      violations.push('SOC 2 Confidentiality: Default network CIDR may not meet confidentiality requirements');
+      recommendations.push('Use organization-specific network ranges with proper access controls');
+    }
+
+    // Privacy: Protect personal information
+    if (!config.region) {
+      violations.push('SOC 2 Privacy: Region specification required for data privacy compliance');
+      recommendations.push('Specify regions for all cloud providers to ensure data residency for privacy');
+    }
+  }
+
+  // SOC 3 compliance checks (General Use SOC 2)
+  if (framework === 'soc3') {
+    // SOC 3 is a simplified version of SOC 2 for general use, focusing on trust services criteria
+    // Similar to SOC 2 but less detailed
+
+    if (!config.compliance?.encryptionAtRest) {
+      violations.push('SOC 3: Encryption at rest required');
+      recommendations.push('Enable encryption at rest for data protection');
+    }
+
+    if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 2) {
+      violations.push('SOC 3: Production environments must have high availability');
+      recommendations.push('Deploy at least 2 nodes for reliability');
+    }
+
+    if (!config.region) {
+      violations.push('SOC 3: Region specification required for compliance');
+      recommendations.push('Specify regions for all cloud providers');
     }
   }
 
   // ISO 27001 compliance checks
   if (framework === 'iso27001') {
-    // Check for access control and encryption
-    if (!config.region) {
-      violations.push('ISO 27001: Region specification required for compliance');
-      recommendations.push('Specify regions for all cloud providers');
+    // Annex A.5 - Information Security Policies
+    if (!config.compliance?.auditLogging) {
+      violations.push('ISO 27001: A.12.4.1 - Event logging required for security monitoring');
+      recommendations.push('Enable comprehensive audit logging (ISO 27001 A.12.4.1)');
     }
 
+    // Annex A.8 - Asset Management
+    if (!config.region) {
+      violations.push('ISO 27001: A.8.1.1 - Inventory of assets requires region specification');
+      recommendations.push('Specify regions for all cloud providers (ISO 27001 A.8.1.1)');
+    }
+
+    // Annex A.9 - Access Control
+    if (config.networkCidr === '10.0.0.0/16') {
+      violations.push('ISO 27001: A.9.1.2 - Default network CIDR may not meet access control requirements');
+      recommendations.push('Use organization-specific network ranges (ISO 27001 A.9.1.2)');
+    }
+
+    // Annex A.10 - Cryptography
+    if (!config.compliance?.encryptionAtRest) {
+      violations.push('ISO 27001: A.10.1.1 - Encryption at rest required for data protection');
+      recommendations.push('Enable encryption at rest for all data stores (ISO 27001 A.10.1.1)');
+    }
+
+    // Annex A.12 - Operations Security
+    if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 2) {
+      violations.push('ISO 27001: A.12.2.1 - Production environments must have redundancy controls');
+      recommendations.push('Deploy at least 2 nodes for operational resilience (ISO 27001 A.12.2.1)');
+    }
+
+    // Annex A.14 - System Acquisition
     if (config.postgres && config.postgres.storageGb < 50 && config.environment === 'prod') {
-      violations.push('ISO 27001: Production databases must have adequate backup storage');
-      recommendations.push('Configure at least 50GB storage for production databases');
+      violations.push('ISO 27001: A.14.2.5 - Production systems must have adequate capacity');
+      recommendations.push('Configure at least 50GB storage for production databases (ISO 27001 A.14.2.5)');
+    }
+
+    // Annex A.16 - Incident Management
+    if (config.environment === 'prod' && !config.compliance?.auditLogging) {
+      violations.push('ISO 27001: A.16.1.1 - Incident response requires comprehensive logging');
+      recommendations.push('Enable audit logging for incident detection (ISO 27001 A.16.1.1)');
     }
   }
 
@@ -340,215 +450,11 @@ export function checkCompliance(
   }
 
 
-  // HITECH compliance checks
-  if (framework.startsWith('hitech-')) {
-    const level = framework.split('-')[1]; // 'low', 'moderate', 'high'
 
-    // HITECH focuses on electronic health records security
-    if (!config.compliance?.encryptionAtRest) {
-      violations.push(`HITECH ${level.toUpperCase()}: Encryption at rest required for EHR data`);
-      recommendations.push('Enable encryption at rest for all health data stores');
-    }
 
-    if (!config.compliance?.auditLogging) {
-      violations.push(`HITECH ${level.toUpperCase()}: Audit logging required for breach notification`);
-      recommendations.push('Enable comprehensive audit logging for access tracking');
-    }
-
-    if (config.environment === 'prod' && !config.region) {
-      violations.push(`HITECH ${level.toUpperCase()}: Geographic data residency required`);
-      recommendations.push('Specify regions compliant with health data location requirements');
-    }
-
-    if (level === 'moderate' || level === 'high') {
-      if (config.networkCidr.startsWith('10.0.0.0/16')) {
-        violations.push(`HITECH ${level.toUpperCase()}: Default network ranges not suitable for health data`);
-        recommendations.push('Use segmented networks for health information systems');
-      }
-    }
-
-    if (level === 'high') {
-      if (config.k8s && config.k8s.minNodes < 3) {
-        violations.push('HITECH HIGH: High-risk health data requires enhanced availability');
-        recommendations.push('Deploy at least 3 nodes for critical health systems');
-      }
-    }
-  }
-
-  // HIPAA with levels
-  if (framework.startsWith('hipaa-')) {
-    const level = framework.split('-')[1]; // 'low', 'moderate', 'high'
-
-    // Basic HIPAA checks for data protection
-    if (config.networkCidr.startsWith('10.0.0.0/16')) {
-      violations.push(`HIPAA ${level.toUpperCase()}: Default network ranges may not meet data protection requirements`);
-      recommendations.push('Use private network ranges with proper segmentation');
-    }
-
-    if (config.environment === 'prod' && !config.region) {
-      violations.push(`HIPAA ${level.toUpperCase()}: Production workloads must specify regions for data residency`);
-      recommendations.push('Specify compliant regions for healthcare data');
-    }
-
-    if (level === 'moderate' || level === 'high') {
-      if (!config.compliance?.encryptionAtRest) {
-        violations.push(`HIPAA ${level.toUpperCase()}: Encryption at rest required`);
-        recommendations.push('Enable encryption at rest for protected health information');
-      }
-    }
-
-    if (level === 'high') {
-      if (!config.compliance?.auditLogging) {
-        violations.push('HIPAA HIGH: Comprehensive audit logging required for high-risk data');
-        recommendations.push('Enable detailed audit logging for all PHI access');
-      }
-
-      if (config.postgres && config.postgres.storageGb < 100 && config.environment === 'prod') {
-        violations.push('HIPAA HIGH: High-risk data requires enhanced storage capacity');
-        recommendations.push('Configure at least 100GB storage for production healthcare databases');
-      }
-    }
-  }
-
-  // NIST 800-53 compliance checks
-  if (framework.startsWith('nist-')) {
-    const level = framework.split('-')[1]; // 'low', 'moderate', 'high'
-
-    // Common controls for all NIST levels - SP 800-53 core requirements
-    if (!config.compliance?.encryptionAtRest) {
-      violations.push(`NIST 800-53 ${level.toUpperCase()}: SC-28 (Cryptographic Protection) - Encryption at rest required`);
-      recommendations.push('Enable encryption at rest for all data stores (NIST SC-28)');
-    }
-
-    if (!config.compliance?.auditLogging) {
-      violations.push(`NIST 800-53 ${level.toUpperCase()}: AU-2 (Audit Events) - Comprehensive audit logging required`);
-      recommendations.push('Enable detailed audit logging for security-relevant events (NIST AU-2)');
-    }
-
-    if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 2) {
-      violations.push(`NIST 800-53 ${level.toUpperCase()}: CP-2 (Continuity of Operations) - Production environments must have high availability`);
-      recommendations.push('Deploy at least 2 nodes for fault tolerance and continuity (NIST CP-2)');
-    }
-
-    // Access Control (AC) family checks
-    if (!config.region) {
-      violations.push(`NIST 800-53 ${level.toUpperCase()}: AC-4 (Information Flow Enforcement) - Region specification required for access control`);
-      recommendations.push('Specify regions for all cloud providers to enforce access controls (NIST AC-4)');
-    }
-
-    // Identification and Authentication (IA) family
-    if (config.networkCidr === '10.0.0.0/16') {
-      violations.push(`NIST 800-53 ${level.toUpperCase()}: IA-3 (Device Identification and Authentication) - Default network CIDR may not meet identification requirements`);
-      recommendations.push('Use organization-specific network ranges with proper device authentication (NIST IA-3)');
-    }
-
-    // Level-specific additional controls
-    if (level === 'moderate' || level === 'high') {
-      // Moderate baseline additional controls
-      if (config.postgres && config.postgres.storageGb < 50 && config.environment === 'prod') {
-        violations.push(`NIST 800-53 ${level.toUpperCase()}: SC-32 (Cryptographic Key Establishment) - Production databases must have minimum storage for key management`);
-        recommendations.push('Increase database storage to support cryptographic key management (NIST SC-32)');
-      }
-
-      // System and Communications Protection (SC) family
-      if (config.k8s && config.k8s.maxNodes > 20) {
-        violations.push(`NIST 800-53 ${level.toUpperCase()}: SC-5 (Denial of Service Protection) - Large clusters require DoS protection measures`);
-        recommendations.push('Implement denial of service protection for large-scale deployments (NIST SC-5)');
-      }
-    }
-
-    if (level === 'high') {
-      // High baseline additional controls - most stringent requirements
-      if (!config.compliance?.dataResidency) {
-        violations.push('NIST 800-53 HIGH: AC-4 (Information Flow Enforcement) - Data residency controls required for high-impact systems');
-        recommendations.push('Specify data residency regions and implement information flow controls (NIST AC-4)');
-      }
-
-      // Configuration Management (CM) family
-      if (config.k8s && config.k8s.maxNodes > 15) {
-        violations.push('NIST 800-53 HIGH: CM-6 (Configuration Settings) - Large node counts require enhanced configuration management');
-        recommendations.push('Implement automated configuration management for large clusters (NIST CM-6)');
-      }
-
-      // Incident Response (IR) family
-      if (config.postgres && config.postgres.storageGb < 100 && config.environment === 'prod') {
-        violations.push('NIST 800-53 HIGH: IR-2 (Incident Response Training) - High-impact systems require enhanced incident response capabilities');
-        recommendations.push('Configure adequate storage for incident response data retention (NIST IR-2)');
-      }
-
-      // System and Information Integrity (SI) family
-      if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 3) {
-        violations.push('NIST 800-53 HIGH: SI-4 (Information System Monitoring) - High-impact systems require enhanced monitoring');
-        recommendations.push('Deploy at least 3 nodes for comprehensive system monitoring (NIST SI-4)');
-      }
-    }
-  // DOD Impact Level compliance checks
-  if (framework.startsWith('dod-')) {
-    const level = framework.split('-')[1]; // 'il2', 'il4', 'il5', 'il6'
-
-    // Common controls for all DOD IL levels - based on NIST 800-53 but DOD-specific
-    if (!config.compliance?.encryptionAtRest) {
-      violations.push(`DOD IL${level.toUpperCase()}: Encryption at rest required`);
-      recommendations.push('Enable encryption at rest for all data stores');
-    }
-
-    if (!config.compliance?.auditLogging) {
-      violations.push(`DOD IL${level.toUpperCase()}: Comprehensive audit logging required`);
-      recommendations.push('Enable detailed audit logging for all resources');
-    }
-
-    if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 2) {
-      violations.push(`DOD IL${level.toUpperCase()}: Production environments must have high availability`);
-      recommendations.push('Deploy at least 2 nodes for fault tolerance');
-    }
-
-    // Level-specific checks
-    if (level === 'il4' || level === 'il5' || level === 'il6') {
-      // Moderate and higher require government cloud or equivalent controls
-      if (config.region?.aws && !config.region.aws.includes('gov')) {
-        violations.push(`DOD IL${level.toUpperCase()}: AWS GovCloud or equivalent controls required`);
-        recommendations.push('Use AWS GovCloud regions or implement compensating controls');
-      }
-
-      if (config.region?.azure && !config.region.azure.includes('usgov')) {
-        violations.push(`DOD IL${level.toUpperCase()}: Azure Government required`);
-        recommendations.push('Use Azure Government regions');
-      }
-
-      if (config.postgres && config.postgres.storageGb < 50 && config.environment === 'prod') {
-        violations.push(`DOD IL${level.toUpperCase()}: Production databases must have minimum 50GB storage`);
-        recommendations.push('Increase database storage to meet compliance requirements');
-      }
-    }
-
-    if (level === 'il5' || level === 'il6') {
-      // High impact additional requirements
-      if (config.k8s && config.k8s.maxNodes > 20) {
-        violations.push(`DOD IL${level.toUpperCase()}: Large node counts require additional security controls`);
-        recommendations.push('Implement additional security monitoring for large clusters');
-      }
-
-      if (!config.region) {
-        violations.push(`DOD IL${level.toUpperCase()}: Explicit region specification required`);
-        recommendations.push('Specify regions for all cloud providers to ensure data sovereignty');
-      }
-    }
-
-    if (level === 'il6') {
-      // Highest impact - most stringent requirements
-      if (config.environment === 'prod' && config.k8s && config.k8s.minNodes < 3) {
-        violations.push('DOD IL6: Highest impact systems require enhanced availability');
-        recommendations.push('Deploy at least 3 nodes for critical systems');
-      }
-
-      if (!config.compliance?.dataResidency) {
-        violations.push('DOD IL6: Data residency controls required for highest impact systems');
-        recommendations.push('Specify data residency regions and implement strict controls');
-      }
-    }
-  }
   return {
     framework,
+    auditType,
     compliant: violations.length === 0,
     violations,
     recommendations
@@ -559,7 +465,7 @@ export function checkCompliance(
 // DEPLOYMENT READINESS CHECKS
 // =================================================================
 
-async function checkDeploymentReadiness(config: ChiralSystem): Promise<{
+export async function checkDeploymentReadiness(config: ChiralSystem): Promise<{
   ready: boolean;
   blockers: string[];
   warnings: string[];
