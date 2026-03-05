@@ -34,7 +34,6 @@ export const awsEksPostgresTemplate: Partial<ChiralSystem> = {
 
   // Migration metadata
   migration: {
-    source: 'terraform',
     strategy: 'progressive',
     rollbackPlan: [
       { description: 'Scale EKS node groups back to original size' },
