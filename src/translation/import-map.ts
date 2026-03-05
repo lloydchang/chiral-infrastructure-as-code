@@ -37,16 +37,13 @@ const azureDbSkuToSize: { [key: string]: WorkloadSize } = {
 
 // GCP mappings
 const gcpMachineTypeToSize: { [key: string]: WorkloadSize } = {
-  'e2-micro': 'small',
   'e2-small': 'small',
   'e2-medium': 'medium', // Fixed: was incorrectly mapped to small
   'n1-standard-2': 'large',
   'n1-standard-4': 'large',
-  'f1-micro': 'small',
 };
 
 const gcpDbTierToSize: { [key: string]: WorkloadSize } = {
-  'db-f1-micro': 'small',
   'db-g1-small': 'small',
   'db-custom-2-4096': 'medium',
   'db-custom-4-8192': 'large',
