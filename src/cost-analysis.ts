@@ -181,7 +181,7 @@ export class InfracostAnalyzer {
           Type: 'AWS::EC2::Instance',
           Properties: {
             InstanceType: this.getAWSInstanceType(config.adfs.size),
-            ImageId: this.getWindowsAMI()
+            ImageId: this.getWindowsAMI(config)
           }
         }
       }
@@ -386,6 +386,15 @@ resource "google_compute_instance" "adfs" {
     };
   }
 
+  private static getFallbackAWSBreakdown(config: ChiralSystem): CostBreakdown {
+    return {
+      compute: { kubernetes: config.k8s.maxNodes * 145, vm: 95, total: 0 },
+      storage: { database: config.postgres.storageGb * 0.23 + 55, vmDisk: 18, total: 0 },
+      network: { dataTransfer: 0, loadBalancer: 0, total: 0 },
+      other: { management: 0, monitoring: 0, total: 0 }
+    };
+  }
+
   private static getAWSInstanceType(size: string): string {
     const sizeMap: { [key: string]: string } = {
       'small': 't3.small',
@@ -425,6 +434,29 @@ resource "google_compute_instance" "adfs" {
       'large': 'db-custom-4-8192'
     };
     return sizeMap[size] || 'db-g1-small';
+  }
+
+  private static getFallbackGCPPricing(config: ChiralSystem, region: string, currency: string): CostEstimate {
+    const breakdown = this.getFallbackGCPBreakdown(config);
+    const totalMonthlyCost = Object.values(breakdown).reduce((sum, cat) => sum + cat.total, 0);
+
+    return {
+      provider: 'gcp',
+      totalMonthlyCost,
+      currency,
+      breakdown,
+      recommendations: ['Install infracost for more accurate GCP pricing'],
+      warnings: ['Using fallback pricing - install infracost for accurate costs']
+    };
+  }
+
+  private static getFallbackGCPBreakdown(config: ChiralSystem): CostBreakdown {
+    return {
+      compute: { kubernetes: config.k8s.maxNodes * 140, vm: 90, total: 0 },
+      storage: { database: config.postgres.storageGb * 0.25 + 50, vmDisk: 17, total: 0 },
+      network: { dataTransfer: 22, loadBalancer: 20, total: 0 },
+      other: { management: 32, monitoring: 16, total: 0 }
+    };
   }
 }
 
