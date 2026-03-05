@@ -13,6 +13,9 @@ export interface MigrationWizardConfig {
   outputPath: string;
   strategy: 'greenfield' | 'progressive' | 'parallel';
   advanced: boolean;
+  includeCostAnalysis?: boolean;
+  includeComplianceCheck?: boolean;
+  generateValidationScripts?: boolean;
 }
 
 export class MigrationWizard {
