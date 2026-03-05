@@ -269,6 +269,81 @@ chiral migrate --source terraform/ --provider aws --strategy parallel
 
 The Terraform migration interface transforms Chiral from an IaC generation tool into a **complete migration solution** for teams wanting to escape the complexity and risks of Terraform state management.
 
+### Terraform Provider Integration
+
+Chiral provides a **Terraform Provider** for seamless integration with existing Terraform workflows, allowing you to use Chiral's multi-cloud capabilities directly within Terraform configurations.
+
+#### Building the Provider
+
+```bash
+# Build the Go-based Terraform Provider
+chiral terraform-provider --build
+
+# Generate example Terraform configuration
+chiral terraform-provider --example
+```
+
+#### Terraform Provider Features
+
+- **Multi-Cloud Generation**: Single Terraform resource generates artifacts for AWS, Azure, and GCP
+- **Intent-Driven**: Uses Chiral's intent schema for consistent infrastructure across clouds
+- **State Management**: Leverages each cloud's native state management (no Terraform state files)
+- **Cost Estimation**: Built-in cost analysis and optimization recommendations
+
+#### Example Terraform Configuration
+
+```hcl
+terraform {
+  required_providers {
+    chiral = {
+      source  = "chiral-io/chiral"
+      version = "~> 1.0"
+    }
+  }
+}
+
+resource "chiral_kubernetes_cluster" "main" {
+  config = {
+    project_name = "my-app"
+    environment  = "dev"
+    k8s = {
+      version      = "1.35"
+      min_nodes    = 1
+      max_nodes    = 3
+      size         = "small"
+    }
+    postgres = {
+      engine_version = "18.3"
+      size           = "small"
+      storage_gb     = 20
+    }
+    adfs = {
+      size            = "small"
+      windows_version = "11 26H2 Build 26300.7877"
+    }
+  }
+}
+```
+
+#### Bridge Options
+
+For gradual migration, Chiral supports bridge configurations that delegate state management to cloud providers while maintaining Terraform compatibility:
+
+```bash
+# Generate Terraform with AWS CloudFormation state delegation
+chiral migrate --source terraform/ --provider aws --terraform-bridge
+
+# Generate Pulumi with cloud-native state delegation  
+chiral migrate --source pulumi-project/ --provider aws --pulumi-bridge --iac-tool pulumi
+```
+
+#### Bridge Benefits
+
+- **Gradual Migration**: Transition incrementally from Terraform/Pulumi to Chiral
+- **State Delegation**: CloudFormation/ARM/Infrastructure Manager handles state
+- **Parallel Operation**: Run both systems during transition period
+- **Zero Downtime**: Maintain service availability during migration
+
 ### Requirements
 
 - Node.js
