@@ -3,7 +3,7 @@
 // Migration Template: AWS EKS + PostgreSQL Setup
 // Use this template to migrate typical AWS EKS + RDS PostgreSQL infrastructure
 
-import { ChiralSystem } from '../../intent';
+import { ChiralSystem, ComplianceFramework } from '../../intent';
 
 export const awsEksPostgresTemplate: ChiralSystem = {
   projectName: 'migrated-aws-infrastructure',
@@ -12,7 +12,7 @@ export const awsEksPostgresTemplate: ChiralSystem = {
 
   // Compliance settings
   compliance: {
-    framework: 'hipaa',
+    framework: 'hipaa' as ComplianceFramework,
   },
 
   region: {
