@@ -573,6 +573,151 @@ export const config: ChiralSystem = {
 
 For detailed compliance guidance, see **[FEDRAMP_GOVRAMP_COMPLIANCE.md](docs/FEDRAMP_GOVRAMP_COMPLIANCE.md)**.
 
+#### Healthcare Compliance (HIPAA, HITRUST CSF, HITECH)
+
+Chiral provides comprehensive compliance validation for healthcare data protection requirements:
+
+**Supported Frameworks:**
+- **HIPAA**: Low, Moderate, High impact levels (Health Insurance Portability and Accountability Act)
+- **HITRUST CSF**: Low, Moderate, High impact levels (Health Information Trust Alliance Common Security Framework)
+- **HITECH**: Low, Moderate, High impact levels (Health Information Technology for Economic and Clinical Health Act)
+
+**Key Healthcare Compliance Features:**
+- PHI (Protected Health Information) data protection controls
+- Enhanced audit logging for healthcare data access
+- Network segmentation and security requirements
+- Data residency and sovereignty for healthcare data
+- High availability requirements for patient care systems
+- Breach notification and prevention controls
+- Enhanced monitoring for healthcare workloads
+
+**Example HIPAA High Configuration:**
+```typescript
+export const config: ChiralSystem = {
+  projectName: 'healthcare-system',
+  environment: 'prod',
+  networkCidr: '192.168.0.0/16',  // Non-default network for PHI
+  
+  region: {
+    aws: 'us-east-1',           // Healthcare-compliant regions
+    azure: 'eastus',
+    gcp: 'us-central1'
+  },
+  
+  compliance: {
+    framework: 'hipaa-high',
+    encryptionAtRest: true,      // Required for PHI
+    auditLogging: true,          // Enhanced PHI access logging
+    dataResidency: {
+      aws: 'us-east-1',
+      azure: 'eastus',
+      gcp: 'us-central1'
+    }
+  },
+  
+  k8s: {
+    version: '1.35',
+    minNodes: 3,                 // High availability for patient care
+    maxNodes: 10,
+    size: 'medium'
+  },
+  
+  postgres: {
+    engineVersion: '15',
+    size: 'large',
+    storageGb: 100               // Minimum 100GB for PHI databases
+  },
+  
+  adfs: {
+    size: 'medium',              // Production ADFS sizing
+    windowsVersion: '2022'
+  }
+};
+```
+
+**Example HITRUST CSF Moderate Configuration:**
+```typescript
+export const config: ChiralSystem = {
+  projectName: 'healthcare-portal',
+  environment: 'prod',
+  networkCidr: '172.16.0.0/16',
+  
+  compliance: {
+    framework: 'hitrust-moderate',
+    encryptionAtRest: true,
+    auditLogging: true,
+    dataResidency: {
+      aws: 'us-east-1',
+      azure: 'eastus'
+    }
+  },
+  
+  k8s: {
+    version: '1.35',
+    minNodes: 2,
+    maxNodes: 8,
+    size: 'medium'
+  },
+  
+  postgres: {
+    engineVersion: '15',
+    size: 'medium',
+    storageGb: 50                // Minimum 50GB for HITRUST Moderate
+  }
+};
+```
+
+**Example HITECH High Configuration:**
+```typescript
+export const config: ChiralSystem = {
+  projectName: 'ehr-system',
+  environment: 'prod',
+  networkCidr: '10.200.0.0/16',
+  
+  compliance: {
+    framework: 'hitech-high',
+    encryptionAtRest: true,      // Prevents breach notifications
+    auditLogging: true,          // Enhanced breach detection
+    dataResidency: {
+      aws: 'us-east-1'
+    }
+  },
+  
+  k8s: {
+    version: '1.35',
+    minNodes: 3,                 // Enhanced availability for breach prevention
+    maxNodes: 15,
+    size: 'large'
+  },
+  
+  postgres: {
+    engineVersion: '15',
+    size: 'large',
+    storageGb: 75                // Minimum 75GB for breach investigation
+  }
+};
+```
+
+**Healthcare Compliance Validation:**
+```bash
+# HIPAA compliance validation
+chiral validate -c chiral.config.ts --compliance hipaa-low
+chiral validate -c chiral.config.ts --compliance hipaa-moderate
+chiral validate -c chiral.config.ts --compliance hipaa-high
+
+# HITRUST CSF compliance validation
+chiral validate -c chiral.config.ts --compliance hitrust-low
+chiral validate -c chiral.config.ts --compliance hitrust-moderate
+chiral validate -c chiral.config.ts --compliance hitrust-high
+
+# HITECH compliance validation
+chiral validate -c chiral.config.ts --compliance hitech-low
+chiral validate -c chiral.config.ts --compliance hitech-moderate
+chiral validate -c chiral.config.ts --compliance hitech-high
+```
+
+For detailed healthcare compliance guidance, see **[HEALTHCARE_COMPLIANCE.md](docs/HEALTHCARE_COMPLIANCE.md)**.
+
 #### Enhanced CLI Commands
 
 **Cost Analysis:**
