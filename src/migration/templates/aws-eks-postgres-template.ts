@@ -9,9 +9,12 @@ export const awsEksPostgresTemplate: ChiralSystem = {
   projectName: 'migrated-aws-infrastructure',
   environment: 'prod',
   networkCidr: '10.0.0.0/16',
+
+  // Compliance settings
   compliance: {
     framework: 'hipaa' as const,
   },
+
   region: {
     aws: 'us-east-1'
   },
