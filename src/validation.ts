@@ -23,7 +23,7 @@ export interface DriftDetectionResult {
 }
 
 export interface ComplianceCheck {
-  framework: ComplianceFramework;
+  framework: 'soc2' | 'iso27001' | 'fedramp-low' | 'fedramp-moderate' | 'fedramp-high' | 'govramp-low' | 'govramp-moderate' | 'govramp-high' | 'hitrust-low' | 'hitrust-moderate' | 'hitrust-high' | 'hitech-low' | 'hitech-moderate' | 'hitech-high' | 'hipaa-low' | 'hipaa-moderate' | 'hipaa-high' | 'nist-low' | 'nist-moderate' | 'nist-high' | 'none';
   compliant: boolean;
   violations: string[];
   recommendations: string[];
@@ -797,3 +797,5 @@ function getFallbackCostEstimation(config: ChiralSystem): number {
   
   return baseCost;
 }
+
+export { validateChiralConfig, checkDeploymentReadiness, checkCompliance };
