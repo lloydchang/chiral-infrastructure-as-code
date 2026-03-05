@@ -4,7 +4,7 @@ describe('Import Mappings', () => {
   describe('mapInstanceTypeToWorkloadSize', () => {
     it('maps AWS instance types correctly', () => {
       expect(mapInstanceTypeToWorkloadSize('t3.small', 'aws')).toBe('small');
-      expect(mapInstanceTypeToWorkloadSize('t3.medium', 'aws')).toBe('small'); // Legacy mapping
+      expect(mapInstanceTypeToWorkloadSize('t3.medium', 'aws')).toBe('medium'); // Fixed mapping
       expect(mapInstanceTypeToWorkloadSize('t3.large', 'aws')).toBe('large');
       expect(mapInstanceTypeToWorkloadSize('unknown', 'aws')).toBe('small'); // Default
     });
@@ -25,7 +25,7 @@ describe('Import Mappings', () => {
   describe('mapDbClassToWorkloadSize', () => {
     it('maps AWS DB classes correctly', () => {
       expect(mapDbClassToWorkloadSize('db.t3.small', 'aws')).toBe('small');
-      expect(mapDbClassToWorkloadSize('db.t3.medium', 'aws')).toBe('small'); // Legacy mapping
+      expect(mapDbClassToWorkloadSize('db.t3.medium', 'aws')).toBe('medium'); // Fixed mapping
       expect(mapDbClassToWorkloadSize('db.m5.large', 'aws')).toBe('large');
     });
 

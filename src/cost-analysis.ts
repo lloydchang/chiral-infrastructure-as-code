@@ -1252,11 +1252,11 @@ resource "google_compute_instance" "adfs" {
 
   private static getGCPMachineType(size: string): string {
     const sizeMap: { [key: string]: string } = {
-      'small': 'e2-micro',
+      'small': 'e2-small',
       'medium': 'e2-medium',
       'large': 'n1-standard-2'
     };
-    return sizeMap[size] || 'e2-micro';
+    return sizeMap[size] || 'e2-small';
   }
 
   private static getGCPDatabaseTier(size: string): string {

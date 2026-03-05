@@ -7,7 +7,7 @@ import { WorkloadSize, EnvironmentTier, ChiralSystem } from '../intent';
 // AWS mappings
 const awsInstanceTypeToSize: { [key: string]: WorkloadSize } = {
   't3.small': 'small',
-  't3.medium': 'small', // Legacy mapping - was incorrectly labeled as medium
+  't3.medium': 'medium', // Fixed: was incorrectly mapped to small
   't3.large': 'large',
   'm5.large': 'large',
   'm5.xlarge': 'large',
@@ -15,7 +15,7 @@ const awsInstanceTypeToSize: { [key: string]: WorkloadSize } = {
 
 const awsDbClassToSize: { [key: string]: WorkloadSize } = {
   'db.t3.small': 'small',
-  'db.t3.medium': 'small', // Legacy mapping - was incorrectly labeled as medium
+  'db.t3.medium': 'medium', // Fixed: was incorrectly mapped to small
   'db.m5.large': 'large',
   'db.m5.xlarge': 'large',
 };
