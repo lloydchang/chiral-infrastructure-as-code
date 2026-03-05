@@ -386,20 +386,6 @@ resource "google_compute_instance" "adfs" {
     };
   }
 
-  static getFallbackGCPPricing(config: ChiralSystem, region: string, currency: string): CostEstimate {
-    const breakdown = this.getFallbackGCPBreakdown(config);
-    const totalMonthlyCost = Object.values(breakdown).reduce((sum, cat) => sum + cat.total, 0);
-
-    return {
-      provider: 'gcp',
-      totalMonthlyCost,
-      currency,
-      breakdown,
-      recommendations: ['Install Infracost for more accurate GCP pricing'],
-      warnings: ['Using fallback pricing - install Infracost for accurate costs']
-    };
-  }
-
   private static getFallbackAWSBreakdown(config: ChiralSystem): CostBreakdown {
     return {
       compute: { kubernetes: config.k8s.maxNodes * 145, vm: 95, total: 0 },
@@ -408,15 +394,7 @@ resource "google_compute_instance" "adfs" {
       other: { management: 35, monitoring: 18, total: 0 }
     };
   }
-
-  private static getFallbackGCPBreakdown(config: ChiralSystem): CostBreakdown {
-    return {
-      compute: { kubernetes: config.k8s.maxNodes * 140, vm: 90, total: 0 },
-      storage: { database: config.postgres.storageGb * 0.25 + 50, vmDisk: 17, total: 0 },
-      network: { dataTransfer: 22, loadBalancer: 20, total: 0 },
-      other: { management: 32, monitoring: 16, total: 0 }
-    };
-  }
+}
 
   // Helper methods for resource type mapping
   private static getAWSInstanceType(size: string): string {
