@@ -1,7 +1,7 @@
 {
   "//": "1. Root Configuration Files: package.json, tsconfig.json",
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2015",
     "module": "CommonJS",
     "strict": true,
     "esModuleInterop": true,
