@@ -1,16 +1,14 @@
 // File: src/main.ts
 
-// 6. The Chiral Engine (Orchestrator)
-
-// The executable that generates the logic from
+// CORE INFRASTRUCTURE ENGINE - MINIMALIST APPROACH
 //
-//   5. The Adapters (Logic)
-//     File: src/adapters/aws-left.ts
-//       The Left Enantiomer: AWS CDK Implementation.
-//     File: src/adapters/azure-right.ts
-//       The Right Enantiomer: Azure Bicep Generator.
+// The executable that generates the logic for the THREE PILLARS ONLY:
+//   1. Kubernetes (K8s)
+//   2. PostgreSQL (Database)
+//   3. Active Directory Federation Services (ADFS)
 //
-// into real artifacts.
+// CORE ISOLATION: Zero outer layer dependencies, zero skills, zero AI agents.
+// Focus exclusively on stateless generation of core infrastructure components.
 
 import * as cdk from 'aws-cdk-lib';
 import * as fs from 'fs';
@@ -469,7 +467,7 @@ const buildChiralSystemFromResources = async (resources: any[], provider: string
         console.log(`AWS Agent suggestions: ${suggestions.join('; ')}`);
       } else if (provider === 'azure') {
         const { AzureAgentAdapter } = await import('./adapters/azure-agent');
-        const adapter = new AzureAgentAdapter(process.env.AZURE_OPENAI_ENDPOINT || '', process.env.AZURE_OPENAI_API_KEY || '', 'gpt-4');
+        const adapter = new AzureAgentAdapter();
         const suggestions = await adapter.suggestMappings(unmappableResources);
         console.log(`Azure Agent suggestions: ${suggestions.join('; ')}`);
       } else if (provider === 'gcp') {
@@ -794,7 +792,7 @@ program
           cloudAgent = new AwsAgentAdapter();
         } else if (provider === 'azure') {
           const { AzureAgentAdapter } = await import('./adapters/azure-agent');
-          cloudAgent = new AzureAgentAdapter(process.env.AZURE_OPENAI_ENDPOINT || '', process.env.AZURE_OPENAI_API_KEY || '', 'gpt-4');
+          cloudAgent = new AzureAgentAdapter();
         } else if (provider === 'gcp') {
           const { GcpAgentAdapter } = await import('./adapters/gcp-agent');
           cloudAgent = new GcpAgentAdapter(process.env.GCP_PROJECT_ID || '');
@@ -1412,12 +1410,18 @@ program
       
       let costEstimate: any = null;
       
-      if (provider === 'azure' && options.subscription) {
-        console.log(`\n🔍 Analyzing Azure costs using azure-cost-cli...`);
-        if (AzureCostAnalyzer.isAvailable()) {
-          costEstimate = await AzureCostAnalyzer.analyzeAzureCosts(options.subscription, {});
-          console.log(`\n📊 Azure Cost Analysis Results:`);
-          console.log(`   Total Monthly Cost: $${costEstimate.totalMonthlyCost.toFixed(2)} ${costEstimate.currency}`);
+      try {
+        if (provider === 'azure' && options.subscription) {
+          console.log(`\n🔍 Analyzing Azure costs using azure-cost-cli...`);
+          if (AzureCostAnalyzer.isAvailable()) {
+            costEstimate = await AzureCostAnalyzer.analyzeAzureCosts(options.subscription, {});
+            console.log(`\n📊 Azure Cost Analysis Results:`);
+            console.log(`   Total Monthly Cost: $${costEstimate.totalMonthlyCost.toFixed(2)} ${costEstimate.currency}`);
+            console.log(`   Compute: $${costEstimate.breakdown.compute.total.toFixed(2)}`);
+            console.log(`   Storage: $${costEstimate.breakdown.storage.total.toFixed(2)}`);
+            console.log(`   Network: $${costEstimate.breakdown.network.total.toFixed(2)}`);
+            console.log(`   Other: $${costEstimate.breakdown.other.total.toFixed(2)}`);
+            
           console.log(`   Compute: $${costEstimate.breakdown.compute.total.toFixed(2)}`);
           console.log(`   Storage: $${costEstimate.breakdown.storage.total.toFixed(2)}`);
           console.log(`   Network: $${costEstimate.breakdown.network.total.toFixed(2)}`);
@@ -1460,86 +1464,47 @@ program
           console.log(`   ⚠️  Install aws-cost-cli for detailed AWS cost analysis`);
           console.log(`   📦 Install from: npm install -g aws-cost-cli`);
         }
-        if (provider === 'gcp' && options.project) {
-          console.log(`\n🔍 Analyzing GCP costs using gcp-cost-cli...`);
-          if (GCPCostAnalyzer.isGCPCostCliAvailable()) {
-            try {
-              const costEstimate = await GCPCostAnalyzer.analyzeGCPCosts(options.project, options);
-              console.log(`\n📊 GCP Cost Analysis Results:`);
-              console.log(`   💰 Total Monthly Cost: $${costEstimate.totalMonthlyCost.toFixed(2)} ${costEstimate.currency}`);
-              console.log(`   🖥️  Compute: $${costEstimate.breakdown.compute.total.toFixed(2)}`);
-              console.log(`      ├── Kubernetes: $${costEstimate.breakdown.compute.kubernetes.toFixed(2)}`);
-              console.log(`      └── VM: $${costEstimate.breakdown.compute.vm.toFixed(2)}`);
-              console.log(`   💾 Storage: $${costEstimate.breakdown.storage.total.toFixed(2)}`);
-              console.log(`      ├── Database: $${costEstimate.breakdown.storage.database.toFixed(2)}`);
-              console.log(`      └── VM Disk: $${costEstimate.breakdown.storage.vmDisk.toFixed(2)}`);
-              console.log(`   🌐 Network: $${costEstimate.breakdown.network.total.toFixed(2)}`);
-              console.log(`      ├── Data Transfer: $${costEstimate.breakdown.network.dataTransfer.toFixed(2)}`);
-              console.log(`      └── Load Balancer: $${costEstimate.breakdown.network.loadBalancer.toFixed(2)}`);
-              console.log(`   🔧 Other: $${costEstimate.breakdown.other.total.toFixed(2)}`);
-              console.log(`      ├── Management: $${costEstimate.breakdown.other.management.toFixed(2)}`);
-              console.log(`      └── Monitoring: $${costEstimate.breakdown.other.monitoring.toFixed(2)}`);
+      } else if (provider === 'gcp' && options.project) {
+        console.log(`\n🔍 Analyzing GCP costs using gcp-cost-cli...`);
+        if (GCPCostAnalyzer.isGCPCostCliAvailable()) {
+          try {
+            const costEstimate = await GCPCostAnalyzer.analyzeGCPCosts(options.project, options);
+            console.log(`\n📊 GCP Cost Analysis Results:`);
+            console.log(`   💰 Total Monthly Cost: $${costEstimate.totalMonthlyCost.toFixed(2)} ${costEstimate.currency}`);
+            console.log(`   🖥️  Compute: $${costEstimate.breakdown.compute.total.toFixed(2)}`);
+            console.log(`      ├── Kubernetes: $${costEstimate.breakdown.compute.kubernetes.toFixed(2)}`);
+            console.log(`      └── VM: $${costEstimate.breakdown.compute.vm.toFixed(2)}`);
+            console.log(`   💾 Storage: $${costEstimate.breakdown.storage.total.toFixed(2)}`);
+            console.log(`      ├── Database: $${costEstimate.breakdown.storage.database.toFixed(2)}`);
+            console.log(`      └── VM Disk: $${costEstimate.breakdown.storage.vmDisk.toFixed(2)}`);
+            console.log(`   🌐 Network: $${costEstimate.breakdown.network.total.toFixed(2)}`);
+            console.log(`      ├── Data Transfer: $${costEstimate.breakdown.network.dataTransfer.toFixed(2)}`);
+            console.log(`      └── Load Balancer: $${costEstimate.breakdown.network.loadBalancer.toFixed(2)}`);
+            console.log(`   🔧 Other: $${costEstimate.breakdown.other.total.toFixed(2)}`);
+            console.log(`      ├── Management: $${costEstimate.breakdown.other.management.toFixed(2)}`);
+            console.log(`      └── Monitoring: $${costEstimate.breakdown.other.monitoring.toFixed(2)}`);
 
-              if (costEstimate.recommendations.length > 0) {
-                console.log(`\n💡 Recommendations:`);
-                costEstimate.recommendations.forEach(rec => console.log(`   • ${rec}`));
-              }
-
-              if (costEstimate.warnings.length > 0) {
-                console.log(`\n⚠️  Warnings:`);
-                costEstimate.warnings.forEach(warn => console.log(`   • ${warn}`));
-              }
-            } catch (error) {
-              console.error(`❌ GCP cost analysis failed: ${error}`);
-              process.exit(1);
+            if (costEstimate.recommendations.length > 0) {
+              console.log(`\n💡 Recommendations:`);
+              costEstimate.recommendations.forEach(rec => console.log(`   • ${rec}`));
             }
-          } else {
-            console.log(`   ⚠️  Install gcp-cost-cli for detailed GCP cost analysis`);
-            console.log(`   📦 Install from: npm install -g gcp-cost-cli`);
+
+            if (costEstimate.warnings.length > 0) {
+              console.log(`\n⚠️  Warnings:`);
+              costEstimate.warnings.forEach(warn => console.log(`   • ${warn}`));
+            }
+          } catch (error) {
+            console.error(`❌ GCP cost analysis failed: ${error}`);
+            process.exit(1);
           }
+        } else {
+          console.log(`   ⚠️  Install gcp-cost-cli for detailed GCP cost analysis`);
+          console.log(`   📦 Install from: npm install -g gcp-cost-cli`);
         }
-      } else {
-        console.log(`\n📊 Cost Analysis Results:`);
-        console.log(`   Note: This feature requires integration with cloud provider billing APIs`);
-        
-        if (provider === 'azure' && !options.subscription) {
-          console.log(`   💡 For Azure, provide --subscription <subscription-id>`);
-        }
-        if (provider === 'aws' && !options.account) {
-          console.log(`   💡 For AWS, provide --account <account-id>`);
-        }
-        if (provider === 'gcp' && !options.project) {
-          console.log(`   💡 For GCP, provide --project <project-id>`);
-        }
-        
-        if (provider === 'azure' && AzureCostAnalyzer.isAvailable()) {
-          console.log(`   ✅ azure-cost-cli is available for detailed Azure cost analysis`);
-        } else if (provider === 'azure') {
-          console.log(`   ⚠️  Install azure-cost-cli for detailed Azure cost analysis`);
-          console.log(`   � Install from: https://github.com/mivano/azure-cost-cli`);
-        }
-        
-        if (provider === 'aws' && AWSCostAnalyzer.isAvailable()) {
-          console.log(`   ✅ AWS cost analysis tools available (infracost or AWS CLI)`);
-        } else if (provider === 'aws') {
-          console.log(`   ⚠️  Install infracost or AWS CLI for detailed AWS cost analysis`);
-        }
-        
-        if (provider === 'gcp' && GCPCostAnalyzer.isAvailable()) {
-          console.log(`   ✅ GCP cost analysis tools available (infracost or gcloud CLI)`);
-        } else if (provider === 'gcp') {
-          console.log(`   ⚠️  Install infracost or gcloud CLI for detailed GCP cost analysis`);
-        }
-        
-        console.log(`\n🔍 Integration Points:`);
-        console.log(`   AWS: Cost Explorer API + aws-cost-cli`);
-        console.log(`   Azure: Cost Management API + azure-cost-cli`);
-        console.log(`   GCP: Cloud Billing API + gcp-cost-cli`);
+      } catch (error) {
+        console.error(`❌ Cost analysis failed: ${error}`);
+        process.exit(1);
       }
-    } catch (error) {
-      console.error(`❌ Cost analysis failed: ${error}`);
-      process.exit(1);
-    }
   });
 
 program

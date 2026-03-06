@@ -219,6 +219,11 @@ export class AwsCdkAdapter extends cdk.Stack {
     });
   }
 
-    });
+  private setupSecurityIntegration() {
+    // Allow EKS to access database
+    this.postgresDatabase.connections.allowFrom(this.eksCluster, ec2.Port.tcp(5432));
+
+    // Allow EKS to access AD FS
+    this.adfsInstance.connections.allowFrom(this.eksCluster, ec2.Port.tcp(443));
   }
 }

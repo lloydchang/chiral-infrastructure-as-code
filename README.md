@@ -1,8 +1,12 @@
 # Chiral Infrastructure as Code
 
-**One Intent, Many Clouds: Native IaC Generation**
+## 🏗️ **PERMANENT ARCHITECTURAL SEPARATION ENFORCED**
 
-> **Solving [multi-cloud infrastructure's enterprise challenges](docs/CHALLENGES.md)**: Different native cloud IaCs, state management complexity, and third-party vendor lock-in make functionally uniform deployments across AWS, Azure, and GCP challenging. **Chiral generates native cloud artifacts from a single intent schema**, ensuring functional uniformity through optimal trade-offs.
+**Core works 100% independently - No AI dependencies, No outer layer imports**
+
+**One Intent, Many Clouds: Native IaC Generation for Core Infrastructure**
+
+> **Solving [multi-cloud infrastructure's enterprise challenges](docs/CHALLENGES.md)**: Different native cloud IaCs, state management complexity, and vendor lock-in make functionally uniform deployments across AWS, Azure, and GCP challenging. **Chiral generates native cloud artifacts from a single intent schema**, ensuring functional uniformity through optimal trade-offs while maintaining **permanent core isolation** with zero outer layer dependencies.
 
 ---
 
@@ -81,14 +85,14 @@ export const config: ChiralSystem = {
   },
   
   postgres: {
-    engineVersion: '18.3',
+    engineVersion: '15',
     size: 'small', // Resolves to db.t3.small (AWS) / Standard_B1s (Azure) / db-g1-small (GCP)
     storageGb: 20
   },
   
   adfs: {
     size: 'small', // Resolves to t3.small (AWS) / Standard_B1s (Azure) / e2-small (GCP)
-    windowsVersion: '11 26H2 Build 26300.7877'
+    windowsVersion: '2022'
   }
 };
 ```
@@ -132,14 +136,14 @@ export const config: ChiralSystem = {
   },
 
   postgres: {
-    engineVersion: '18.3',
+    engineVersion: '15',
     size: 'large', // Resolves to db.m5.large (AWS) / Standard_D4s_v3 (Azure) / db-custom-2-4096 (GCP)
     storageGb: 100
   },
 
   adfs: {
     size: 'large', // Resolves to m5.xlarge (AWS) / Standard_D4s_v3 (Azure) / n1-standard-2 (GCP)
-    windowsVersion: '11 26H2 Build 26300.7877'
+    windowsVersion: '2022'
   }
 };
 ```
@@ -882,6 +886,7 @@ We use the Chiral Pattern to avoid vendor lock-ins to 3rd-party state managers. 
 1. **Shared DNA:** There is only one source of truth (The *ChiralSpec*).
 2. **Native Cloud Separation:** AWS, Azure, and GCP outputs are generated separately.
 3. **Zero State:** The Chiral Engine never stores state; it only emits artifacts.
+4. **Core Isolation:** The core focuses solely on the three pillars (K8s, Postgres, ADFS) with zero outer layer dependencies.
 
 ### Description
 The Chiral Pattern is a software design approach for multi-cloud infrastructure management where an intent schema is used to generate native, 1st-party artifacts for each target cloud. 
