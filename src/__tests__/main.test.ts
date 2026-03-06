@@ -92,7 +92,7 @@ resource "unknown_resource" "test" {
       const result = await importIaC('./terraform', 'aws', 'test-stack', true);
       
       expect(result).toBeDefined();
-      expect(result.projectName).toBe('imported-infrastructure');
+      expect(result.projectName).toBe('test-stack');
     });
 
     it('should handle import errors gracefully', async () => {

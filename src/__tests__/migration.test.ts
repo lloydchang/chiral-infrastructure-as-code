@@ -43,7 +43,7 @@ describe('Migration and Analysis Tests', () => {
 
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
-      await analyzeTerraformSetup('/path/to/terraform.tfstate', 'aws', true, false);
+      await analyzeTerraformSetup('/path/to/terraform.tfstate', 'aws', true);
 
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('📋 Terraform Setup Analysis'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('terraform.tfstate: 3 resources'));

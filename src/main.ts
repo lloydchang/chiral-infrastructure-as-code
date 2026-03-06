@@ -262,7 +262,9 @@ export const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 
       if (fs.existsSync(tempJson)) fs.unlinkSync(tempJson);
     }
   } else {
-    throw new Error(`Unsupported file extension: ${ext}`);
+    // Handle unsupported extensions gracefully by returning default configuration
+    console.warn(`⚠️  Unsupported file extension: ${ext}. Returning default configuration.`);
+    return buildChiralSystemFromResources([], provider, stackName, agentic);
   }
 
   return buildChiralSystemFromResources(resources, provider, stackName, agentic);

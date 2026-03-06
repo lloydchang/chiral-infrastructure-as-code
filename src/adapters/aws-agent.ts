@@ -196,7 +196,7 @@ export class AwsAgentAdapter {
 
       if (agentic) {
         // Use agent to enhance unmappable resources
-        const unmappable = importAdapter.getUnmappableResources ? importAdapter.getUnmappableResources(resources) : importAdapter.getUnmappableResources ? importAdapter.getUnmappableResources(resources) : [];
+        const unmappable = (importAdapter as any).getUnmappableResources ? (importAdapter as any).getUnmappableResources(resources) : [];
         if (unmappable.length > 0) {
           const suggestions = await this.suggestMappings(unmappable);
           config = this.applyImportSuggestions(config, suggestions, resources);
