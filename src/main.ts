@@ -234,7 +234,14 @@ export const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 
     }
   } else if (ext === '.yaml' || ext === '.yml' || ext === '.json') {
     const content = fs.readFileSync(sourcePath, 'utf8');
-    const template = ext === '.json' ? JSON.parse(content) : yaml.load(content);
+    let template: any;
+    try {
+      template = ext === '.json' ? JSON.parse(content) : yaml.load(content);
+    } catch (error) {
+      console.warn(`⚠️  Failed to parse ${ext.toUpperCase()} file: ${error instanceof Error ? error.message : String(error)}`);
+      console.warn(`   Returning default configuration.`);
+      return buildChiralSystemFromResources([], provider, stackName, agentic);
+    }
 
     // Handle Pulumi YAML format
     if (template.resources) {
