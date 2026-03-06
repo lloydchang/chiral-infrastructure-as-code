@@ -1506,10 +1506,10 @@ program
           console.log(`   ⚠️  Install gcp-cost-cli for detailed GCP cost analysis`);
           console.log(`   📦 Install from: npm install -g gcp-cost-cli`);
         }
-      } catch (error) {
-        console.error(`❌ Cost analysis failed: ${error}`);
-        process.exit(1);
-      }
+    } catch (error) {
+      console.error(`❌ Cost analysis failed: ${error}`);
+      process.exit(1);
+    }
   });
 
 program
