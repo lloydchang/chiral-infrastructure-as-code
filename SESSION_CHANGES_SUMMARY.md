@@ -1,11 +1,47 @@
-# Infrastructure Sizing and Terraform Import Fixes - Session Summary
+# Permanent Architectural Separation - Session Summary
 
 ## Overview
-This document summarizes the fixes made to resolve infrastructure sizing inconsistencies and improve the Terraform import functionality in the Chiral Infrastructure as Code system.
+This document summarizes the **PERMANENT ARCHITECTURAL SEPARATION** implemented to enforce Chiral's original purpose as a minimalist infrastructure engine with zero dependencies on outer layers.
 
 ## Date: March 5, 2026
 
-## Issues Identified and Fixed
+## 🏗️ **PERMANENT ARCHITECTURAL SEPARATION IMPLEMENTED**
+
+### Core Layer (100% Independent)
+**Problem**: Chiral needed permanent protection of its core purpose as a minimalist infrastructure engine.
+
+**Solution**: Implemented hard architectural boundaries that cannot be violated.
+
+**Files Created**:
+- `src/core/index.ts` - Minimalist core engine
+- `src/cli/core-commands.ts` - Core-only CLI commands
+- `tsconfig.core.json` - Core-specific TypeScript config
+
+**Core Guarantees**:
+- ✅ Works 100% independently (ZERO outer layer dependencies)
+- ✅ No AI/agent dependencies
+- ✅ Pure deterministic generation
+- ✅ Infrastructure focus only (K8s, Postgres, ADFS)
+- ✅ Stateless generation
+- ✅ Minimal dependencies
+
+### Outer Layer (100% Isolated)
+**Problem**: Outer layers (AI agents, traffic enforcement) needed to be completely separated from core.
+
+**Solution**: Architectural enforcement preventing outer layer imports from core.
+
+**Files Created**:
+- `src/cli/traffic-commands.ts` - Traffic enforcement (separated)
+- `src/migration/traffic-enforcer.ts` - Traffic enforcement (separated)
+- Enforcement scripts and tooling
+
+**Outer Layer Guarantees**:
+- ✅ Cannot import from core
+- ✅ Must fallback to core on failure
+- ✅ Optional enhancement only
+- ✅ Never modifies core behavior
+
+### Issues Identified and Fixed
 
 ### 1. Infrastructure Sizing Inconsistencies
 

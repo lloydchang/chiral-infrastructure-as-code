@@ -4,6 +4,7 @@
 // =================================================================
 // PURPOSE: Stateless generation of K8s, Postgres, and ADFS across clouds
 // PRINCIPLE: Core works 100% independently - NO outer layer dependencies
+// GUARANTEE: PERMANENT ARCHITECTURAL SEPARATION ENFORCED
 // =================================================================
 
 import { ChiralSystem, KubernetesIntent, DatabaseIntent, AdfsIntent } from '../intent';

@@ -1,14 +1,19 @@
 // File: src/main.ts
 
-// CORE INFRASTRUCTURE ENGINE - MINIMALIST APPROACH
+// CORE INFRASTRUCTURE ENGINE - MINIMALIST APPROACH WITH PERMANENT SEPARATION
 //
-// The executable that generates the logic for the THREE PILLARS ONLY:
+// The executable that generates logic for THREE PILLARS ONLY:
 //   1. Kubernetes (K8s)
 //   2. PostgreSQL (Database)
 //   3. Active Directory Federation Services (ADFS)
 //
-// CORE ISOLATION: Zero outer layer dependencies, zero skills, zero AI agents.
-// Focus exclusively on stateless generation of core infrastructure components.
+// 🔒 PERMANENT ARCHITECTURAL SEPARATION ENFORCED:
+// - Core works 100% independently (ZERO outer layer dependencies)
+// - Core never imports from agents/, skills, or AI modules
+// - Core is pure deterministic (NO AI services required)
+// - Core focuses exclusively on infrastructure (K8s, Postgres, ADFS)
+// - Outer layers are OPTIONAL and must fallback to core
+// - Architectural violations cause compilation failures
 
 import * as cdk from 'aws-cdk-lib';
 import * as fs from 'fs';

@@ -15,7 +15,20 @@
 
 ## 🎯 Overview
 
-Chiral Infrastructure as Code is a **stateless multi-cloud infrastructure generation platform** that solves the core enterprise challenges of traditional IaC tools.
+Chiral is a **minimalist infrastructure engine** with **permanent architectural separation** between core and outer layers. This ensures Chiral's original purpose is preserved while allowing optional enhancements.
+
+### **🎯 Core Architecture (Permanent)**
+- **Pure deterministic generation** of K8s, PostgreSQL, ADFS
+- **Zero AI dependencies** - works without any AI services
+- **Stateless operation** - generates artifacts and exits
+- **Infrastructure focus only** - no application-level features
+- **100% independence** - never imports from outer layers
+
+### **🚫 Outer Layer Architecture (Isolated)**
+- **Optional AI enhancements** - agents, traffic enforcement
+- **Always fallbacks to core** - guaranteed core functionality
+- **Cannot import from core** - architectural enforcement
+- **Enhancement only** - never modifies core behavior
 
 ### Problems Solved
 

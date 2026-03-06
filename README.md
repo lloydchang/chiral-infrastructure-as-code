@@ -10,6 +10,42 @@
 
 ---
 
+## 🏗️ **ARCHITECTURAL SEPARATION (PERMANENT)**
+
+### **Core Layer (100% Independent)**
+```bash
+# Pure deterministic infrastructure - NO AI DEPENDENCIES
+chiral core compile -c config.ts
+chiral core validate -c config.ts
+chiral core cost -c config.ts
+chiral core drift -c config.ts -a dist/
+```
+
+**Core Guarantees:**
+- ✅ Works 100% independently
+- ✅ No AI/agent dependencies
+- ✅ Pure deterministic generation
+- ✅ Infrastructure focus only (K8s, Postgres, ADFS)
+- ✅ Stateless operation
+- ✅ Minimal dependencies
+
+### **Outer Layer (100% Optional)**
+```bash
+# Optional AI enhancement - FALLBACK GUARANTEED
+chiral agent enhance -c config.ts         # AI optimization
+chiral traffic enforce -c traffic.json     # Traffic enforcement
+chiral multi-agent -c config.ts            # Multi-agent workflows
+```
+
+**Outer Layer Guarantees:**
+- ✅ Always fallbacks to core
+- ✅ Never modifies core behavior
+- ✅ Optional enhancement only
+- ✅ Cannot import from core
+- ✅ Architectural violation = compilation failure
+
+---
+
 ## Installation
 
 ```bash

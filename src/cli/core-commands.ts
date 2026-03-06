@@ -4,6 +4,7 @@
 // =================================================================
 // PURPOSE: CLI interface for pure Chiral core functionality
 // PRINCIPLE: Core CLI works 100% without outer layer dependencies
+// GUARANTEE: PERMANENT ARCHITECTURAL SEPARATION ENFORCED
 // =================================================================
 
 import { Command } from 'commander';
