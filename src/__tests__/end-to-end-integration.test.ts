@@ -40,7 +40,7 @@ resource "aws_db_instance" "example" {
   instance_class      = "db.t3.medium"
   db_name             = "exampledb"
   username            = "admin"
-  password            = "password123"
+  password            = "admin-secret"
   skip_final_snapshot = true
 }
 `;

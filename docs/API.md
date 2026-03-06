@@ -643,6 +643,19 @@ function importIaC(
 function writeChiralConfig(config: ChiralSystem, outputPath: string): void;
 ```
 
+## Agent Skills
+
+Chiral integrates with cloud agent platforms (AWS Q, Azure AI Foundry, GCP Vertex AI) through defined skills that expose deterministic functions for agent orchestration. Skills are documented in `skills.md` and include:
+
+- **generateArtifacts**: Generate IaC artifacts from ChiralSystem config
+- **validateConfig**: Validate configurations against schemas and compliance
+- **analyzeCosts**: Estimate costs using integrated analyzers
+- **importIaC**: Import IaC with optional AI-enhanced inference
+- **checkCompliance**: Assess compliance frameworks
+- **detectDrift**: Compare artifacts with deployed infrastructure
+
+See `skills.md` for detailed parameters, examples, and integration guidelines.
+
 ## 📊 Error Handling
 
 ### Common Error Types

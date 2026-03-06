@@ -60,6 +60,10 @@
   },
   "dependencies": {
     "@aws-cdk/lambda-layer-kubectl-v26": "^2.0.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.1003.0",
+    "@aws-sdk/client-qbusiness": "^3.1003.0",
+    "@azure/openai": "^2.0.0",
+    "@google-cloud/aiplatform": "^6.5.0",
     "aws-cdk-lib": "^2.130.0",
     "commander": "^12.0.0",
     "constructs": "^10.0.0",

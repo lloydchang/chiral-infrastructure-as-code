@@ -36,7 +36,7 @@ import { TerraformImportAdapter } from './adapters/declarative/terraform-adapter
 // =================================================================
 // IMPORT HELPERS
 // =================================================================
-export const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 'gcp', stackName?: string): Promise<ChiralSystem> => {
+export const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 'gcp', stackName?: string, agentic?: boolean): Promise<ChiralSystem> => {
   const ext = path.extname(sourcePath);
   let resources: any[] = [];
 
@@ -64,7 +64,7 @@ export const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 
         throw new Error(`Terraform directory parsing failed: ${error instanceof Error ? error.message : String(error)}`);
       }
       
-      return buildChiralSystemFromResources(resources, provider, stackName);
+      return await buildChiralSystemFromResources(resources, provider, stackName, agentic);
     }
   } catch (error) {
     // Continue with file-based handling if stat fails
@@ -256,7 +256,7 @@ export const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 
     throw new Error(`Unsupported file extension: ${ext}`);
   }
 
-  return buildChiralSystemFromResources(resources, provider, stackName);
+  return buildChiralSystemFromResources(resources, provider, stackName, agentic);
 };
 
 // Helper functions for enhanced state file analysis
@@ -384,7 +384,7 @@ const inferRegion = (resources: any[], provider: string): { aws?: string; azure?
   return {};
 };
 
-const buildChiralSystemFromResources = (resources: any[], provider: string, stackName?: string): ChiralSystem => {
+const buildChiralSystemFromResources = async (resources: any[], provider: string, stackName?: string, agentic?: boolean): Promise<ChiralSystem> => {
   // Enhanced resource mapping with better error handling and type support
   const warnings: string[] = [];
   const unmappableResources: string[] = [];
@@ -450,6 +450,31 @@ const buildChiralSystemFromResources = (resources: any[], provider: string, stac
 
   if (unmappableResources.length > 0) {
     warnings.push(`Found ${unmappableResources.length} unmappable resource types: ${unmappableResources.slice(0, 5).join(', ')}${unmappableResources.length > 5 ? '...' : ''}. These will need manual migration.`);
+  }
+
+  // Agentic import: Use AI agents to suggest mappings for unmappable resources
+  if (agentic && unmappableResources.length > 0) {
+    console.log(`🤖 Using agentic import for ${unmappableResources.length} unmappable resources...`);
+    try {
+      if (provider === 'aws') {
+        const { AwsAgentAdapter } = await import('./adapters/aws-agent');
+        const adapter = new AwsAgentAdapter();
+        const suggestions = await adapter.suggestMappings(unmappableResources);
+        console.log(`AWS Agent suggestions: ${suggestions.join('; ')}`);
+      } else if (provider === 'azure') {
+        const { AzureAgentAdapter } = await import('./adapters/azure-agent');
+        const adapter = new AzureAgentAdapter(process.env.AZURE_OPENAI_ENDPOINT || '', process.env.AZURE_OPENAI_API_KEY || '', 'gpt-4');
+        const suggestions = await adapter.suggestMappings(unmappableResources);
+        console.log(`Azure Agent suggestions: ${suggestions.join('; ')}`);
+      } else if (provider === 'gcp') {
+        const { GcpAgentAdapter } = await import('./adapters/gcp-agent');
+        const adapter = new GcpAgentAdapter(process.env.GCP_PROJECT_ID || '');
+        const suggestions = await adapter.suggestMappings(unmappableResources);
+        console.log(`GCP Agent suggestions: ${suggestions.join('; ')}`);
+      }
+    } catch (error) {
+      console.warn('Agentic import failed, continuing with deterministic import:', error);
+    }
   }
 
   // Migration analytics
@@ -711,6 +736,7 @@ program
   .description('Compile Chiral config into cloud artifacts')
   .requiredOption('-c, --config <path>', 'Path to the chiral config file (JS or TS)')
   .option('-o, --out <dir>', 'Output directory for generated files', 'dist')
+  .option('--multi-agent', 'Use GenDB-inspired multi-agent IaC generation with LLM optimization', false)
   .action(async (options) => {
     const configPath = path.resolve(options.config);
     const DIST_DIR = path.resolve(options.out);
@@ -734,21 +760,71 @@ program
       console.log(`⚠️  [Azure] Warning: Large cluster (${config.k8s.maxNodes} nodes) detected. Bicep may have performance issues with complex deployments. Consider using Terraform for Azure if you encounter issues.`);
     }
 
-    // =================================================================
-    // THE CHIRAL ENGINE (Orchestrator)
-    // 1. Reads chiral config
-    // 2. Instantiates Programmatic Adapter (AWS) -> Generates CDK and CloudFormation to dist/
-    // 3. Instantiates Declarative Adapter (Azure) -> Generates Bicep to dist/
-    // 4. Instantiates Declarative Adapter (GCP) -> Generates Google Cloud Infrastructure Manager Terraform Blueprint to dist/
-    // 5. VALIDATES the generated Bicep using Azure CLI
-    // =================================================================
+    console.log(`\n🧪 Starting Chiral Generation for: [${config.projectName}]`);
 
-    // Ensure output directory exists
-    if (!fs.existsSync(DIST_DIR)) {
-      fs.mkdirSync(DIST_DIR, { recursive: true });
+    if (options.multiAgent) {
+      // GenDB-inspired multi-agent IaC generation
+      const provider = config.region?.aws ? 'aws' : config.region?.azure ? 'azure' : config.region?.gcp ? 'gcp' : 'aws';
+      console.log(`🤖 Using multi-agent IaC generation for ${provider.toUpperCase()}`);
+
+      try {
+        // Import agents
+        const { WorkloadAnalyzerAgent } = await import('./agents/workload-analyzer');
+        const { StorageDesignerAgent } = await import('./agents/storage-designer');
+        const { IaCPlannerAgent } = await import('./agents/iac-planner');
+        const { IaCGeneratorAgent } = await import('./agents/iac-generator');
+        const { IaCOptimizerAgent } = await import('./agents/iac-optimizer');
+
+        // Create cloud agent
+        let cloudAgent: any;
+        if (provider === 'aws') {
+          const { AwsAgentAdapter } = await import('./adapters/aws-agent');
+          cloudAgent = new AwsAgentAdapter();
+        } else if (provider === 'azure') {
+          const { AzureAgentAdapter } = await import('./adapters/azure-agent');
+          cloudAgent = new AzureAgentAdapter(process.env.AZURE_OPENAI_ENDPOINT || '', process.env.AZURE_OPENAI_API_KEY || '', 'gpt-4');
+        } else if (provider === 'gcp') {
+          const { GcpAgentAdapter } = await import('./adapters/gcp-agent');
+          cloudAgent = new GcpAgentAdapter(process.env.GCP_PROJECT_ID || '');
+        }
+
+        // Create multi-agents
+        const analyzer = new WorkloadAnalyzerAgent(cloudAgent);
+        const designer = new StorageDesignerAgent(cloudAgent);
+        const planner = new IaCPlannerAgent(cloudAgent);
+        const generator = new IaCGeneratorAgent(cloudAgent);
+        const optimizer = new IaCOptimizerAgent(cloudAgent);
+
+        // Run pipeline
+        const workload = await analyzer.process(config);
+        const design = await designer.process(config, workload);
+        const plan = await planner.process(config, design);
+        const generated = await generator.process(config, plan, design);
+        const result = await optimizer.process(config, generated);
+
+        // Write optimized IaC to file
+        const ext = result.optimizedIaC.language === 'typescript' ? 'ts' : result.optimizedIaC.language === 'hcl' ? 'tf' : 'bicep';
+        const outputFile = path.join(DIST_DIR, `multi-agent-${provider}-optimized.${ext}`);
+        fs.writeFileSync(outputFile, result.optimizedIaC.code);
+
+        console.log(`✅ Multi-agent IaC generation complete: ${path.relative(process.cwd(), outputFile)}`);
+        console.log(`📊 Optimization Results:`);
+        console.log(`   Iterations: ${result.iterations}`);
+        console.log(`   Final Cost: $${result.finalMetrics.cost}/month`);
+        console.log(`   Performance: ${(result.finalMetrics.performance * 100).toFixed(1)}%`);
+        console.log(`   Security: ${(result.finalMetrics.security * 100).toFixed(1)}%`);
+        if (result.improvements.length > 0) {
+          console.log(`   Improvements: ${result.improvements.join(', ')}`);
+        }
+
+      } catch (error) {
+        console.error(`❌ Multi-agent generation failed: ${error}`);
+        console.log(`🔄 Falling back to single-agent generation...`);
+        // Fall back to single-agent generation
+      }
     }
 
-    console.log(`\n🧪 Starting Chiral Generation for: [${config.projectName}]`);
+    if (!options.multiAgent) {
 
     // -----------------------------------------------------
     // 1. Generate via Programmatic Adapter (AWS CloudFormation)
@@ -919,6 +995,8 @@ program
     }
 
     console.log(`\n🎉 Chiral Generation Complete! Check ${options.out} for generated artifacts.`);
+
+    } // Close if (!options.multiAgent)
   });
 
 // Import command
