@@ -1,14 +1,71 @@
 // File: src/adapters/gcp-agent.ts
 
-import { VertexAI } from '@google-cloud/aiplatform';
+import { VertexAI } from '@google-cloud/vertexai';
 import { ChiralSystem } from '../intent';
 import { GcpTerraformAdapter } from './declarative/gcp-terraform';
+import { validateChiralConfig, checkCompliance } from '../validation';
+import { CostAnalyzer } from '../cost-analysis';
+import { TerraformImportAdapter } from './declarative/terraform-adapter';
+
+// Skill Response Interfaces (matching AWS/Azure agents)
+export interface ArtifactResponse {
+  artifacts: {
+    aws?: string;
+    azure?: string;
+    gcp?: string;
+  };
+  metadata: {
+    generatedAt: Date;
+    agentEnhanced: boolean;
+    processingTime: number;
+  };
+}
+
+export interface ValidationResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+  recommendations: string[];
+}
+
+export interface CostAnalysis {
+  comparison: any;
+  recommendations: string[];
+}
+
+export interface ComplianceResult {
+  compliant: boolean;
+  violations: Array<{
+    id?: string;
+    severity?: 'high' | 'medium' | 'low';
+    description?: string;
+    remediation?: string;
+  }>; 
+  recommendations: string[];
+}
+
+export interface DriftResult {
+  hasDrift: boolean;
+  driftedResources: string[];
+  missingResources: string[];
+  addedResources: string[];
+  summary: string;
+}
 
 export class GcpAgentAdapter {
-  private client: VertexAI;
+  private vertexClient: VertexAI;
+  private region: string;
 
-  constructor(projectId: string, location: string = 'us-central1') {
-    this.client = new VertexAI({ project: projectId, location });
+  constructor(region: string = 'us-central1') {
+    this.region = region;
+    // Initialize Vertex AI client for GCP Vertex AI
+    this.vertexClient = new VertexAI({
+      project: process.env.GOOGLE_CLOUD_PROJECT || '',
+      location: region,
+      googleAuthOptions: {
+        scopes: ['https://www.googleapis.com/auth/cloud-platform']
+      }
+    });
   }
 
   /**
@@ -60,13 +117,13 @@ Focus on best practices for GKE, Cloud SQL, and Compute Engine.
 
   private async invokeGcpAgent(prompt: string): Promise<string> {
     try {
-      const generativeModel = this.client.getGenerativeModel({
-        model: 'gemini-1.5-pro'
+      const response = await this.vertexClient.generateContent({
+        model: 'gemini-1.5-pro',
+        prompt: prompt,
+        maxOutputTokens: 2000,
+        temperature: 0.1 // Low temperature for deterministic outputs
       });
-
-      const result = await generativeModel.generateContent(prompt);
-      const response = await result.response;
-      return response.text();
+      return response.response?.text || 'No response from GCP agent';
     } catch (error) {
       console.warn('GCP agent call failed, falling back to deterministic generation:', error);
       return 'Fallback to deterministic';

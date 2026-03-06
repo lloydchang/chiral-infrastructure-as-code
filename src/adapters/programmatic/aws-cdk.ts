@@ -12,6 +12,9 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as kms from 'aws-cdk-lib/aws-kms';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import { KubectlV26Layer } from '@aws-cdk/lambda-layer-kubectl-v26';
 import { Construct } from 'constructs';
 import { ChiralSystem } from '../../intent';
@@ -62,7 +65,12 @@ export class AwsCdkAdapter extends cdk.Stack {
     this.adfsInstance = this.createAdfsInstance(intent);
 
     // =================================================================
-    // 5. SECURITY & NETWORKING INTEGRATION
+    // 5. AI AGENT SKILLS (Optional - Level 3 Constructs)
+    // =================================================================
+    this.createSkillResources(intent);
+
+    // =================================================================
+    // 6. SECURITY & NETWORKING INTEGRATION
     // =================================================================
     this.setupSecurityIntegration();
 
@@ -227,6 +235,124 @@ export class AwsCdkAdapter extends cdk.Stack {
 
     // Allow EKS to access AD FS
     this.adfsInstance.connections.allowFrom(this.eksCluster, ec2.Port.tcp(443));
+  }
+
+  private createSkillResources(intent: ChiralSystem) {
+    if (!intent.skills) return;
+
+    // Image Processing Skill
+    if (intent.skills.imageProcessing) {
+      this.createImageProcessingSkill(intent.skills.imageProcessing);
+    }
+
+    // Data Analysis Skill
+    if (intent.skills.dataAnalysis) {
+      this.createDataAnalysisSkill(intent.skills.dataAnalysis);
+    }
+
+    // Natural Language Skill
+    if (intent.skills.naturalLanguage) {
+      this.createNaturalLanguageSkill(intent.skills.naturalLanguage);
+    }
+
+    // Automation Skill
+    if (intent.skills.automation) {
+      this.createAutomationSkill(intent.skills.automation);
+    }
+  }
+
+  private createImageProcessingSkill(skill: NonNullable<ChiralSystem['skills']>['imageProcessing']) {
+    const lambdaFunction = new lambda.Function(this, 'ImageProcessingFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      code: lambda.Code.fromAsset('skills/image-processing'),
+      handler: 'index.handler',
+      timeout: cdk.Duration.minutes(5),
+      memorySize: skill.performance! === 'high' ? 2048 : skill.performance! === 'medium' ? 1024 : 512,
+      environment: {
+        CAPABILITY: skill.capability!,
+        PERFORMANCE: skill.performance!
+      }
+    });
+
+    // Grant necessary permissions for image processing
+    const bucket = new s3.Bucket(this, 'ImageProcessingBucket');
+    bucket.grantReadWrite(lambdaFunction);
+
+    // API Gateway for HTTP access
+    const api = new apigateway.LambdaRestApi(this, 'ImageProcessingApi', {
+      handler: lambdaFunction,
+    });
+  }
+
+  private createDataAnalysisSkill(skill: NonNullable<ChiralSystem['skills']>['dataAnalysis']) {
+    const runtime = skill.framework === 'tensorflow' ? lambda.Runtime.PYTHON_3_9 :
+                   skill.framework === 'pytorch' ? lambda.Runtime.PYTHON_3_9 :
+                   lambda.Runtime.PYTHON_3_8; // scikit-learn
+
+    const lambdaFunction = new lambda.Function(this, 'DataAnalysisFunction', {
+      runtime: runtime,
+      code: lambda.Code.fromAsset(`skills/data-analysis/${skill.framework}`),
+      handler: 'index.handler',
+      timeout: cdk.Duration.minutes(10),
+      memorySize: 2048, // ML workloads need more memory
+      environment: {
+        FRAMEWORK: skill.framework,
+        CAPABILITY: skill.capability
+      }
+    });
+
+    // Grant access to database for data analysis
+    this.postgresDatabase.connections.allowFrom(lambdaFunction, ec2.Port.tcp(5432));
+
+    // API Gateway
+    const api = new apigateway.LambdaRestApi(this, 'DataAnalysisApi', {
+      handler: lambdaFunction,
+    });
+  }
+
+  private createNaturalLanguageSkill(skill: NonNullable<ChiralSystem['skills']>['naturalLanguage']) {
+    const lambdaFunction = new lambda.Function(this, 'NaturalLanguageFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      code: lambda.Code.fromAsset('skills/natural-language'),
+      handler: 'index.handler',
+      timeout: cdk.Duration.minutes(5),
+      memorySize: skill.modelSize === 'large' ? 4096 : skill.modelSize === 'medium' ? 2048 : 1024,
+      environment: {
+        CAPABILITY: skill.capability,
+        MODEL_SIZE: skill.modelSize
+      }
+    });
+
+    // API Gateway
+    const api = new apigateway.LambdaRestApi(this, 'NaturalLanguageApi', {
+      handler: lambdaFunction,
+    });
+  }
+
+  private createAutomationSkill(skill: NonNullable<ChiralSystem['skills']>['automation']) {
+    const lambdaFunction = new lambda.Function(this, 'AutomationFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      code: lambda.Code.fromAsset('skills/automation'),
+      handler: 'index.handler',
+      timeout: cdk.Duration.minutes(skill.complexity === 'complex' ? 15 : skill.complexity === 'moderate' ? 10 : 5),
+      memorySize: skill.complexity === 'complex' ? 2048 : skill.complexity === 'moderate' ? 1024 : 512,
+      environment: {
+        CAPABILITY: skill.capability,
+        COMPLEXITY: skill.complexity
+      }
+    });
+
+    // Grant access to database and EKS for automation
+    this.postgresDatabase.connections.allowFrom(lambdaFunction, ec2.Port.tcp(5432));
+    lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['eks:DescribeCluster', 'eks:ListClusters'],
+      resources: [this.eksCluster.clusterArn]
+    }));
+
+    // API Gateway
+    const api = new apigateway.LambdaRestApi(this, 'AutomationApi', {
+      handler: lambdaFunction,
+    });
   }
 
   private createOutputs(intent: ChiralSystem) {

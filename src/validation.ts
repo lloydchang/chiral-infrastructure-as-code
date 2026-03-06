@@ -97,14 +97,50 @@ export function validateChiralConfig(config: ChiralSystem): ValidationResult {
     }
   }
 
-  // Environment-specific validation
-  if (config.environment === 'prod') {
-    // Production-specific checks
-    if (config.k8s && config.k8s.minNodes < 2) {
-      warnings.push('Production environments should have at least 2 nodes for high availability');
+  // Skills validation (optional)
+  if (config.skills) {
+    if (config.skills.imageProcessing) {
+      const capability = config.skills.imageProcessing.capability;
+      const performance = config.skills.imageProcessing.performance;
+      if (!['resize', 'filter', 'analyze'].includes(capability)) {
+        errors.push('Image processing capability must be resize, filter, or analyze');
+      }
+      if (!['low', 'medium', 'high'].includes(performance)) {
+        errors.push('Image processing performance must be low, medium, or high');
+      }
     }
-    if (config.postgres && config.postgres.storageGb < 100) {
-      warnings.push('Production databases should have at least 100GB storage');
+
+    if (config.skills.dataAnalysis) {
+      const capability = config.skills.dataAnalysis.capability;
+      const framework = config.skills.dataAnalysis.framework;
+      if (!['ml', 'statistics', 'reporting'].includes(capability)) {
+        errors.push('Data analysis capability must be ml, statistics, or reporting');
+      }
+      if (!['tensorflow', 'pytorch', 'scikit-learn'].includes(framework)) {
+        errors.push('Data analysis framework must be tensorflow, pytorch, or scikit-learn');
+      }
+    }
+
+    if (config.skills.naturalLanguage) {
+      const capability = config.skills.naturalLanguage.capability;
+      const modelSize = config.skills.naturalLanguage.modelSize;
+      if (!['text-generation', 'sentiment-analysis', 'translation'].includes(capability)) {
+        errors.push('Natural language capability must be text-generation, sentiment-analysis, or translation');
+      }
+      if (!['small', 'medium', 'large'].includes(modelSize)) {
+        errors.push('Natural language model size must be small, medium, or large');
+      }
+    }
+
+    if (config.skills.automation) {
+      const capability = config.skills.automation.capability;
+      const complexity = config.skills.automation.complexity;
+      if (!['workflow-automation', 'data-pipeline', 'monitoring'].includes(capability)) {
+        errors.push('Automation capability must be workflow-automation, data-pipeline, or monitoring');
+      }
+      if (!['simple', 'moderate', 'complex'].includes(complexity)) {
+        errors.push('Automation complexity must be simple, moderate, or complex');
+      }
     }
   }
 

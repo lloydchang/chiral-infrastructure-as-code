@@ -28,6 +28,25 @@ export interface AdfsIntent {
   windowsVersion: '2019' | '2022';
 }
 
+export interface SkillIntent {
+  imageProcessing?: {
+    capability: 'resize' | 'filter' | 'analyze';
+    performance: 'low' | 'medium' | 'high';
+  };
+  dataAnalysis?: {
+    capability: 'ml' | 'statistics' | 'reporting';
+    framework: 'tensorflow' | 'pytorch' | 'scikit-learn';
+  };
+  naturalLanguage?: {
+    capability: 'text-generation' | 'sentiment-analysis' | 'translation';
+    modelSize: 'small' | 'medium' | 'large';
+  };
+  automation?: {
+    capability: 'workflow-automation' | 'data-pipeline' | 'monitoring';
+    complexity: 'simple' | 'moderate' | 'complex';
+  };
+}
+
 export interface ChiralSystem {
   projectName: string;
   environment: EnvironmentTier;
@@ -134,6 +153,9 @@ export interface ChiralSystem {
       cloudDisasterRecovery?: boolean; // Cloud disaster recovery
     };
   };
+
+  // AI Agent Skills (Optional - enables application-level capabilities)
+  skills?: SkillIntent;
 
   // The Three Pillars
   k8s: KubernetesIntent;

@@ -1448,19 +1448,43 @@ program
           console.log(`   ⚠️  Install aws-cost-cli for detailed AWS cost analysis`);
           console.log(`   📦 Install from: npm install -g aws-cost-cli`);
         }
-      } else if (provider === 'gcp' && options.project) {
-        console.log(`\n🔍 Analyzing GCP costs using gcp-cost-cli...`);
-        if (GCPCostAnalyzer.isGCPCostCliAvailable()) {
-          if (options.project) {
-            // TODO: Implement GCP cost analysis using gcp-cost-cli
-            console.log(`   ℹ️  GCP cost analysis integration coming soon`);
-            console.log(`   📊 For now, use 'chiral compare' to see cost comparisons`);
+        if (provider === 'gcp' && options.project) {
+          console.log(`\n🔍 Analyzing GCP costs using gcp-cost-cli...`);
+          if (GCPCostAnalyzer.isGCPCostCliAvailable()) {
+            try {
+              const costEstimate = await GCPCostAnalyzer.analyzeGCPCosts(options.project, options);
+              console.log(`\n📊 GCP Cost Analysis Results:`);
+              console.log(`   💰 Total Monthly Cost: $${costEstimate.totalMonthlyCost.toFixed(2)} ${costEstimate.currency}`);
+              console.log(`   🖥️  Compute: $${costEstimate.breakdown.compute.total.toFixed(2)}`);
+              console.log(`      ├── Kubernetes: $${costEstimate.breakdown.compute.kubernetes.toFixed(2)}`);
+              console.log(`      └── VM: $${costEstimate.breakdown.compute.vm.toFixed(2)}`);
+              console.log(`   💾 Storage: $${costEstimate.breakdown.storage.total.toFixed(2)}`);
+              console.log(`      ├── Database: $${costEstimate.breakdown.storage.database.toFixed(2)}`);
+              console.log(`      └── VM Disk: $${costEstimate.breakdown.storage.vmDisk.toFixed(2)}`);
+              console.log(`   🌐 Network: $${costEstimate.breakdown.network.total.toFixed(2)}`);
+              console.log(`      ├── Data Transfer: $${costEstimate.breakdown.network.dataTransfer.toFixed(2)}`);
+              console.log(`      └── Load Balancer: $${costEstimate.breakdown.network.loadBalancer.toFixed(2)}`);
+              console.log(`   🔧 Other: $${costEstimate.breakdown.other.total.toFixed(2)}`);
+              console.log(`      ├── Management: $${costEstimate.breakdown.other.management.toFixed(2)}`);
+              console.log(`      └── Monitoring: $${costEstimate.breakdown.other.monitoring.toFixed(2)}`);
+
+              if (costEstimate.recommendations.length > 0) {
+                console.log(`\n💡 Recommendations:`);
+                costEstimate.recommendations.forEach(rec => console.log(`   • ${rec}`));
+              }
+
+              if (costEstimate.warnings.length > 0) {
+                console.log(`\n⚠️  Warnings:`);
+                costEstimate.warnings.forEach(warn => console.log(`   • ${warn}`));
+              }
+            } catch (error) {
+              console.error(`❌ GCP cost analysis failed: ${error}`);
+              process.exit(1);
+            }
           } else {
-            console.log(`   ⚠️  GCP project ID required for detailed cost analysis (--project <project-id>)`);
+            console.log(`   ⚠️  Install gcp-cost-cli for detailed GCP cost analysis`);
+            console.log(`   📦 Install from: npm install -g gcp-cost-cli`);
           }
-        } else {
-          console.log(`   ⚠️  Install gcp-cost-cli for detailed GCP cost analysis`);
-          console.log(`   📦 Install from: npm install -g gcp-cost-cli`);
         }
       } else {
         console.log(`\n📊 Cost Analysis Results:`);
