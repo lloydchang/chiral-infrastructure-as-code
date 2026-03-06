@@ -582,6 +582,189 @@ The healthcare compliance engine includes:
 
 For detailed healthcare compliance guidance, see **[HEALTHCARE_COMPLIANCE.md](docs/HEALTHCARE_COMPLIANCE.md)**.
 
+### 8. Multi-Agent IaC Generation (GenDB-Inspired)
+
+Chiral implements a GenDB-inspired multi-agent architecture for advanced IaC generation using AI agents to optimize infrastructure configurations across multiple dimensions.
+
+#### Multi-Agent Pipeline
+
+The multi-agent system uses specialized agents working in coordination:
+- **WorkloadAnalyzerAgent**: Analyzes application requirements and workload patterns
+- **StorageDesignerAgent**: Optimizes storage configurations and data placement strategies  
+- **IaCPlannerAgent**: Plans infrastructure topology and resource relationships
+- **IaCGeneratorAgent**: Generates optimized IaC artifacts for target clouds
+- **IaCOptimizerAgent**: Iteratively optimizes generated IaC for cost, performance, and security
+
+#### Usage
+
+```bash
+# Generate IaC using multi-agent optimization
+chiral compile -c chiral.config.ts --multi-agent
+
+# Generate for specific cloud with multi-agent pipeline
+chiral compile -c chiral.config.ts --multi-agent --provider aws
+```
+
+#### Benefits
+
+- **Iterative Optimization**: Agents refine IaC through multiple optimization passes
+- **Multi-Dimensional Analysis**: Considers cost, performance, security, and compliance simultaneously
+- **AI-Enhanced Generation**: Uses machine learning to identify optimal infrastructure patterns
+- **Fallback Resilience**: Falls back to deterministic generation if agent services unavailable
+
+#### Example Multi-Agent Generation
+
+```bash
+# Complex e-commerce platform with multi-agent optimization
+chiral compile -c ecommerce.config.ts --multi-agent
+
+# Results show optimization iterations and final metrics
+✅ Multi-agent IaC generation complete: multi-agent-aws-optimized.ts
+📊 Optimization Results:
+   Iterations: 3
+   Final Cost: $1,247/month
+   Performance: 94.2%
+   Security: 91.8%
+   Improvements: Cost reduction 23%, Auto-scaling optimization, Security hardening
+```
+
+#### Agent Architecture
+
+The multi-agent system provides:
+- **Cloud-Specific Agents**: AWS, Azure, and GCP agents with platform-specific knowledge
+- **Specialized Roles**: Each agent focuses on a specific optimization domain
+- **Iterative Refinement**: Multi-pass optimization with feedback loops
+- **Deterministic Fallbacks**: Core functionality remains available without AI services
+
+### 9. Agentic Import with AI-Enhanced Mapping
+
+Advanced import capabilities using AI agents to intelligently map existing IaC to Chiral intent schemas.
+
+#### Agentic Import Features
+
+- **Intelligent Resource Mapping**: AI agents suggest mappings for unmappable resources
+- **Context-Aware Translation**: Understands application patterns and business logic
+- **Progressive Enhancement**: Deterministic import with optional AI augmentation
+
+#### Usage
+
+```bash
+# Standard deterministic import
+chiral import -s terraform/ -p aws -o chiral.config.ts
+
+# Agentic import with AI-enhanced mapping suggestions
+chiral import -s terraform/ -p aws -o chiral.config.ts --agentic
+
+# Multi-cloud agentic import
+chiral import -s terraform/ -p aws --agentic --multi-cloud
+```
+
+#### Agentic Import Benefits
+
+- **Automated Discovery**: AI agents discover complex resource relationships
+- **Pattern Recognition**: Identifies common infrastructure patterns and anti-patterns
+- **Migration Guidance**: Provides actionable recommendations for cloud migration
+- **Risk Assessment**: Evaluates migration complexity and potential issues
+
+### 10. Security Scanning and Sensitive Data Detection
+
+Built-in security scanning capabilities to detect potential sensitive data exposure in IaC files.
+
+#### Security Features
+
+- **Sensitive Data Detection**: Scans Terraform and other IaC files for potential secrets
+- **Pattern-Based Analysis**: Uses comprehensive regex patterns to identify security risks
+- **AWS/Azure/GCP Support**: Cloud-specific secret patterns and credential detection
+
+#### Detected Patterns
+
+```typescript
+// Examples of detected sensitive patterns
+- Password fields: password = "secret123"
+- API keys: api_key = "AKIAIOSFODNN7EXAMPLE"
+- Private keys: -----BEGIN PRIVATE KEY-----
+- Access tokens: token = "ghp_1234567890abcdef"
+```
+
+#### Security Scanning Integration
+
+Security scanning is automatically integrated into import workflows:
+
+```bash
+# Import with automatic security scanning
+chiral import -s terraform/ -p aws -o config.ts
+
+# Results show security warnings
+⚠️  terraform/main.tf: Potential sensitive data detected - password pattern
+⚠️  terraform/variables.tf: Potential sensitive data detected - api_key pattern
+```
+
+### 11. HardwareMap Integration
+
+Unified hardware mapping system providing consistent instance type resolution across all cost analysis and generation modules.
+
+#### HardwareMap Features
+
+- **Centralized Mappings**: Single source of truth for cloud instance types
+- **Regional Awareness**: Region-specific hardware availability and pricing
+- **Size Standardization**: Consistent workload size to instance type mappings
+- **Cost Integration**: Direct integration with cost analysis modules
+
+#### Supported Workload Sizes
+
+```typescript
+// Standard workload sizes
+'small'   // Development, testing, low-traffic applications
+'medium'  // Production applications, moderate traffic
+'large'   // High-traffic applications, enterprise workloads
+```
+
+#### HardwareMap Usage
+
+```typescript
+import { HardwareMap } from './translation/hardware-map';
+
+// Get AWS instance type for medium workload
+const instanceType = HardwareMap.aws.vm.medium; // 't3.medium'
+
+// Get Azure VM size for large workload  
+const vmSize = HardwareMap.azure.vm.large; // 'Standard_D4s_v3'
+
+// Get GCP machine type for small workload
+const machineType = HardwareMap.gcp.vm.small; // 'e2-small'
+```
+
+### 12. Core Isolation Enforcement
+
+Permanent architectural separation ensuring the core remains independent of outer layer dependencies.
+
+#### Core Isolation Principles
+
+- **Zero Outer Dependencies**: Core modules import nothing from agents/, skills/, or AI directories
+- **Permanent Separation**: Architectural violations cause compilation failures
+- **Three Pillars Focus**: Core exclusively handles K8s, Postgres, and ADFS
+- **Fallback Resilience**: Core functionality works independently of AI services
+
+#### Enforcement Mechanisms
+
+```bash
+# Automatic isolation checking
+npm run enforce-core-isolation
+
+# Pre-build verification
+npm run build  # Runs enforce-core-isolation automatically
+
+# Test isolation validation
+npm run test:core  # Only runs core-focused tests
+```
+
+#### Core Isolation Benefits
+
+- **Reliability**: Core functionality never depends on external AI services
+- **Security**: Sensitive operations remain in controlled core modules
+- **Maintainability**: Clear separation between deterministic and AI-enhanced features
+- **Deployment Flexibility**: Core can be deployed without AI dependencies
+
 ## Future Roadmap
 
 - **Additional IaC Formats**: CDK, ARM templates, Crossplane

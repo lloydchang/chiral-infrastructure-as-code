@@ -760,12 +760,21 @@ chiral migrate -s pulumi-project/ -p aws --pulumi-bridge --iac-tool pulumi
 
 For detailed documentation of all enhanced features including migration workflows, troubleshooting guides, and integration examples, see **[ENHANCED_FEATURES.md](./ENHANCED_FEATURES.md)**.
 
+### Agent Integration & Skills
+
+Chiral provides agent-accessible skills for integration with cloud agent platforms (AWS Q, Azure AI Foundry, GCP Vertex AI). Skills expose deterministic, stateless operations for infrastructure generation, validation, and analysis. See **[SKILLS.md](./skills.md)** for detailed skill specifications.
+
 This covers:
 - Advanced Terraform & Pulumi migration strategies
 - Multi-format IaC import capabilities
 - Cost analysis and optimization
 - Compliance validation frameworks
 - Bridge modes for gradual migration
+- **Multi-agent IaC generation** with AI-enhanced optimization
+- **Agentic import** with intelligent resource mapping
+- **Security scanning** for sensitive data detection
+- **HardwareMap integration** for consistent instance resolution
+- **Core isolation enforcement** for architectural separation
 - Troubleshooting and integration examples
 
 ### Terraform Provider Integration
