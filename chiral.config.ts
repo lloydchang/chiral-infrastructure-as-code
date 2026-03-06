@@ -14,7 +14,7 @@ export const config: ChiralSystem = {
   // Optional: Configure regions for each cloud (defaults will be used if not specified)
   region: {
     aws: 'us-east-1',      // Default: from CDK env vars
-    azure: 'East US',      // Default: resourceGroup().location
+    azure: 'eastus',      // Default: resourceGroup().location
     gcp: 'us-central1'     // Default: us-central1
   },
 

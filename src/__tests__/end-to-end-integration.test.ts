@@ -95,6 +95,7 @@ resource "aws_db_instance" "example" {
         ...importedConfig,
         compliance: {
           encryptionAtRest: true,
+          encryptionInTransit: true,
           auditLogging: true,
           securityControls: {
             mfaRequired: true,
