@@ -145,7 +145,7 @@ export function setupCoreCommands(program: Command): void {
             
             if (compliance.violations.length > 0) {
               console.log('Violations:');
-              compliance.violations.forEach(v => console.log(`   - ${v.description || v.id}`));
+              compliance.violations.forEach(v => console.log(`   - ${v}`));
             }
             
             if (compliance.recommendations.length > 0) {
@@ -180,7 +180,7 @@ export function setupCoreCommands(program: Command): void {
         const config: ChiralSystem = require(configPath);
         
         // CORE COST ANALYSIS
-        const costAnalysis = ChiralCoreEngine.analyzeCosts(config);
+        const costAnalysis = await ChiralCoreEngine.analyzeCosts(config);
         
         console.log('\n📊 Cost Analysis Results:');
         console.log(`Cheapest Provider: ${costAnalysis.cheapest.provider}`);
