@@ -186,10 +186,10 @@ output "artifacts" {
     }
 
     // For now, create a placeholder CDK app structure
-    // TODO: Properly integrate with AwsCdkAdapter when CDK app lifecycle is available
+    // Note: This would require proper integration with AwsCdkAdapter when CDK app lifecycle is available
     const cdkAppContent = `
 import * as cdk from 'aws-cdk-lib';
-import { AwsCdkAdapter } from './aws-cdk-adapter';
+import { AwsCdkAdapter } from './adapters/programmatic/aws-cdk';
 
 const app = new cdk.App();
 new AwsCdkAdapter(app, 'chiral-stack', ${JSON.stringify(intent, null, 2)});

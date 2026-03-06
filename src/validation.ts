@@ -140,6 +140,17 @@ export function detectDrift(
   const missingResources: string[] = [];
   const addedResources: string[] = [];
 
+  // Check for missing artifacts
+  if (!generatedArtifacts.aws) {
+    missingResources.push('AWS CloudFormation template');
+  }
+  if (!generatedArtifacts.azure) {
+    missingResources.push('Azure Bicep template');
+  }
+  if (!generatedArtifacts.gcp) {
+    missingResources.push('GCP Terraform configuration');
+  }
+
   // This is a simplified drift detection
   // In a real implementation, this would:
   // 1. Parse generated artifacts to extract resource definitions
@@ -1193,13 +1204,17 @@ function analyzeAWSDrift(config: ChiralSystem, artifact: string): {
   missing: string[];
   added: string[];
 } {
-  // Simplified AWS drift analysis
-  // In real implementation, this would use AWS CloudFormation APIs
-  return {
-    drifted: [],
-    missing: [],
-    added: []
-  };
+  const drifted: string[] = [];
+  const missing: string[] = [];
+  const added: string[] = [];
+  
+  // Simple drift detection based on cluster name
+  const expectedClusterName = `${config.projectName}-${config.environment}-eks-cluster`;
+  if (!artifact.includes(expectedClusterName)) {
+    drifted.push(`EKS cluster name mismatch: expected ${expectedClusterName}`);
+  }
+  
+  return { drifted, missing, added };
 }
 
 function analyzeAzureDrift(config: ChiralSystem, artifact: string): {
@@ -1207,13 +1222,17 @@ function analyzeAzureDrift(config: ChiralSystem, artifact: string): {
   missing: string[];
   added: string[];
 } {
-  // Simplified Azure drift analysis
-  // In real implementation, this would use Azure Resource Manager APIs
-  return {
-    drifted: [],
-    missing: [],
-    added: []
-  };
+  const drifted: string[] = [];
+  const missing: string[] = [];
+  const added: string[] = [];
+  
+  // Simple drift detection based on cluster name
+  const expectedClusterName = `${config.projectName}-${config.environment}-aks-cluster`;
+  if (!artifact.includes(expectedClusterName)) {
+    drifted.push(`AKS cluster name mismatch: expected ${expectedClusterName}`);
+  }
+  
+  return { drifted, missing, added };
 }
 
 function analyzeGCPDrift(config: ChiralSystem, artifact: string): {
@@ -1221,13 +1240,17 @@ function analyzeGCPDrift(config: ChiralSystem, artifact: string): {
   missing: string[];
   added: string[];
 } {
-  // Simplified GCP drift analysis
-  // In real implementation, this would use GCP Resource Manager APIs
-  return {
-    drifted: [],
-    missing: [],
-    added: []
-  };
+  const drifted: string[] = [];
+  const missing: string[] = [];
+  const added: string[] = [];
+  
+  // Simple drift detection based on cluster name
+  const expectedClusterName = `${config.projectName}-${config.environment}-gke-cluster`;
+  if (!artifact.includes(expectedClusterName)) {
+    drifted.push(`GKE cluster name mismatch: expected ${expectedClusterName}`);
+  }
+  
+  return { drifted, missing, added };
 }
 
 function isRegionServiceAvailable(provider: string, region: string, service: string): boolean {

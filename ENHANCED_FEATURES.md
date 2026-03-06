@@ -459,6 +459,129 @@ chiral validate -c chiral.config.ts
 # Fix reported issues and re-run
 ```
 
+### 7. Healthcare Compliance Frameworks (HIPAA, HITRUST CSF, HITECH)
+
+Chiral provides comprehensive compliance validation for healthcare data protection requirements, supporting the major healthcare security frameworks.
+
+#### Supported Frameworks
+
+- **HIPAA (Health Insurance Portability and Accountability Act)**: Low, Moderate, High impact levels
+- **HITRUST CSF (Health Information Trust Alliance Common Security Framework)**: Low, Moderate, High impact levels  
+- **HITECH (Health Information Technology for Economic and Clinical Health Act)**: Low, Moderate, High impact levels
+
+#### Key Healthcare Compliance Features
+
+- **PHI Protection**: Protected Health Information (PHI) encryption and access controls
+- **Audit Logging**: Enhanced logging for all PHI access and system activities
+- **Network Segmentation**: Healthcare-grade network isolation requirements
+- **Data Residency**: Healthcare data sovereignty and regional compliance
+- **High Availability**: Production requirements for patient care systems
+- **Breach Prevention**: Proactive security controls to prevent data breaches
+- **Incident Response**: Healthcare-specific breach notification and response procedures
+
+#### Compliance Validation Commands
+
+```bash
+# HIPAA compliance validation
+chiral validate -c chiral.config.ts --compliance hipaa-low
+chiral validate -c chiral.config.ts --compliance hipaa-moderate
+chiral validate -c chiral.config.ts --compliance hipaa-high
+
+# HITRUST CSF compliance validation
+chiral validate -c chiral.config.ts --compliance hitrust-low
+chiral validate -c chiral.config.ts --compliance hitrust-moderate
+chiral validate -c chiral.config.ts --compliance hitrust-high
+
+# HITECH compliance validation
+chiral validate -c chiral.config.ts --compliance hitech-low
+chiral validate -c chiral.config.ts --compliance hitech-moderate
+chiral validate -c chiral.config.ts --compliance hitech-high
+```
+
+#### Example HIPAA High Configuration
+
+```typescript
+export const config: ChiralSystem = {
+  projectName: 'healthcare-system',
+  environment: 'prod',
+  networkCidr: '192.168.0.0/16',  // Non-default network for PHI
+  
+  region: {
+    aws: 'us-east-1',           // Healthcare-compliant regions
+    azure: 'eastus',
+    gcp: 'us-central1'
+  },
+  
+  compliance: {
+    framework: 'hipaa-high',
+    encryptionAtRest: true,      // Required for PHI
+    auditLogging: true,          // Enhanced PHI access logging
+    dataResidency: {
+      aws: 'us-east-1',
+      azure: 'eastus',
+      gcp: 'us-central1'
+    }
+  },
+  
+  k8s: {
+    version: '1.35',
+    minNodes: 3,                 // High availability for patient care
+    maxNodes: 10,
+    size: 'medium'
+  },
+  
+  postgres: {
+    engineVersion: '15',
+    size: 'large',
+    storageGb: 100               // Minimum 100GB for PHI databases
+  },
+  
+  adfs: {
+    size: 'medium',              // Production ADFS sizing
+    windowsVersion: '2022'
+  }
+};
+```
+
+#### Healthcare Compliance Validation Features
+
+- **PHI Data Protection**: Automatic detection of missing encryption controls for health data
+- **Audit Trail Requirements**: Validation of comprehensive logging for PHI access
+- **Network Security**: Healthcare-grade network segmentation and access controls
+- **Storage Requirements**: Minimum storage capacities for audit logs and PHI data
+- **High Availability**: Production system redundancy requirements for patient care
+- **Breach Prevention**: Proactive security controls and monitoring
+
+#### Integration with Healthcare Workflows
+
+Healthcare compliance integrates seamlessly with existing Chiral workflows:
+
+1. **Configuration**: Define healthcare-compliant infrastructure requirements
+2. **Validation**: Run compliance checks against HIPAA/HITRUST/HITECH frameworks  
+3. **Generation**: Generate compliant artifacts for all supported clouds
+4. **Deployment**: Deploy to healthcare-certified cloud regions and services
+5. **Monitoring**: Continuous compliance monitoring and audit logging
+
+#### Technical Implementation
+
+The healthcare compliance engine includes:
+
+- **Framework-Specific Assessments**: Separate assessment logic for HIPAA, HITRUST CSF, and HITECH
+- **Severity-Based Validation**: Critical, high, medium, and low severity violation detection
+- **Remediation Guidance**: Automated suggestions for compliance remediation
+- **Audit Trail Integration**: Comprehensive logging of compliance assessments
+- **Risk Assessment**: Automated risk scoring based on compliance violations
+
+#### Benefits for Healthcare Organizations
+
+- **Regulatory Compliance**: Automated validation against multiple healthcare frameworks
+- **Risk Reduction**: Proactive identification of compliance gaps
+- **Cost Optimization**: Right-sized infrastructure for compliance requirements
+- **Multi-Cloud Flexibility**: Deploy compliant infrastructure across cloud providers
+- **Operational Efficiency**: Single configuration for multi-framework compliance
+
+For detailed healthcare compliance guidance, see **[HEALTHCARE_COMPLIANCE.md](docs/HEALTHCARE_COMPLIANCE.md)**.
+
 ## Future Roadmap
 
 - **Additional IaC Formats**: CDK, ARM templates, Crossplane

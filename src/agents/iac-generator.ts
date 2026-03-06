@@ -138,17 +138,145 @@ Return the generated code as a string, properly formatted and commented.
       // Use existing AwsCdkAdapter logic
       return `// Fallback CDK code for ${config.projectName}
 // Generated deterministically due to LLM failure
-// TODO: Implement full CDK generation`;
+import * as cdk from 'aws-cdk-lib';
+import * as eks from 'aws-cdk-lib/aws-eks';
+import * as rds from 'aws-cdk-lib/aws-rds';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
+
+export class ${config.projectName}Stack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
+
+    // VPC
+    const vpc = new ec2.Vpc(this, 'Vpc', {
+      cidr: '${config.networkCidr}',
+      maxAzs: 2
+    });
+
+    // EKS Cluster
+    new eks.Cluster(this, 'EksCluster', {
+      vpc,
+      version: '${config.k8s.version}',
+      defaultCapacity: ${config.k8s.maxNodes}
+    });
+
+    // RDS Database
+    new rds.DatabaseInstance(this, 'Database', {
+      vpc,
+      engine: rds.DatabaseInstanceEngine.postgres({
+        version: rds.PostgresEngineVersion.${config.postgres.engineVersion.replace('.', '')}
+      }),
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.${config.postgres.size === 'small' ? 'T3' : config.postgres.size === 'medium' ? 'T3' : 'M5'}, ec2.InstanceSize.${config.postgres.size === 'small' ? 'SMALL' : config.postgres.size === 'medium' ? 'MEDIUM' : 'LARGE'}),
+      allocatedStorage: ${config.postgres.storageGb}
+    });
+  }
+}`;
     } else if (plan.provider === 'azure') {
       // Use existing AzureBicepAdapter logic
       return `// Fallback Bicep code for ${config.projectName}
 // Generated deterministically due to LLM failure
-// TODO: Implement full Bicep generation`;
+@description('Generated Chiral infrastructure for ${config.projectName}')
+param location string = resourceGroup().location
+param projectPrefix string = '${config.projectName}'
+
+// Virtual Network
+resource vnet 'Microsoft.Network/virtualNetworks@2021-02-01' = {
+  name: '\${projectPrefix}-vnet'
+  location: location
+  properties: {
+    addressSpace: {
+      addressPrefixes: [
+        '${config.networkCidr}'
+      ]
+    }
+  }
+}
+
+// AKS Cluster
+resource aks 'Microsoft.ContainerService/managedClusters@2021-05-01' = {
+  name: '\${projectPrefix}-aks'
+  location: location
+  properties: {
+    kubernetesVersion: '${config.k8s.version}'
+    agentPoolProfiles: [
+      {
+        name: 'default'
+        count: ${config.k8s.maxNodes}
+        vmSize: '${config.k8s.size === 'small' ? 'Standard_B2s' : config.k8s.size === 'medium' ? 'Standard_D2s_v3' : 'Standard_D4s_v3'}'
+        mode: 'System'
+      }
+    ]
+  }
+}
+
+// PostgreSQL Server
+resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2022-12-01' = {
+  name: '\${projectPrefix}-postgres'
+  location: location
+  properties: {
+    version: '${config.postgres.engineVersion}'
+    storage: {
+      storageSizeGB: ${config.postgres.storageGb}
+    }
+  }
+}`;
     } else {
       // Use existing GcpTerraformAdapter logic
-      return `// Fallback Terraform code for ${config.projectName}
-// Generated deterministically due to LLM failure
-# TODO: Implement full Terraform generation`;
+      return `# Fallback Terraform code for ${config.projectName}
+# Generated deterministically due to LLM failure
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+      version = "~> 4.0"
+    }
+  }
+}
+
+provider "google" {
+  region = "us-central1"
+}
+
+# VPC Network
+resource "google_compute_network" "vpc" {
+  name                    = "${config.projectName}-vpc"
+  auto_create_subnetworks = false
+}
+
+# Subnet
+resource "google_compute_subnetwork" "subnet" {
+  name          = "${config.projectName}-subnet"
+  ip_cidr_range = "${config.networkCidr}"
+  region        = "us-central1"
+  network       = google_compute_network.vpc.id
+}
+
+# GKE Cluster
+resource "google_container_cluster" "gke" {
+  name     = "${config.projectName}-gke"
+  location = "us-central1"
+  
+  node_pool {
+    name = "default-pool"
+    node_count = ${config.k8s.maxNodes}
+    
+    node_config {
+      machine_type = "${config.k8s.size === 'small' ? 'e2-small' : config.k8s.size === 'medium' ? 'e2-medium' : 'n1-standard-2'}"
+    }
+  }
+}
+
+# Cloud SQL PostgreSQL
+resource "google_sql_database_instance" "postgres" {
+  name             = "${config.projectName}-postgres"
+  database_version = "POSTGRES_${config.postgres.engineVersion}"
+  region           = "us-central1"
+  
+  settings {
+    tier = "${config.postgres.size === 'small' ? 'db-g1-small' : config.postgres.size === 'medium' ? 'db-custom-2-4096' : 'db-custom-4-8192'}"
+    disk_size = ${config.postgres.storageGb}
+  }
+}`;
     }
   }
 }

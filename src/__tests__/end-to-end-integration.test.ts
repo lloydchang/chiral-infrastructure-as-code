@@ -23,6 +23,10 @@ describe('End-to-End Integration Tests', () => {
     test('should complete full workflow: import → validate → generate → compliance check', async () => {
       // Mock a Terraform file with EKS and RDS
       const mockTfContent = `
+provider "aws" {
+  region = "us-east-1"
+}
+
 resource "aws_eks_cluster" "example" {
   name     = "example-cluster"
   role_arn = aws_iam_role.example.arn
@@ -67,7 +71,7 @@ resource "aws_db_instance" "example" {
       mockFs.readFileSync.mockReturnValue(mockTfContent);
 
       // Step 1: Import IaC
-      const importedConfig = await importIaC('main.tf', 'aws', 'imported-project');
+      const importedConfig = await importIaC('main.tf', 'aws', 'imported-project', false);
 
       // Verify import worked
       expect(importedConfig).toBeDefined();

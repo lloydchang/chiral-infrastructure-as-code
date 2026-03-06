@@ -8,13 +8,15 @@ jest.mock('fs');
 const mockFs = fs as jest.Mocked<typeof fs>;
 
 describe('Migration and Analysis Tests', () => {
+  let mockState: any;
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('Terraform Setup Analysis', () => {
     it('should analyze single state file correctly', async () => {
-      const mockState = {
+      mockState = {
         version: 4,
         terraform_version: "1.0.0",
         serial: 1,
@@ -41,7 +43,7 @@ describe('Migration and Analysis Tests', () => {
 
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
-      await analyzeTerraformSetup('/path/to/terraform.tfstate', 'aws', true);
+      await analyzeTerraformSetup('/path/to/terraform.tfstate', 'aws', true, false);
 
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('📋 Terraform Setup Analysis'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('terraform.tfstate: 3 resources'));
