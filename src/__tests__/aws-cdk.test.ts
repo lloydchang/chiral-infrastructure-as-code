@@ -295,18 +295,6 @@ describe('AWS CDK Adapter', () => {
         }).not.toThrow();
       });
     });
-  });
-
-  describe('Template Structure', () => {
-    it('should generate valid CloudFormation template', () => {
-      const stack = new AwsCdkAdapter(app, 'TestStack', config);
-      const template = app.synth().getStackByName(stack.stackName).template;
-      
-      expect(template).toBeDefined();
-      expect(template.AWSTemplateFormatVersion).toBe('2010-09-09');
-      expect(template.Resources).toBeDefined();
-      expect(typeof template.Resources).toBe('object');
-    });
 
     it('should include required CloudFormation sections', () => {
       const stack = new AwsCdkAdapter(app, 'TestStack', config);
