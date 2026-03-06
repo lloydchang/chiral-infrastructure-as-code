@@ -1,48 +1,8 @@
 # Chiral Infrastructure as Code
 
-## 🏗️ **PERMANENT ARCHITECTURAL SEPARATION ENFORCED**
-
-**Core works 100% independently - No AI dependencies, No outer layer imports**
-
 **One Intent, Many Clouds: Native IaC Generation for Core Infrastructure**
 
 > **Solving [multi-cloud infrastructure's enterprise challenges](docs/CHALLENGES.md)**: Different native cloud IaCs, state management complexity, and vendor lock-in make functionally uniform deployments across AWS, Azure, and GCP challenging. **Chiral generates native cloud artifacts from a single intent schema**, ensuring functional uniformity through optimal trade-offs while maintaining **permanent core isolation** with zero outer layer dependencies.
-
----
-
-## 🏗️ **ARCHITECTURAL SEPARATION (PERMANENT)**
-
-### **Core Layer (100% Independent)**
-```bash
-# Pure deterministic infrastructure - NO AI DEPENDENCIES
-chiral core compile -c config.ts
-chiral core validate -c config.ts
-chiral core cost -c config.ts
-chiral core drift -c config.ts -a dist/
-```
-
-**Core Guarantees:**
-- ✅ Works 100% independently
-- ✅ No AI/agent dependencies
-- ✅ Pure deterministic generation
-- ✅ Infrastructure focus only (K8s, Postgres, ADFS)
-- ✅ Stateless operation
-- ✅ Minimal dependencies
-
-### **Outer Layer (100% Optional)**
-```bash
-# Optional AI enhancement - FALLBACK GUARANTEED
-chiral agent enhance -c config.ts         # AI optimization
-chiral traffic enforce -c traffic.json     # Traffic enforcement
-chiral multi-agent -c config.ts            # Multi-agent workflows
-```
-
-**Outer Layer Guarantees:**
-- ✅ Always fallbacks to core
-- ✅ Never modifies core behavior
-- ✅ Optional enhancement only
-- ✅ Cannot import from core
-- ✅ Architectural violation = compilation failure
 
 ---
 
@@ -189,7 +149,7 @@ export const config: ChiralSystem = {
 **Key Features:**
 - **minNodes/maxNodes**: Controls Kubernetes cluster sizing and autoscaling bounds
 - **Autoscaling**: All clouds support automatic scaling within configured limits
-- **Environment-aware**: Production vs development configurations
+- **Environment-aware**: Development configurations
 
 Run the CLI:
 
@@ -238,7 +198,7 @@ chiral cost-estimate --config chiral.config.ts --detailed --provider azure
 The `compile` command generates artifacts for all configured clouds. Deploy using native tools:
 
 **AWS**: Use CloudFormation CLI or CDK CLI
-**Azure**: Use Azure CLI with Bicep or deployment stacks for production
+**Azure**: Use Azure CLI with Bicep or deployment stacks
 **GCP**: Use Terraform CLI or Infrastructure Manager
 
 ```bash
@@ -253,7 +213,6 @@ Chiral provides a **complete Terraform import workflow** that enables migration 
 - **Complete HCL Parser**: Parse Terraform `.tf` files and extract resource definitions
 - **Resource Mapping**: Convert AWS/Azure/GCP resources to Chiral intent
 - **Progressive Migration**: Stateless generation with migration metadata
-- **Production Ready**: 96.5% test coverage with integration tests
 
 #### Quick Start
 ```typescript
@@ -275,11 +234,6 @@ const chiralSystem = await TerraformImportAdapter.importFromTerraform({
 1. **Parse Terraform Files**: Extract resource blocks from `.tf` files
 2. **Convert to Chiral Intent**: Map cloud-specific resources to abstract intent
 3. **Complete Import**: Generate full ChiralSystem with migration metadata
-
-#### Test Coverage
-- **Unit Tests**: 244/244 tests passing (100% success rate)
-- **Integration Tests**: 17/17 test suites passing
-- **Overall Success Rate**: 100%
 
 For detailed documentation, see **[TERRAFORM_IMPORT_WORKFLOW.md](docs/TERRAFORM_IMPORT_WORKFLOW.md)**.
 
@@ -316,7 +270,7 @@ chiral migrate --source terraform/ --provider aws --strategy greenfield
 - Lowest risk for simple setups
 - Requires full infrastructure recreation
 
-**Progressive Migration** (Recommended for production):
+**Progressive Migration**:
 ```bash
 chiral migrate --source terraform/ --provider aws --strategy progressive
 ```
@@ -324,13 +278,12 @@ chiral migrate --source terraform/ --provider aws --strategy progressive
 - Can run Terraform and Chiral in parallel
 - Higher safety but more complex coordination
 
-**Parallel Migration** (Recommended for mission-critical systems):
+**Parallel Migration**:
 ```bash
 chiral migrate --source terraform/ --provider aws --strategy parallel
 ```
 - Deploy Chiral infrastructure alongside existing Terraform
 - Use load balancers for traffic switching
-- Highest safety with extended testing periods
 
 #### Migration Workflow
 
@@ -602,7 +555,7 @@ export const config: ChiralSystem = {
   postgres: {
     engineVersion: '15',
     size: 'medium',
-    storageGb: 100            // Minimum 50GB for Moderate
+    storageGb: 100
   },
   
   adfs: {
@@ -666,11 +619,11 @@ export const config: ChiralSystem = {
   postgres: {
     engineVersion: '15',
     size: 'large',
-    storageGb: 100               // Minimum 100GB for PHI databases
+    storageGb: 100
   },
   
   adfs: {
-    size: 'medium',              // Production ADFS sizing
+    size: 'medium',
     windowsVersion: '2022'
   }
 };
@@ -703,7 +656,7 @@ export const config: ChiralSystem = {
   postgres: {
     engineVersion: '15',
     size: 'medium',
-    storageGb: 50                // Minimum 50GB for HITRUST Moderate
+    storageGb: 50
   }
 };
 ```
@@ -734,7 +687,7 @@ export const config: ChiralSystem = {
   postgres: {
     engineVersion: '15',
     size: 'large',
-    storageGb: 75                // Minimum 75GB for breach investigation
+    storageGb: 75
   }
 };
 ```
@@ -1088,9 +1041,9 @@ Chiral takes a different approach to multi-cloud infrastructure management compa
 - Google Cloud Infrastructure Manager Terraform Blueprint (Infrastructure Manager)
 
 **Azure Enhancements**:
-- Uses Azure Verified Modules (AVM) for standardized, production-ready deployments
+- Uses Azure Verified Modules (AVM) for standardized deployments
 - Integrates azure-cost-cli for real-time cost estimation during generation
-- Supports deployment stacks for complete mode in production environments
+- Supports deployment stacks for complete mode in environments
 
 **Ideal**: Each cloud's best native IaC format (Bicep for Azure, Terraform for GCP)
 
@@ -1212,9 +1165,6 @@ flowchart TD
     AZURE_D --> AZURE_C
     GCP_D --> GCP_C
 ```
-
----
-
 
 ---
 
