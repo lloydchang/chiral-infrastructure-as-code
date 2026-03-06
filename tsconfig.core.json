@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/adapters/programmatic/aws-cdk.ts",
+    "src/adapters/declarative/azure-bicep.ts", 
+    "src/adapters/declarative/gcp-terraform.ts",
+    "src/intent/index.ts",
+    "src/validation.ts",
+    "src/translation/hardware-map.ts",
+    "src/main.ts",
+    "src/cost-analysis.ts",
+    "src/compliance.ts",
+    "src/security-compliance.ts",
+    "src/cloud-security-monitoring.ts",
+    "src/__tests__/**/*.test.ts"
+  ],
+  "exclude": [
+    "src/adapters/*-agent.ts",
+    "src/agents/**",
+    "node_modules"
+  ]
+}

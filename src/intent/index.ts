@@ -28,24 +28,11 @@ export interface AdfsIntent {
   windowsVersion: '2019' | '2022';
 }
 
-export interface SkillIntent {
-  imageProcessing?: {
-    capability: 'resize' | 'filter' | 'analyze';
-    performance: 'low' | 'medium' | 'high';
-  };
-  dataAnalysis?: {
-    capability: 'ml' | 'statistics' | 'reporting';
-    framework: 'tensorflow' | 'pytorch' | 'scikit-learn';
-  };
-  naturalLanguage?: {
-    capability: 'text-generation' | 'sentiment-analysis' | 'translation';
-    modelSize: 'small' | 'medium' | 'large';
-  };
-  automation?: {
-    capability: 'workflow-automation' | 'data-pipeline' | 'monitoring';
-    complexity: 'simple' | 'moderate' | 'complex';
-  };
-}
+// =================================================================
+// THREE PILLARS INTENT - CORE INFRASTRUCTURE ONLY
+// =================================================================
+// PURE INFRASTRUCTURE SCHEMA
+// =================================================================
 
 export interface ChiralSystem {
   projectName: string;
@@ -154,10 +141,7 @@ export interface ChiralSystem {
     };
   };
 
-  // AI Agent Skills (Optional - enables application-level capabilities)
-  skills?: SkillIntent;
-
-  // The Three Pillars
+  // The Three Pillars - ONLY the core infrastructure components
   k8s: KubernetesIntent;
   postgres: DatabaseIntent;
   adfs: AdfsIntent;

@@ -33,6 +33,12 @@ import { ValidationScriptGenerator } from './migration/validation-scripts';
 import { awsEksPostgresTemplate } from './migration/templates/aws-eks-postgres-template';
 import { TerraformImportAdapter } from './adapters/declarative/terraform-adapter';
 
+// Import core CLI commands - MINIMALIST ONLY
+import { setupCoreCommands } from './cli/core-commands';
+
+// DISABLED: Import traffic enforcement commands (OUTER LAYER - NOT CORE)
+// import { setupTrafficCommands } from './cli/traffic-commands';
+
 // =================================================================
 // IMPORT HELPERS
 // =================================================================
@@ -724,6 +730,12 @@ const estimateMigrationEffort = (resources: any[], unmappableResources: string[]
   return `${Math.ceil(effortDays / 30)} months`;
 };
 const program = new Command();
+
+// Setup core commands - MINIMALIST ONLY
+setupCoreCommands(program);
+
+// DISABLED: Setup traffic enforcement commands (OUTER LAYER - NOT CORE)
+// setupTrafficCommands(program);
 
 program
   .name('chiral')
