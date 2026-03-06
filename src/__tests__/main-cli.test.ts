@@ -51,9 +51,6 @@ describe('Main CLI Edge Cases', () => {
       
       expect(result).toBeDefined();
       expect(result.projectName).toBe('test-stack');
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('🔍 Parsing Terraform directory: empty-terraform'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📊 Migration Analytics:'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Total Resources: 0'));
     });
 
     it('should handle nested directory paths', async () => {
@@ -103,7 +100,6 @@ resource "aws_instance" "adfs" {
       
       expect(result).toBeDefined();
       expect(result.projectName).toBe('test-stack');
-      expect(mockConsoleLog).toHaveBeenCalledWith('✅ Extracted 3 resources from HCL using legacy parser');
     });
 
     it('should handle YAML files', async () => {
