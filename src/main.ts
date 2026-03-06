@@ -259,8 +259,8 @@ export const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 
       execSync('az --version', { stdio: 'ignore' });
       azAvailable = true;
     } catch {
-      console.log(`⚠️  Azure CLI not found. Skipping Bicep import and returning default configuration.`);
-      console.log(`   Install Azure CLI to enable Bicep file import: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli`);
+      console.warn(`⚠️  Azure CLI not found. Skipping Bicep import and returning default configuration.`);
+      console.warn(`   Install Azure CLI to enable Bicep file import: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli`);
       return buildChiralSystemFromResources([], provider, stackName, agentic);
     }
 
@@ -271,8 +271,8 @@ export const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 
         const arm = JSON.parse(fs.readFileSync(tempJson, 'utf8'));
         resources = arm.resources || [];
       } catch (error) {
-        console.log(`⚠️  Azure Bicep build failed. Returning default configuration.`);
-        console.log(`   Error: ${error}`);
+        console.warn(`⚠️  Azure Bicep build failed. Returning default configuration.`);
+        console.warn(`   Error: ${error}`);
         return buildChiralSystemFromResources([], provider, stackName, agentic);
       } finally {
         if (fs.existsSync(tempJson)) fs.unlinkSync(tempJson);

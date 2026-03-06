@@ -26,9 +26,23 @@ jest.mock('path', () => ({
 jest.mock('child_process');
 const mockExecSync = execSync as jest.MockedFunction<typeof execSync>;
 
+// Mock console methods
+const mockConsoleWarn = jest.spyOn(console, 'warn').mockImplementation();
+const mockConsoleLog = jest.spyOn(console, 'log').mockImplementation();
+const mockConsoleError = jest.spyOn(console, 'error').mockImplementation();
+
 describe('Main CLI Functions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockConsoleWarn.mockClear();
+    mockConsoleLog.mockClear();
+    mockConsoleError.mockClear();
+  });
+
+  afterEach(() => {
+    mockConsoleWarn.mockRestore();
+    mockConsoleLog.mockRestore();
+    mockConsoleError.mockRestore();
   });
 
   describe('importIaC', () => {
@@ -121,6 +135,7 @@ resource "aws_eks_cluster" "main" {
       
       expect(result).toBeDefined();
       expect(result.projectName).toBe('test-stack');
+      expect(result.environment).toBe('prod'); // Should return default config
     });
 
     it('should import from YAML files', async () => {
@@ -317,6 +332,7 @@ resource "azurerm_kubernetes_cluster" "main" {
       
       expect(result).toBeDefined();
       expect(result.projectName).toBe('test-stack');
+      expect(result.environment).toBe('prod'); // Should return default config
     });
 
     it('should handle Bicep build failure gracefully', async () => {
@@ -342,6 +358,79 @@ resource "azurerm_kubernetes_cluster" "main" {
       
       expect(result).toBeDefined();
       expect(result.projectName).toBe('test-stack');
+      expect(result.environment).toBe('prod'); // Should return default config
+    });
+
+    it('should handle corrupted Terraform state files', async () => {
+      const mockCorruptedState = '{ invalid json';
+
+      mockFs.statSync.mockReturnValue({ isDirectory: () => false } as any);
+      mockFs.readFileSync.mockReturnValue(mockCorruptedState);
+
+      await expect(importIaC('./terraform.tfstate', 'aws', 'test-stack')).rejects.toThrow('Corrupted Terraform state file');
+    });
+
+    it('should handle corrupted Terraform state files gracefully', async () => {
+      const mockCorruptedState = '{ invalid json';
+
+      mockFs.statSync.mockReturnValue({ isDirectory: () => false } as any);
+      mockFs.readFileSync.mockReturnValue(mockCorruptedState);
+
+      await expect(importIaC('./terraform.tfstate', 'aws', 'test-stack')).rejects.toThrow('Corrupted Terraform state file');
+    });
+
+    it('should handle empty Terraform state files', async () => {
+      const mockEmptyState = JSON.stringify({
+        version: 4,
+        terraform_version: "1.5.0",
+        serial: 1,
+        lineage: "test-lineage",
+        outputs: {},
+        resources: []
+      });
+
+      mockFs.statSync.mockReturnValue({ isDirectory: () => false } as any);
+      mockFs.readFileSync.mockReturnValue(mockEmptyState);
+
+      const result = await importIaC('./terraform.tfstate', 'aws', 'test-stack');
+      
+      expect(result).toBeDefined();
+      expect(result.projectName).toBe('test-stack');
+    });
+
+    it('should handle different stack names', async () => {
+      const mockTfContent = `
+resource "aws_eks_cluster" "main" {
+  name     = "my-cluster"
+  version  = "1.29"
+}
+`;
+
+      mockFs.statSync.mockReturnValue({ isDirectory: () => false } as any);
+      mockFs.readFileSync.mockReturnValue(mockTfContent);
+
+      const result = await importIaC('./main.tf', 'aws', 'custom-stack-name');
+      
+      expect(result).toBeDefined();
+      expect(result.projectName).toBe('custom-stack-name');
+    });
+
+    it('should handle different environments', async () => {
+      const mockTfContent = `
+resource "aws_eks_cluster" "main" {
+  name     = "my-cluster"
+  version  = "1.29"
+}
+`;
+
+      mockFs.statSync.mockReturnValue({ isDirectory: () => false } as any);
+      mockFs.readFileSync.mockReturnValue(mockTfContent);
+
+      const result = await importIaC('./main.tf', 'aws', 'test-stack');
+      
+      expect(result).toBeDefined();
+      expect(result.projectName).toBe('test-stack');
+      expect(result.environment).toBe('prod'); // Import always defaults to prod for safety
     });
   });
 });
