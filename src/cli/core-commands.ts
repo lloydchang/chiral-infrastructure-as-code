@@ -199,9 +199,11 @@ export function setupCoreCommands(program: Command): void {
           }
         });
         
-        if (costAnalysis.recommendations.length > 0) {
+        // Show recommendations from the cheapest provider
+        const cheapestEstimate = costAnalysis.estimates[costAnalysis.cheapest.provider];
+        if (cheapestEstimate.recommendations.length > 0) {
           console.log('\n💡 Cost Optimization Recommendations:');
-          costAnalysis.recommendations.forEach(rec => console.log(`   - ${rec}`));
+          cheapestEstimate.recommendations.forEach(rec => console.log(`   - ${rec}`));
         }
         
       } catch (error) {
