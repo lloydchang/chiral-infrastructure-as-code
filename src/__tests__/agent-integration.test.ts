@@ -7,6 +7,26 @@ import { AgentOrchestrator, OrchestratorConfig } from '../agents/orchestrator';
 import { AgentSecurityManager, SecurityConfig } from '../agents/security-manager';
 import { ChiralSystem } from '../intent';
 
+// Mock AWS SDK to suppress warnings in tests
+jest.mock('@aws-sdk/client-bedrock-runtime', () => ({
+  BedrockRuntimeClient: jest.fn().mockImplementation(() => ({
+    send: jest.fn().mockResolvedValue({
+      body: new TextEncoder().encode(JSON.stringify({
+        content: [{ text: 'Mock agent response' }]
+      }))
+    })
+  })),
+  InvokeModelCommand: jest.fn()
+}));
+
+jest.mock('@aws-sdk/credential-providers', () => ({
+  fromNodeProviderChain: jest.fn().mockResolvedValue({
+    accessKeyId: 'test',
+    secretAccessKey: 'test',
+    sessionToken: 'test'
+  })
+}));
+
 describe('Agent Integration Tests', () => {
   let testConfig: ChiralSystem;
   let securityConfig: SecurityConfig;
