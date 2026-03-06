@@ -253,13 +253,33 @@ export const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 
       }));
     }
   } else if (ext === '.bicep') {
-    const tempJson = path.join(os.tmpdir(), `bicep-${Date.now()}.json`);
+    // Check if Azure CLI is available
+    let azAvailable = false;
     try {
-      execSync(`az bicep build --file ${sourcePath} --outfile ${tempJson}`, { stdio: 'ignore' });
-      const arm = JSON.parse(fs.readFileSync(tempJson, 'utf8'));
-      resources = arm.resources || [];
-    } finally {
-      if (fs.existsSync(tempJson)) fs.unlinkSync(tempJson);
+      execSync('az --version', { stdio: 'ignore' });
+      azAvailable = true;
+    } catch {
+      console.log(`⚠️  Azure CLI not found. Skipping Bicep import and returning default configuration.`);
+      console.log(`   Install Azure CLI to enable Bicep file import: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli`);
+      return buildChiralSystemFromResources([], provider, stackName, agentic);
+    }
+
+    if (azAvailable) {
+      const tempJson = path.join(os.tmpdir(), `bicep-${Date.now()}.json`);
+      try {
+        execSync(`az bicep build --file ${sourcePath} --outfile ${tempJson}`, { stdio: 'ignore' });
+        const arm = JSON.parse(fs.readFileSync(tempJson, 'utf8'));
+        resources = arm.resources || [];
+      } catch (error) {
+        console.log(`⚠️  Azure Bicep build failed. Returning default configuration.`);
+        console.log(`   Error: ${error}`);
+        return buildChiralSystemFromResources([], provider, stackName, agentic);
+      } finally {
+        if (fs.existsSync(tempJson)) fs.unlinkSync(tempJson);
+      }
+    } else {
+      // This should not be reached due to the check above, but fallback just in case
+      return buildChiralSystemFromResources([], provider, stackName, agentic);
     }
   } else {
     // Handle unsupported extensions gracefully by returning default configuration
