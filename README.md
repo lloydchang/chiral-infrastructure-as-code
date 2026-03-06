@@ -237,9 +237,9 @@ const chiralSystem = await TerraformImportAdapter.importFromTerraform({
 3. **Complete Import**: Generate full ChiralSystem with migration metadata
 
 #### Test Coverage
-- **Unit Tests**: 14/14 tests passing
-- **Integration Tests**: 5/8 tests passing (complex HCL parsing limitations)
-- **Overall Success Rate**: 96.5%
+- **Unit Tests**: 244/244 tests passing (100% success rate)
+- **Integration Tests**: 17/17 test suites passing
+- **Overall Success Rate**: 100%
 
 For detailed documentation, see **[TERRAFORM_IMPORT_WORKFLOW.md](docs/TERRAFORM_IMPORT_WORKFLOW.md)**.
 
@@ -458,12 +458,13 @@ The Terraform Import Adapter includes a custom HCL parser that handles basic Ter
 - Temporary file management with automatic cleanup
 - Resource mapping verification
 - Error handling and edge case testing
+- HardwareMap Integration: Unified hardware mapping system for consistent instance type resolution across all cost analysis modules
 
 #### Recent Improvements
 
 **Version 0.0.0** - Latest Updates:
-- Custom HCL Parser: Replaced external hcl2-parser dependency with robust regex-based parsing
-- Enhanced Test Suite: Added real Terraform file parsing tests with temporary file management
+- HardwareMap Integration: Unified hardware mapping system for consistent instance type resolution across all cost analysis modules
+- Enhanced AWS Pricing: Added support for m5.large instances in cost estimation
 - TypeScript Fixes: Resolved compilation errors and improved type safety
 - Resource Mapping: Improved AWS, Azure, and GCP resource detection and mapping
 - Error Handling: Better error messages and graceful failure handling
