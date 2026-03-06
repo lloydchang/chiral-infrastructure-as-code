@@ -190,6 +190,215 @@ resource "google_compute_instance" "adfs" {
     </powershell>
   EOT
 }
+
+${this.generateSkillsTerraform(intent, gcpRegion, gcpZone)}
     `.trim();
+  }
+
+  private static generateSkillsTerraform(intent: ChiralSystem, gcpRegion: string, gcpZone: string): string {
+    if (!intent.skills) return '';
+
+    let skillsTerraform = '\n\n# =================================================================\n';
+    skillsTerraform += '# 5. AI AGENT SKILLS (Optional - Cloud Functions)\n';
+    skillsTerraform += '# =================================================================\n';
+
+    // Storage bucket for skills that need object storage
+    if (intent.skills.imageProcessing || intent.skills.automation) {
+      skillsTerraform += `
+// Storage bucket for AI Skills
+resource "google_storage_bucket" "skills_storage" {
+  name          = "${intent.projectName}-skills-storage"
+  location      = "${gcpRegion}"
+  force_destroy = false
+
+  uniform_bucket_level_access = true
+
+  versioning {
+    enabled = false
+  }
+}
+`;
+    }
+
+    // Image Processing Skill - Cloud Function
+    if (intent.skills.imageProcessing) {
+      const memoryMb = intent.skills.imageProcessing.performance === 'high' ? 2048 :
+                      intent.skills.imageProcessing.performance === 'medium' ? 1024 : 512;
+      const timeout = 300; // 5 minutes
+
+      skillsTerraform += `
+// Image Processing Cloud Function
+resource "google_cloudfunctions_function" "image_processing" {
+  name        = "${intent.projectName}-image-processing"
+  runtime     = "python39"
+  region      = "${gcpRegion}"
+
+  available_memory_mb   = ${memoryMb}
+  timeout               = ${timeout}
+  max_instances         = 100
+
+  source_archive_bucket = google_storage_bucket.skills_storage.name
+  source_archive_object = google_storage_bucket_object.image_processing_source.name
+
+  entry_point = "process_image"
+
+  environment_variables = {
+    CAPABILITY  = "${intent.skills.imageProcessing.capability}"
+    PERFORMANCE = "${intent.skills.imageProcessing.performance}"
+  }
+
+  event_trigger {
+    event_type = "google.storage.object.finalize"
+    resource   = google_storage_bucket.skills_storage.name
+  }
+}
+
+resource "google_storage_bucket_object" "image_processing_source" {
+  name   = "image-processing-source.zip"
+  bucket = google_storage_bucket.skills_storage.name
+  source = "./functions/image-processing.zip"  # Path to your function source
+}
+`;
+    }
+
+    // Data Analysis Skill - Cloud Function
+    if (intent.skills.dataAnalysis) {
+      const runtime = intent.skills.dataAnalysis.framework === 'tensorflow' ? 'python39' :
+                     intent.skills.dataAnalysis.framework === 'pytorch' ? 'python39' : 'python39';
+
+      skillsTerraform += `
+// Data Analysis Cloud Function
+resource "google_cloudfunctions_function" "data_analysis" {
+  name        = "${intent.projectName}-data-analysis"
+  runtime     = "${runtime}"
+  region      = "${gcpRegion}"
+
+  available_memory_mb   = 2048  # ML workloads need more memory
+  timeout               = 600   # 10 minutes for ML processing
+  max_instances         = 50
+
+  source_archive_bucket = google_storage_bucket.skills_storage.name
+  source_archive_object = google_storage_bucket_object.data_analysis_source.name
+
+  entry_point = "analyze_data"
+
+  environment_variables = {
+    FRAMEWORK = "${intent.skills.dataAnalysis.framework}"
+    CAPABILITY = "${intent.skills.dataAnalysis.capability}"
+  }
+
+  trigger_http = true
+}
+
+resource "google_storage_bucket_object" "data_analysis_source" {
+  name   = "data-analysis-source.zip"
+  bucket = google_storage_bucket.skills_storage.name
+  source = "./functions/data-analysis.zip"
+}
+
+resource "google_cloudfunctions_function_iam_member" "data_analysis_invoker" {
+  project        = var.project_id
+  region         = google_cloudfunctions_function.data_analysis.region
+  cloud_function = google_cloudfunctions_function.data_analysis.name
+
+  role   = "roles/cloudfunctions.invoker"
+  member = "allUsers"
+}
+`;
+    }
+
+    // Natural Language Skill - Cloud Function
+    if (intent.skills.naturalLanguage) {
+      const memoryMb = intent.skills.naturalLanguage.modelSize === 'large' ? 4096 :
+                      intent.skills.naturalLanguage.modelSize === 'medium' ? 2048 : 1024;
+
+      skillsTerraform += `
+// Natural Language Cloud Function
+resource "google_cloudfunctions_function" "natural_language" {
+  name        = "${intent.projectName}-natural-language"
+  runtime     = "python39"
+  region      = "${gcpRegion}"
+
+  available_memory_mb   = ${memoryMb}
+  timeout               = 300
+  max_instances         = 20
+
+  source_archive_bucket = google_storage_bucket.skills_storage.name
+  source_archive_object = google_storage_bucket_object.natural_language_source.name
+
+  entry_point = "process_language"
+
+  environment_variables = {
+    CAPABILITY = "${intent.skills.naturalLanguage.capability}"
+    MODEL_SIZE = "${intent.skills.naturalLanguage.modelSize}"
+  }
+
+  trigger_http = true
+}
+
+resource "google_storage_bucket_object" "natural_language_source" {
+  name   = "natural-language-source.zip"
+  bucket = google_storage_bucket.skills_storage.name
+  source = "./functions/natural-language.zip"
+}
+
+resource "google_cloudfunctions_function_iam_member" "natural_language_invoker" {
+  project        = var.project_id
+  region         = google_cloudfunctions_function.natural_language.region
+  cloud_function = google_cloudfunctions_function.natural_language.name
+
+  role   = "roles/cloudfunctions.invoker"
+  member = "allUsers"
+}
+`;
+    }
+
+    // Automation Skill - Cloud Function
+    if (intent.skills.automation) {
+      const timeout = intent.skills.automation.complexity === 'complex' ? 900 :
+                     intent.skills.automation.complexity === 'moderate' ? 600 : 300;
+
+      skillsTerraform += `
+// Automation Cloud Function
+resource "google_cloudfunctions_function" "automation" {
+  name        = "${intent.projectName}-automation"
+  runtime     = "nodejs18"
+  region      = "${gcpRegion}"
+
+  available_memory_mb   = ${intent.skills.automation.complexity === 'complex' ? 2048 : intent.skills.automation.complexity === 'moderate' ? 1024 : 512}
+  timeout               = ${timeout}
+  max_instances         = 50
+
+  source_archive_bucket = google_storage_bucket.skills_storage.name
+  source_archive_object = google_storage_bucket_object.automation_source.name
+
+  entry_point = "run_automation"
+
+  environment_variables = {
+    CAPABILITY = "${intent.skills.automation.capability}"
+    COMPLEXITY = "${intent.skills.automation.complexity}"
+  }
+
+  trigger_http = true
+}
+
+resource "google_storage_bucket_object" "automation_source" {
+  name   = "automation-source.zip"
+  bucket = google_storage_bucket.skills_storage.name
+  source = "./functions/automation.zip"
+}
+
+resource "google_cloudfunctions_function_iam_member" "automation_invoker" {
+  project        = var.project_id
+  region         = google_cloudfunctions_function.automation.region
+  cloud_function = google_cloudfunctions_function.automation.name
+
+  role   = "roles/cloudfunctions.invoker"
+  member = "allUsers"
+}
+`;
+    }
+
+    return skillsTerraform;
   }
 }
