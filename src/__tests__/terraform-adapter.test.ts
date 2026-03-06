@@ -108,6 +108,11 @@ resource "aws_db_instance" "test" {
     });
 
     it('should return a complete ChiralSystem', async () => {
+      // Mock console methods - suppress all warnings/errors in tests
+      const mockConsoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const mockConsoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+      const mockConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+
       const chiralSystem = await TerraformImportAdapter.importFromTerraform(testConfig);
 
       expect(chiralSystem).toBeDefined();

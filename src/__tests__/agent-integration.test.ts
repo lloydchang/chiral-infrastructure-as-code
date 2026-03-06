@@ -7,6 +7,11 @@ import { AgentOrchestrator, OrchestratorConfig } from '../agents/orchestrator';
 import { AgentSecurityManager, SecurityConfig } from '../agents/security-manager';
 import { ChiralSystem } from '../intent';
 
+// Mock console methods - suppress all warnings/errors in tests
+const mockConsoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+const mockConsoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+const mockConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+
 // Mock AWS SDK to suppress warnings in tests
 jest.mock('@aws-sdk/client-bedrock-runtime', () => ({
   BedrockRuntimeClient: jest.fn().mockImplementation(() => ({
@@ -33,6 +38,11 @@ describe('Agent Integration Tests', () => {
   let orchestratorConfig: OrchestratorConfig;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    mockConsoleWarn.mockClear();
+    mockConsoleLog.mockClear();
+    mockConsoleError.mockClear();
+
     testConfig = {
       projectName: 'test-project',
       environment: 'dev' as any,
@@ -70,6 +80,12 @@ describe('Agent Integration Tests', () => {
       maxRetries: 3,
       timeoutMs: 30000
     };
+  });
+
+  afterEach(() => {
+    mockConsoleWarn.mockRestore();
+    mockConsoleLog.mockRestore();
+    mockConsoleError.mockRestore();
   });
 
   describe('AWS Agent Adapter', () => {

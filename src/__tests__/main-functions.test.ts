@@ -264,13 +264,13 @@ config:
             ]
           }
         }
-      };
+      });
 
       mockFs.readdirSync.mockReturnValue(['Pulumi.yaml', 'Pulumi.test.yaml', 'Pulumi.test.stack.json'] as any);
-      mockFs.readFileSync.mockImplementation((path: any, options?: any) => {
-        const filePath = typeof path === 'string' ? path : String(path);
-        if (filePath.includes('Pulumi.yaml')) return mockPulumiYaml;
-        if (filePath.includes('.stack.json')) return mockStackContent;
+      mockFs.readFileSync.mockImplementation((filePath: any, options?: any) => {
+        const filePathLocal = typeof filePath === 'string' ? filePath : String(filePath);
+        if (filePathLocal.includes('Pulumi.yaml')) return mockPulumiYaml;
+        if (filePathLocal.includes('.stack.json')) return mockStackContent;
         return '';
       });
 
@@ -301,7 +301,7 @@ export const cluster = new aws.eks.Cluster("my-cluster", {
       mockFs.existsSync.mockReturnValue(true);
       mockFs.statSync.mockReturnValue({ isDirectory: () => true } as any);
       mockFs.readdirSync.mockReturnValue(['Pulumi.yaml', 'index.ts'] as any);
-      mockFs.readFileSync.mockImplementation((filePath: string) => {
+      mockFs.readFileSync.mockImplementation((filePath: any) => {
         if (filePath.includes('Pulumi.yaml')) return mockPulumiYaml;
         if (filePath.includes('index.ts')) return mockTsContent;
         return '';

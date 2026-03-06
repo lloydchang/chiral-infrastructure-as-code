@@ -54,8 +54,8 @@ describe('Main CLI Coverage Tests', () => {
 
       await analyzeTerraformSetup('./terraform', 'aws', true);
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('💰 Detailed Cost Analysis')));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('💡 Cost Optimization')));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('💰 Detailed Cost Analysis'));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('💡 Cost Optimization'));
     });
 
     it('should handle different Terraform versions', async () => {
@@ -75,7 +75,7 @@ describe('Main CLI Coverage Tests', () => {
 
       await analyzeTerraformSetup('./terraform', 'aws', false);
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📦 Terraform Version: 1.4.6')));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📦 Terraform Version: 1.4.6'));
     });
 
     it('should handle Azure provider analysis', async () => {
@@ -102,7 +102,7 @@ describe('Main CLI Coverage Tests', () => {
 
       await analyzeTerraformSetup('./terraform', 'azure', false);
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('☁️  Provider: Azure')));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('☁️  Provider: Azure'));
     });
 
     it('should handle GCP provider analysis', async () => {
@@ -129,7 +129,7 @@ describe('Main CLI Coverage Tests', () => {
 
       await analyzeTerraformSetup('./terraform', 'gcp', false);
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('☁️  Provider: GCP')));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('☁️  Provider: GCP'));
     });
 
     it('should handle missing backend configuration', async () => {
@@ -149,7 +149,7 @@ describe('Main CLI Coverage Tests', () => {
 
       await analyzeTerraformSetup('./terraform', 'aws', false);
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('🔍 Backend: None')));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('🔍 Backend: None'));
     });
 
     it('should handle workspace information', async () => {
@@ -170,7 +170,7 @@ describe('Main CLI Coverage Tests', () => {
 
       await analyzeTerraformSetup('./terraform', 'aws', false);
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('🏢 Workspace: production')));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('🏢 Workspace: production'));
     });
   });
 
@@ -203,7 +203,7 @@ description: Python application
 
       await analyzePulumiSetup('./pulumi', 'aws', false);
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('🔧 Runtime: python')));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('🔧 Runtime: python'));
     });
 
     it('should handle Go runtime', async () => {
@@ -234,7 +234,7 @@ description: Go application
 
       await analyzePulumiSetup('./pulumi', 'aws', false);
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('🔧 Runtime: go')));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('🔧 Runtime: go'));
     });
 
     it('should handle configuration values', async () => {
@@ -275,8 +275,8 @@ config:
 
       await analyzePulumiSetup('./pulumi', 'aws', false);
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('⚙️  Configuration')));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Secrets detected')));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('⚙️  Configuration'));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Secrets detected'));
     });
 
     it('should handle dependencies', async () => {
@@ -310,7 +310,7 @@ dependencies:
 
       await analyzePulumiSetup('./pulumi', 'aws', false);
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📦 Dependencies')));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📦 Dependencies'));
     });
 
     it('should handle stack outputs', async () => {
@@ -338,8 +338,8 @@ dependencies:
 
       await analyzePulumiSetup('./Pulumi.test.stack.json', 'aws', false);
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📤 Stack Outputs')));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Secrets detected')));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📤 Stack Outputs'));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Secrets detected'));
     });
   });
 
@@ -347,29 +347,29 @@ dependencies:
     it('should handle different team sizes', async () => {
       await compareApproaches(10, 1, 'simple');
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Team Size: 1')));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Learning Curve: Low')));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Team Size: 1'));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Learning Curve: Low'));
     });
 
     it('should handle large teams', async () => {
       await compareApproaches(50, 20, 'complex');
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Team Size: 20')));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Learning Curve: High')));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Team Size: 20'));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Learning Curve: High'));
     });
 
     it('should show security considerations', async () => {
       await compareApproaches(10, 5, 'medium');
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('🔒 Security')));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Secret Management')));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('🔒 Security'));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Secret Management'));
     });
 
     it('should show compliance features', async () => {
       await compareApproaches(15, 8, 'complex');
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📋 Compliance')));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Audit Trail')));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📋 Compliance'));
+      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Audit Trail'));
     });
   });
 

@@ -26,10 +26,10 @@ jest.mock('path', () => ({
 jest.mock('child_process');
 const mockExecSync = execSync as jest.MockedFunction<typeof execSync>;
 
-// Mock console methods
-const mockConsoleWarn = jest.spyOn(console, 'warn').mockImplementation();
-const mockConsoleLog = jest.spyOn(console, 'log').mockImplementation();
-const mockConsoleError = jest.spyOn(console, 'error').mockImplementation();
+// Mock console methods - suppress all warnings/errors in tests
+const mockConsoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+const mockConsoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+const mockConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
 describe('Main CLI Functions', () => {
   beforeEach(() => {
