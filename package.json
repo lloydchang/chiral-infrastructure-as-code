@@ -19,7 +19,7 @@
     "test": "NODE_OPTIONS=\"--no-warnings\" jest --no-watch",
     "test:watch": "NODE_OPTIONS=\"--no-warnings\" jest --watch",
     "test:coverage": "NODE_OPTIONS=\"--no-warnings\" jest --coverage --no-watch",
-    "test:core": "jest --testPathPattern=\"src/(core|intent|validation|adapters/(programmatic|declarative)|cost-analysis|compliance)\" --no-watch",
+    "test:core": "jest --testPathPatterns=\"src/__tests__/(cost-analysis|validation|terraform-adapter|import|intent|main|migration|compliance|hardware-map|generation-integration|terraform-integration).test.ts\" --no-watch",
     "test:security": "NODE_OPTIONS=\"--no-warnings\" jest --testPathPatterns=security --no-watch",
     "security:scan": "trufflehog filesystem .",
     "security:deps": "npm audit",
