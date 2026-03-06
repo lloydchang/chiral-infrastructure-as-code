@@ -42,8 +42,8 @@ network_security = {
 
 # Database Configuration
 db_administrator_login    = "demo_admin"
-db_administrator_password = "REPLACE_WITH_STRONG_DB_PASSWORD_987654321!"
+# db_administrator_password = "REPLACE_WITH_STRONG_DB_PASSWORD_987654321!"  # Add your secure password here
 
 # Virtual Machine Configuration
 vm_admin_username = "demo_admin"
-vm_admin_password = "REPLACE_WITH_STRONG_VM_PASSWORD_987654321!"
+# vm_admin_password = "REPLACE_WITH_STRONG_VM_PASSWORD_987654321!"  # Add your secure password here

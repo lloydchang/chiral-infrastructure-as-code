@@ -42,5 +42,5 @@ network_security = {
 
 # Database Configuration
 db_username = "demo_user"
-db_password = "REPLACE_WITH_STRONG_DB_PASSWORD_123456789!"
+# db_password = "REPLACE_WITH_STRONG_DB_PASSWORD_123456789!"  # Add your secure password here
 db_name     = "demo_db"

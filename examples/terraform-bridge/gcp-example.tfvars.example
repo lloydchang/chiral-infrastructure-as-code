@@ -41,4 +41,4 @@ network_security = {
 }
 
 # ADFS Service Account
-adfs_service_password = "REPLACE_WITH_STRONG_ADFS_PASSWORD_123456789!"
+# adfs_service_password = "REPLACE_WITH_STRONG_ADFS_PASSWORD_123456789!"  # Add your secure password here
