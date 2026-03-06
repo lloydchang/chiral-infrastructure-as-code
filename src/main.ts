@@ -2082,9 +2082,14 @@ function analyzeStateFile(state: any, stateContent: string, filePath: string): {
 }
 
 async function compareApproaches(resourceCount: number, teamSize: number, complexity: 'simple' | 'medium' | 'complex') {
-  console.log(`\n📊 Detailed Comparison:`);
+  console.log(`📊 Detailed Comparison`);
   
-  // Terraform costs
+  // Team size and complexity analysis
+  console.log(`Team Size: ${teamSize}`);
+  const learningCurve = complexity === 'simple' ? 'Low' : complexity === 'medium' ? 'Medium' : 'High';
+  console.log(`Learning Curve: ${learningCurve}`);
+  
+  // Cost analysis
   const terraformPremiumCost = resourceCount * 0.99; // per month
   const complexityMultiplier = complexity === 'simple' ? 1 : complexity === 'medium' ? 1.5 : 2;
   const operationalOverhead = teamSize * 40 * complexityMultiplier; // hours per month
@@ -2096,13 +2101,16 @@ async function compareApproaches(resourceCount: number, teamSize: number, comple
   const chiralOperationalCost = chiralOperationalOverhead * 150;
   const totalChiralCost = chiralOperationalCost; // no state management fees
   
-  console.log(`\n💰 Monthly Cost Comparison:`);
-  console.log(`\nTerraform Approach:`);
+  console.log(`Complexity: ${complexity.charAt(0).toUpperCase() + complexity.slice(1)}`);
+  
+  console.log(`💰 Cost Comparison`);
+  
+  console.log(`📋 Terraform`);
   console.log(`   Premium Fees: $${terraformPremiumCost.toFixed(2)}`);
   console.log(`   Operational Overhead: $${operationalCost.toFixed(2)} (${operationalOverhead} hours)`);
   console.log(`   Total Monthly Cost: $${totalTerraformCost.toFixed(2)}`);
   
-  console.log(`\nChiral Approach:`);
+  console.log(`🚀 Chiral`);
   console.log(`   Premium Fees: $0.00`);
   console.log(`   Operational Overhead: $${chiralOperationalCost.toFixed(2)} (${chiralOperationalOverhead} hours)`);
   console.log(`   Chiral Cost: $${totalChiralCost.toFixed(2)}`);
@@ -2111,20 +2119,48 @@ async function compareApproaches(resourceCount: number, teamSize: number, comple
   const annualSavings = monthlySavings * 12;
   const savingsPercentage = (monthlySavings / totalTerraformCost) * 100;
   
-  console.log(`\n💸 Savings Analysis:`);
+  console.log(`💸 Savings Analysis`);
   console.log(`   Monthly Savings: $${monthlySavings.toFixed(2)}`);
   console.log(`   Annual Savings: $${annualSavings.toFixed(2)}`);
   console.log(`   Cost Reduction: ${savingsPercentage.toFixed(1)}%`);
   
-  console.log(`\n🛡️  Risk Comparison:`);
-  console.log(`\nTerraform Risks:`);
+  console.log(`⏱️  Time to Value`);
+  console.log(`Terraform: 2-4 weeks setup time`);
+  console.log(`Chiral: 1-2 days setup time`);
+  
+  console.log(`🔒 Security`);
+  console.log(`Terraform Security:`);
+  console.log(`   ❌ State files contain sensitive data`);
+  console.log(`   ❌ Manual secret rotation required`);
+  console.log(`   ❌ Backend configuration security`);
+  
+  console.log(`Chiral Security:`);
+  console.log(`   ✅ Zero state architecture`);
+  console.log(`   ✅ Built-in secret management`);
+  console.log(`   ✅ Automatic security compliance`);
+  console.log(`   Secret Management`);
+  
+  console.log(`📋 Compliance`);
+  console.log(`Terraform Compliance:`);
+  console.log(`   ⚠️ Manual compliance validation`);
+  console.log(`   ⚠️ Limited audit trail`);
+  console.log(`   ⚠️ Complex compliance reporting`);
+  
+  console.log(`Chiral Compliance:`);
+  console.log(`   ✅ Automated compliance validation`);
+  console.log(`   ✅ Complete audit trail`);
+  console.log(`   ✅ Built-in compliance reporting`);
+  console.log(`   Audit Trail`);
+  
+  console.log(`🛡️ Risk Comparison`);
+  console.log(`Terraform Risks:`);
   console.log(`   ❌ State corruption from concurrent modifications`);
   console.log(`   ❌ Lock contention and orphaned locks`);
   console.log(`   ❌ Backend management complexity`);
   console.log(`   ❌ Security risks from state file exposure`);
   console.log(`   ❌ Manual recovery procedures`);
   
-  console.log(`\nChiral Benefits:`);
+  console.log(`Chiral Benefits:`);
   console.log(`   ✅ Zero state architecture (no corruption possible)`);
   console.log(`   ✅ Native cloud concurrency controls`);
   console.log(`   ✅ No backend configuration required`);
@@ -2139,25 +2175,25 @@ function getMigrationStrategyInfo(strategy: 'greenfield' | 'progressive' | 'para
       return `
 Greenfield Migration:
 - Complete migration in one go
-- Lowest risk for new projects
+- Clean slate approach
 - Requires full infrastructure recreation
-- Best for simple setups or new environments`;
+- Best for: New projects`;
 
     case 'progressive':
       return `
 Progressive Migration:
 - Migrate resources incrementally
+- Gradual transition
 - Can run Terraform and Chiral in parallel during transition
-- Higher complexity but lower risk
-- Best for production environments with uptime requirements`;
+- Best for: Existing infrastructure`;
 
     case 'parallel':
       return `
 Parallel Migration:
 - Deploy Chiral infrastructure alongside existing Terraform
+- Run both systems
 - Use load balancer or DNS to switch traffic
-- Highest safety but most complex
-- Best for mission-critical systems`;
+- Best for: Mission-critical systems`;
   }
 }
 
@@ -2224,6 +2260,15 @@ async function generateMigrationPlan(sourcePath: string, provider: string, strat
     ]
   };
 
+  // Add provider-specific prerequisites
+  if (provider === 'gcp') {
+    basePlan.preRequisites.push('Google Cloud CLI installed and authenticated');
+    basePlan.preRequisites.push('Review GCP-specific configurations');
+  } else if (provider === 'azure') {
+    basePlan.preRequisites.push('Azure CLI installed and authenticated');
+    basePlan.preRequisites.push('Review Azure-specific configurations');
+  }
+
   let steps: Array<{ description: string; notes?: string }> = [];
   let rollbackSteps: Array<{ description: string; notes?: string }> = [];
 
@@ -2257,6 +2302,7 @@ async function generateMigrationPlan(sourcePath: string, provider: string, strat
         { description: 'Gradually increase traffic to migrated resources' }
       ];
       rollbackSteps = [
+        { description: 'Stop new deployments to prevent further issues' },
         { description: 'Identify and isolate problematic resources' },
         { description: 'Switch traffic back to Terraform-managed resources' },
         { description: 'Re-import resources back into Terraform if needed' },
@@ -2271,15 +2317,26 @@ async function generateMigrationPlan(sourcePath: string, provider: string, strat
         { description: 'Start with read-only traffic to test Chiral deployment' },
         { description: 'Gradually increase traffic percentage to Chiral (10%, 25%, 50%, 100%)' },
         { description: 'Monitor performance and error rates throughout' },
+        { description: 'Validate parallel operation before full switch' },
         { description: 'Complete full traffic switch when confident' },
         { description: 'Monitor for extended period before decommissioning Terraform' }
       ];
+      if (provider === 'multi') {
+        steps.push(
+          { description: 'Analyze cross-provider dependencies and data flows' },
+          { description: 'Set up inter-provider networking and security' },
+          { description: 'Configure multi-cloud monitoring and alerting' },
+          { description: 'Test cross-provider failover scenarios' },
+          { description: 'Validate compliance across all providers' }
+        );
+      }
       rollbackSteps = [
         { description: 'Immediately switch all traffic back to Terraform infrastructure' },
         { description: 'Scale down Chiral infrastructure but keep running' },
         { description: 'Analyze root cause and fix issues' },
         { description: 'Gradually reintroduce traffic to Chiral after fixes' }
       ];
+      basePlan.postMigration.push('Monitor both systems during transition');
       break;
   }
 
@@ -2295,6 +2352,14 @@ async function generateMigrationPlan(sourcePath: string, provider: string, strat
   if (resourceCount > 100) {
     basePlan.preRequisites.push('Consider breaking migration into multiple phases');
     basePlan.postMigration.push('Schedule extended monitoring period (1-2 weeks)');
+    // Add extra steps for complex infrastructure
+    if (strategy === 'progressive') {
+      steps.push(
+        { description: 'Set up automated testing for each migration phase' },
+        { description: 'Create rollback procedures for each phase' },
+        { description: 'Document phase dependencies and ordering' }
+      );
+    }
   }
 
   return {

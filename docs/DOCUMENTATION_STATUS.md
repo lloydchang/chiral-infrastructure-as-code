@@ -30,10 +30,10 @@
 
 ### **Test Results**
 ```
-✅ Test Suites: 18 passed, 18 total
-✅ Tests: 268 passed, 268 total
+✅ Test Suites: 20 passed, 2 failed, 22 total
+✅ Tests: 343 passed, 39 failed, 382 total
 ✅ Snapshots: 0 total
-⚠️ Time: 108.929s (some tests may be slow)
+⚠️ Time: 27.169s (some tests may be slow)
 ```
 
 ### **Test Categories**

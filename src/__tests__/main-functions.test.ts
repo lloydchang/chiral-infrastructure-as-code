@@ -283,6 +283,8 @@ config:
     });
 
     it('should analyze Pulumi directory with TypeScript stack', async () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      
       const mockPulumiYaml = `
 name: my-app
 runtime: nodejs
@@ -309,23 +311,31 @@ export const cluster = new aws.eks.Cluster("my-cluster", {
 
       await analyzePulumiSetup('./pulumi', 'aws', false);
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📋 Pulumi Setup Analysis'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('🔧 Runtime: nodejs'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📄 Stack Type: TypeScript'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('📋 Pulumi Setup Analysis'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('🔧 Runtime: nodejs'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('📄 Stack Type: TypeScript'));
+      
+      consoleSpy.mockRestore();
     });
 
     it('should handle missing Pulumi configuration', async () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      
       mockFs.existsSync.mockReturnValue(false);
       mockFs.statSync.mockReturnValue({ isDirectory: () => true } as any);
       mockFs.readdirSync.mockReturnValue(['main.ts'] as any);
 
       await analyzePulumiSetup('./pulumi', 'aws', false);
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('⚠️  No Pulumi configuration found'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('💡 Consider running: pulumi new'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('⚠️  No Pulumi configuration found'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('💡 Consider running: pulumi new'));
+      
+      consoleSpy.mockRestore();
     });
 
     it('should analyze single Pulumi stack file', async () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      
       const mockStackContent = JSON.stringify({
         version: "3.0.0",
         deployment: {
@@ -348,41 +358,57 @@ export const cluster = new aws.eks.Cluster("my-cluster", {
 
       await analyzePulumiSetup('./Pulumi.test.stack.json', 'aws', false);
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📋 Pulumi Setup Analysis'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📊 File Analysis: Pulumi.test.stack.json'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('📋 Pulumi Setup Analysis'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('📊 File Analysis: Pulumi.test.stack.json'));
+      
+      consoleSpy.mockRestore();
     });
   });
 
   describe('compareApproaches', () => {
     it('should compare approaches for simple setup', async () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      
       await compareApproaches(5, 2, 'simple');
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📊 Detailed Comparison'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📋 Terraform'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('🚀 Chiral'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('💰 Cost Comparison'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('⏱️  Time to Value'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('📊 Detailed Comparison'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('📋 Terraform'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('🚀 Chiral'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('💰 Cost Comparison'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('⏱️  Time to Value'));
+      
+      consoleSpy.mockRestore();
     });
 
     it('should compare approaches for medium setup', async () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      
       await compareApproaches(20, 5, 'medium');
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📊 Detailed Comparison'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Complexity: Medium'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Team Size: 5'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('📊 Detailed Comparison'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Complexity: Medium'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Team Size: 5'));
+      
+      consoleSpy.mockRestore();
     });
 
     it('should compare approaches for complex setup', async () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      
       await compareApproaches(50, 10, 'complex');
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📊 Detailed Comparison'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Complexity: Complex'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Team Size: 10'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('📊 Detailed Comparison'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Complexity: Complex'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Team Size: 10'));
+      
+      consoleSpy.mockRestore();
     });
   });
 
   describe('getMigrationStrategyInfo', () => {
     it('should return greenfield strategy info', () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      
       const result = getMigrationStrategyInfo('greenfield');
       
       expect(result).toBeDefined();

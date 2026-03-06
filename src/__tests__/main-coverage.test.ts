@@ -308,73 +308,68 @@ dependencies:
         return '';
       });
 
-      await analyzePulumiSetup('./pulumi', 'aws', false);
-      
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📦 Dependencies'));
-    });
-
-    it('should handle stack outputs', async () => {
-      const mockStackContent = JSON.stringify({
-        version: "3.0.0",
-        deployment: {
-          manifest: {
-            resources: [],
-            outputs: {
-              clusterEndpoint: {
-                value: "eks.example.com"
-              },
-              databaseUrl: {
-                secret: true,
-                value: "postgresql://user:pass@db:5432/db"
-              }
-            }
-          }
-        }
-      });
-
-      mockFs.existsSync.mockReturnValue(false);
       mockFs.statSync.mockReturnValue({ isDirectory: () => false } as any);
       mockFs.readFileSync.mockReturnValue(mockStackContent);
 
       await analyzePulumiSetup('./Pulumi.test.stack.json', 'aws', false);
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📤 Stack Outputs'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Secrets detected'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('📤 Stack Outputs'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Secrets detected'));
+      
+      consoleSpy.mockRestore();
     });
   });
 
   describe('compareApproaches - Additional Coverage', () => {
     it('should handle different team sizes', async () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      
       await compareApproaches(10, 1, 'simple');
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Team Size: 1'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Learning Curve: Low'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Team Size: 1'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Learning Curve: Low'));
+      
+      consoleSpy.mockRestore();
     });
 
     it('should handle large teams', async () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      
       await compareApproaches(50, 20, 'complex');
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Team Size: 20'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Learning Curve: High'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Team Size: 20'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Learning Curve: High'));
+      
+      consoleSpy.mockRestore();
     });
 
     it('should show security considerations', async () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      
       await compareApproaches(10, 5, 'medium');
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('🔒 Security'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Secret Management'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('🔒 Security'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Secret Management'));
+      
+      consoleSpy.mockRestore();
     });
 
     it('should show compliance features', async () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      
       await compareApproaches(15, 8, 'complex');
       
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('📋 Compliance'));
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('Audit Trail'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('📋 Compliance'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Audit Trail'));
+      
+      consoleSpy.mockRestore();
     });
   });
 
   describe('generateMigrationPlan - Additional Coverage', () => {
     it('should handle Azure provider prerequisites', async () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      
       const mockTfContent = `
 resource "azurerm_kubernetes_cluster" "main" {
   name = "my-cluster"
