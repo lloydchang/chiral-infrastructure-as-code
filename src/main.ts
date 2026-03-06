@@ -1415,8 +1415,7 @@ program
       
       let costEstimate: any = null;
       
-      try {
-        if (provider === 'azure' && options.subscription) {
+      if (provider === 'azure' && options.subscription) {
           console.log(`\n🔍 Analyzing Azure costs using azure-cost-cli...`);
           if (AzureCostAnalyzer.isAvailable()) {
             costEstimate = await AzureCostAnalyzer.analyzeAzureCosts(options.subscription, {});
@@ -1506,6 +1505,7 @@ program
           console.log(`   ⚠️  Install gcp-cost-cli for detailed GCP cost analysis`);
           console.log(`   📦 Install from: npm install -g gcp-cost-cli`);
         }
+      }
     } catch (error) {
       console.error(`❌ Cost analysis failed: ${error}`);
       process.exit(1);
