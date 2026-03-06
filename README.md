@@ -712,6 +712,78 @@ chiral validate -c chiral.config.ts --compliance hitech-high
 
 For detailed healthcare compliance guidance, see **[HEALTHCARE_COMPLIANCE.md](docs/HEALTHCARE_COMPLIANCE.md)**.
 
+#### Department of Defense (DoD) Impact Levels
+
+Chiral provides compliance validation for Department of Defense Impact Levels (IL2, IL4, IL5, IL6) for Controlled Unclassified Information (CUI) and mission-critical defense systems:
+
+**Supported Frameworks:**
+- **DoD IL2**: Basic protection for CUI
+- **DoD IL4**: Enhanced protection for CUI and mission-critical systems  
+- **DoD IL5**: Highest level protection for national security systems
+- **DoD IL6**: Classified information processing (SCI/SAP)
+
+**Key DoD Compliance Features:**
+- Government cloud region validation (AWS GovCloud, Azure Government, GCP Government)
+- Enhanced encryption at rest and audit logging requirements
+- High availability and fault tolerance controls
+- Data residency and sovereignty for defense data
+- Specialized security controls for classified information
+
+**Example DoD IL5 Configuration:**
+```typescript
+export const config: ChiralSystem = {
+  projectName: 'defense-system',
+  environment: 'prod',
+  networkCidr: '10.100.0.0/16',
+  
+  region: {
+    aws: 'us-gov-west-1',      // GovCloud Secret Region required
+    azure: 'usgovarizona',     // Azure Government Secret
+    gcp: 'us-gov-west1'        // GCP GovCloud Secret
+  },
+  
+  compliance: {
+    framework: 'dod-il5',
+    encryptionAtRest: true,
+    auditLogging: true,
+    dataResidency: {
+      aws: 'us-gov-west-1',
+      azure: 'usgovarizona',
+      gcp: 'us-gov-west1'
+    }
+  },
+  
+  k8s: {
+    version: '1.35',
+    minNodes: 3,                // Enhanced availability for defense systems
+    maxNodes: 10,
+    size: 'large'
+  },
+  
+  postgres: {
+    engineVersion: '15',
+    size: 'large',
+    storageGb: 200              // Minimum 100GB for IL5
+  },
+  
+  adfs: {
+    size: 'large',
+    windowsVersion: '2022'
+  }
+};
+```
+
+**DoD Compliance Validation:**
+```bash
+# DoD Impact Level validation
+chiral validate -c chiral.config.ts --compliance dod-il2
+chiral validate -c chiral.config.ts --compliance dod-il4
+chiral validate -c chiral.config.ts --compliance dod-il5
+chiral validate -c chiral.config.ts --compliance dod-il6
+```
+
+For detailed DoD compliance guidance, see **[DOD_COMPLIANCE.md](docs/DOD_COMPLIANCE.md)**.
+
 #### Enhanced CLI Commands
 
 **Cost Analysis:**
@@ -735,6 +807,23 @@ chiral validate -c chiral.config.ts --compliance fedramp-high
 chiral validate -c chiral.config.ts --compliance govramp-low
 chiral validate -c chiral.config.ts --compliance govramp-moderate
 chiral validate -c chiral.config.ts --compliance govramp-high
+
+# Healthcare compliance validation (HIPAA, HITRUST CSF, HITECH)
+chiral validate -c chiral.config.ts --compliance hipaa-low
+chiral validate -c chiral.config.ts --compliance hipaa-moderate
+chiral validate -c chiral.config.ts --compliance hipaa-high
+chiral validate -c chiral.config.ts --compliance hitrust-low
+chiral validate -c chiral.config.ts --compliance hitrust-moderate
+chiral validate -c chiral.config.ts --compliance hitrust-high
+chiral validate -c chiral.config.ts --compliance hitech-low
+chiral validate -c chiral.config.ts --compliance hitech-moderate
+chiral validate -c chiral.config.ts --compliance hitech-high
+
+# DoD Impact Level compliance validation
+chiral validate -c chiral.config.ts --compliance dod-il2
+chiral validate -c chiral.config.ts --compliance dod-il4
+chiral validate -c chiral.config.ts --compliance dod-il5
+chiral validate -c chiral.config.ts --compliance dod-il6
 
 # Full compliance and deployment readiness check
 chiral validate -c chiral.config.ts --compliance fedramp-moderate --deployment-check
@@ -770,11 +859,11 @@ This covers:
 - Cost analysis and optimization
 - Compliance validation frameworks
 - Bridge modes for gradual migration
-- **Multi-agent IaC generation** with AI-enhanced optimization
+- **[Multi-agent IaC generation](./docs/MULTI_AGENT_GENERATION.md)** with AI-enhanced optimization
 - **Agentic import** with intelligent resource mapping
 - **Security scanning** for sensitive data detection
 - **HardwareMap integration** for consistent instance resolution
-- **Core isolation enforcement** for architectural separation
+- **[Core isolation enforcement](./docs/CORE_ISOLATION.md)** for architectural separation
 - Troubleshooting and integration examples
 
 ### Terraform Provider Integration
