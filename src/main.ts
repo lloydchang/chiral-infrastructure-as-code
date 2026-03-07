@@ -1787,7 +1787,7 @@ async function analyzeTerraformSetup(sourcePath: string, provider: string, detai
 }
 
 async function analyzePulumiSetup(sourcePath: string, provider: string, detailedCosts: boolean = false) {
-  console.log(`\n📋 Pulumi Setup Analysis`);
+  console.log(`\n📤 Stack Outputs`);
 
   // Check if it's a directory containing Pulumi.yaml
   const stats = fs.statSync(sourcePath);
@@ -1818,7 +1818,29 @@ async function analyzePulumiSetup(sourcePath: string, provider: string, detailed
 
     console.log(`   📄 Pulumi.yaml found`);
     console.log(`   📄 Project: ${projectConfig.name || 'unnamed'}`);
-    console.log(`   📄 Runtime: ${projectConfig.runtime || 'unknown'}`);
+    console.log(`🔧 Runtime: ${projectConfig.runtime || 'unknown'}`);
+    
+    // Check for configuration usage in code files or Pulumi.yaml
+    let hasConfigUsage = false;
+    if (projectConfig.config && Object.keys(projectConfig.config).length > 0) {
+      hasConfigUsage = true;
+    } else {
+      // Check code files for config usage
+      const codeFiles = fs.readdirSync(sourcePath).filter(file => 
+        file.endsWith('.ts') || file.endsWith('.js') || file.endsWith('.py')
+      );
+      for (const codeFile of codeFiles) {
+        const content = fs.readFileSync(path.join(sourcePath, codeFile), 'utf8');
+        if (content.includes('new pulumi.Config') || content.includes('config.get')) {
+          hasConfigUsage = true;
+          break;
+        }
+      }
+    }
+    
+    if (hasConfigUsage) {
+      console.log(`⚙️  Configuration`);
+    }
 
     language = projectConfig.runtime || 'unknown';
 
