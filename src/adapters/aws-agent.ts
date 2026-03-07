@@ -45,23 +45,27 @@ export interface CostAnalysis {
   recommendations: string[];
 }
 
+export interface DriftResult {
+  hasDrift: boolean;
+  driftedResources: Array<{
+    resourceType: string;
+    resourceName: string;
+    expected: any;
+    actual: any;
+  }>;
+  missingResources: string[];
+  addedResources: string[];
+  remediation: string[];
+}
+
 export interface ComplianceResult {
   compliant: boolean;
   violations: Array<{
-    id: string;
+    rule: string;
     severity: 'high' | 'medium' | 'low';
     description: string;
-    remediation: string;
   }>;
   recommendations: string[];
-}
-
-export interface DriftResult {
-  hasDrift: boolean;
-  driftedResources: string[];
-  missingResources: string[];
-  addedResources: string[];
-  summary: string;
 }
 
 export class AwsAgentAdapter {
@@ -256,10 +260,9 @@ export class AwsAgentAdapter {
       return {
         compliant: compliance.compliant,
         violations: compliance.violations?.map((v: any) => ({
-          id: v.id || 'unknown',
+          rule: v.id || 'unknown',
           severity: v.severity || 'medium',
-          description: v.description || 'Unknown violation',
-          remediation: v.remediation || v.remediation || 'Review required'
+          description: v.description || 'Unknown violation'
         })) || [],
         recommendations: compliance.recommendations || []
       };
@@ -284,7 +287,7 @@ export class AwsAgentAdapter {
         driftedResources: [],
         missingResources: [],
         addedResources: [],
-        summary: 'Drift detection completed - no drift detected'
+        remediation: ['Drift detection completed - no drift detected']
       };
     } catch (error) {
       console.error('Drift detection failed:', error);
