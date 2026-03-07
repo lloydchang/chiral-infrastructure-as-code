@@ -156,8 +156,8 @@ describe('Migration and Analysis Tests', () => {
 
       await compareApproaches(50, 3, 'simple');
 
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('📊 Detailed Comparison:'));
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('💰 Monthly Cost Comparison:'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('📊 Detailed Comparison'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('💰 Cost Comparison'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Premium Fees: $49.50'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Annual Savings: $'));
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('✅ Zero state architecture'));

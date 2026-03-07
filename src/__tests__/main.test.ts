@@ -370,15 +370,6 @@ resource "azurerm_kubernetes_cluster" "main" {
       await expect(importIaC('./terraform.tfstate', 'aws', 'test-stack')).rejects.toThrow('Corrupted Terraform state file');
     });
 
-    it('should handle corrupted Terraform state files gracefully', async () => {
-      const mockCorruptedState = '{ invalid json';
-
-      mockFs.statSync.mockReturnValue({ isDirectory: () => false } as any);
-      mockFs.readFileSync.mockReturnValue(mockCorruptedState);
-
-      await expect(importIaC('./terraform.tfstate', 'aws', 'test-stack')).rejects.toThrow('Corrupted Terraform state file');
-    });
-
     it('should handle empty Terraform state files', async () => {
       const mockEmptyState = JSON.stringify({
         version: 4,
