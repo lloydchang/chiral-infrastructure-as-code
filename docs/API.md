@@ -795,6 +795,134 @@ export const migrationConfig = {
 };
 ```
 
+## 🤖 Agent Integration
+
+Chiral supports integration with cloud provider agent services for agentic infrastructure management while preserving deterministic core functionality.
+
+### Agent Orchestrator
+
+The `AgentOrchestrator` coordinates multi-agent IaC generation using GenDB-inspired architecture.
+
+```typescript
+import { AgentOrchestrator, OrchestratorConfig } from './src/agents/orchestrator';
+
+const config: OrchestratorConfig = {
+  enableMultiAgent: true,
+  securityConfig: {
+    enableEncryption: true,
+    credentialValidation: true
+  },
+  fallbackToDeterministic: true,
+  maxRetries: 3,
+  timeoutMs: 30000
+};
+
+const orchestrator = new AgentOrchestrator(config);
+const result = await orchestrator.generate(config);
+```
+
+### Cloud Agent Adapters
+
+Chiral provides adapters for major cloud agent services:
+
+#### AWS Agent Adapter
+
+```typescript
+import { AwsAgentAdapter } from './src/adapters/aws-agent';
+
+const adapter = new AwsAgentAdapter({
+  region: 'us-east-1',
+  modelId: 'anthropic.claude-3-sonnet-20240229-v1:0'
+});
+
+const result = await adapter.generateWithAgent(chiralConfig);
+```
+
+#### Azure Agent Adapter
+
+```typescript
+import { AzureAgentAdapter } from './src/adapters/azure-agent';
+
+const adapter = new AzureAgentAdapter('eastus');
+const result = await adapter.invokeAzureAgent(prompt);
+```
+
+#### GCP Agent Adapter
+
+```typescript
+import { GcpAgentAdapter } from './src/adapters/gcp-agent';
+
+const adapter = new GcpAgentAdapter({
+  projectId: 'my-project',
+  location: 'us-central1'
+});
+
+const result = await adapter.invokeGcpAgent(prompt);
+```
+
+### Multi-Agent Pipeline
+
+The GenDB-inspired multi-agent pipeline includes specialized agents:
+
+```typescript
+// WorkloadAnalyzer - Analyzes intent and constraints
+const workloadAnalyzer = new WorkloadAnalyzerAgent(awsAdapter);
+
+// StorageDesigner - Designs optimal resource configurations
+const storageDesigner = new StorageDesignerAgent(awsAdapter);
+
+// IaCPlanner - Plans execution strategies
+const iacPlanner = new IaCPlannerAgent(awsAdapter);
+
+// IaCGenerator - Generates optimized IaC code
+const iacGenerator = new IaCGeneratorAgent(awsAdapter);
+
+// IaCOptimizer - Iteratively refines with feedback
+const iacOptimizer = new IaCOptimizerAgent(awsAdapter);
+```
+
+### CLI Agent Commands
+
+Use the `--multi-agent` flag for GenDB-style generation:
+
+```bash
+# Generate with multi-agent optimization
+chiral generate --multi-agent --config chiral.config.ts --providers aws,azure,gcp
+
+# Generate with specific agent configuration
+chiral generate --multi-agent --max-iterations 5 --optimization-goals cost,performance
+```
+
+### Agent Message Protocol
+
+Agents communicate using standardized messages:
+
+```typescript
+interface AgentMessage {
+  from: string;
+  to: string;
+  type: 'analysis' | 'design' | 'plan' | 'generation' | 'optimization' | 'feedback';
+  payload: any;
+  timestamp: number;
+}
+```
+
+### Security Manager
+
+The `AgentSecurityManager` handles authentication and validation:
+
+```typescript
+import { AgentSecurityManager } from './src/agents/security-manager';
+
+const securityManager = new AgentSecurityManager({
+  enableEncryption: true,
+  credentialValidation: true,
+  inputValidation: true
+});
+
+await securityManager.validateCredentials();
+```
+
 ## 🔧 Development
 
 ### Testing
