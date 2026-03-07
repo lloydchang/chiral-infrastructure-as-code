@@ -486,6 +486,12 @@ Once imported, use the generated configuration for multi-cloud generation:
 # Generate artifacts for all clouds
 chiral compile -c imported-config.ts -o dist
 
+# Generate with multi-agent optimization (GenDB-inspired)
+chiral compile -c imported-config.ts -o dist --multi-agent
+
+# Generate with specific optimization goals
+chiral compile -c imported-config.ts -o dist --multi-agent --max-iterations 5 --optimization-goals cost,performance
+
 # Deploy to specific cloud
 cd dist/aws-assembly && cdk deploy
 az deployment group create --resource-group my-rg --template-file azure-deployment.bicep
