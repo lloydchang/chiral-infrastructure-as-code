@@ -47,6 +47,9 @@ resource "aws_db_instance" "test" {
     });
 
     it('should handle different providers', async () => {
+      // Suppress expected warnings for non-existent paths
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      
       const awsResources = await TerraformImportAdapter.parseTerraformFiles('/aws/path', 'aws');
       const azureResources = await TerraformImportAdapter.parseTerraformFiles('/azure/path', 'azure');
       const gcpResources = await TerraformImportAdapter.parseTerraformFiles('/gcp/path', 'gcp');
@@ -54,6 +57,9 @@ resource "aws_db_instance" "test" {
       expect(Array.isArray(awsResources)).toBe(true);
       expect(Array.isArray(azureResources)).toBe(true);
       expect(Array.isArray(gcpResources)).toBe(true);
+      
+      // Restore console.warn
+      consoleSpy.mockRestore();
     });
   });
 

@@ -272,10 +272,16 @@ resource kubernetesCluster 'Microsoft.ContainerService/managedClusters@2023-05-0
       mockFs.writeFileSync.mockImplementation(() => {});
       mockFs.readFileSync.mockReturnValue(mockBicepContent);
 
+      // Suppress expected Azure Bicep warnings
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
       const result = await importIaC('./main.bicep', 'azure', 'test-stack');
       
       expect(result).toBeDefined();
       expect(result.projectName).toBe('test-stack');
+      
+      // Restore console.warn
+      consoleSpy.mockRestore();
     });
 
     it('should handle different providers', async () => {
