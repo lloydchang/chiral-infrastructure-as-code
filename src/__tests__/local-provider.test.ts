@@ -320,8 +320,13 @@ describe('Local Provider Functionality', () => {
         expect(mapInstanceTypeToWorkloadSize('minikube', 'local')).toBe('small');
         expect(mapInstanceTypeToWorkloadSize('kind', 'local')).toBe('small');
         expect(mapInstanceTypeToWorkloadSize('k3s', 'local')).toBe('small');
-        expect(mapInstanceTypeToWorkloadSize('docker-desktop', 'local')).toBe('medium');
+        expect(mapInstanceTypeToWorkloadSize('k0s', 'local')).toBe('small');
+        expect(mapInstanceTypeToWorkloadSize('microk8s', 'local')).toBe('small');
+        expect(mapInstanceTypeToWorkloadSize('rancher-desktop', 'local')).toBe('medium');
+        expect(mapInstanceTypeToWorkloadSize('podman', 'local')).toBe('small');
+        expect(mapInstanceTypeToWorkloadSize('lima', 'local')).toBe('small');
         expect(mapInstanceTypeToWorkloadSize('colima', 'local')).toBe('medium');
+        expect(mapInstanceTypeToWorkloadSize('docker-desktop', 'local')).toBe('medium');
         expect(mapInstanceTypeToWorkloadSize('unknown', 'local')).toBe('small'); // default
       });
     });

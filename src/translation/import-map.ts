@@ -56,9 +56,13 @@ const localInstanceTypeToSize: { [key: string]: WorkloadSize } = {
   'minikube': 'small',
   'kind': 'small',
   'k3s': 'small',
-  'docker-desktop': 'medium',
+  'k0s': 'small',
+  'microk8s': 'small',
+  'rancher-desktop': 'medium',
+  'podman': 'small',
   'lima': 'small',
   'colima': 'medium',
+  'docker-desktop': 'medium',
 };
 
 const localDbClassToSize: { [key: string]: WorkloadSize } = {

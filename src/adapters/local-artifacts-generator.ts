@@ -3,7 +3,7 @@ import { ChiralSystem, WorkloadSize } from '../intent';
 import * as yaml from 'js-yaml';
 
 export interface LocalArtifactOptions {
-  environment: 'docker-compose' | 'minikube' | 'kind' | 'k3s' | 'docker-desktop';
+  environment: 'docker-compose' | 'minikube' | 'kind' | 'k3s' | 'docker-desktop' | 'podman' | 'k0s' | 'rancher-desktop' | 'lima' | 'colima' | 'microk8s' | 'k3d' | 'docker-swarm' | 'nomad' | 'containerd' | 'cri-o';
   includeMonitoring?: boolean;
   includeIngress?: boolean;
   includePersistence?: boolean;
@@ -38,6 +38,15 @@ export class LocalArtifactGenerator {
     
     // K3s configuration
     artifacts['k3s-config.yaml'] = this.generateK3sConfig();
+    
+    // K3d configuration
+    artifacts['k3d-config.yaml'] = this.generateK3dConfig();
+    
+    // Docker Swarm configuration
+    artifacts['docker-swarm.yml'] = this.generateDockerSwarm();
+    
+    // Nomad configuration
+    artifacts['nomad.hcl'] = this.generateNomadConfig();
     
     // Setup and utility scripts
     artifacts['setup-local.sh'] = this.generateSetupScript();
@@ -1016,5 +1025,191 @@ networks:
     const cidr = this.config.networkCidr;
     const parts = cidr.split('.');
     return `${parts[0]}.${parts[1]}.${parts[2]}.1`;
+  }
+
+  private generateK3dConfig(): string {
+    return `# K3d cluster configuration for ${this.config.projectName}
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: ${this.config.projectName}-cluster
+servers: 1
+agents: 2
+ports:
+  - port: 8080
+    nodeFilters:
+    - loadbalancer
+  - port: 8443
+    nodeFilters:
+    - loadbalancer
+options:
+  k3s:
+    extraArgs:
+      - arg: --disable=traefik
+  kubeconfig:
+    updateDefaultKubeconfig: true
+    switchCurrentContext: true
+`;
+  }
+
+  private generateDockerSwarm(): string {
+    return `# Docker Stack configuration for ${this.config.projectName}
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:${this.config.postgres.engineVersion}
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: '${this.getCpuLimit()}'
+          memory: '${this.getMemoryLimit()}M'
+        reservations:
+          cpus: '0.5'
+          memory: '512M'
+    environment:
+      POSTGRES_DB: ${this.config.projectName}
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: \${POSTGRES_PASSWORD:-password123}
+    networks:
+      - ${this.config.projectName}-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  adfs:
+    image: mcr.microsoft.com/windows/servercore:ltsc2022
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: '2'
+          memory: '4G'
+        reservations:
+          cpus: '1'
+          memory: '2G'
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - ${this.config.projectName}-network
+    volumes:
+      - adfs_data:/c/data
+
+  nginx:
+    image: nginx:alpine
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '512M'
+        reservations:
+          cpus: '0.25'
+          memory: '256M'
+    ports:
+      - "8080:80"
+      - "8443:443"
+    networks:
+      - ${this.config.projectName}-network
+    depends_on:
+      - postgres
+      - adfs
+
+volumes:
+  postgres_data:
+    driver: local
+  adfs_data:
+    driver: local
+
+networks:
+  ${this.config.projectName}-network:
+    driver: overlay
+    attachable: true
+`;
+  }
+
+  private generateNomadConfig(): string {
+    return `# Nomad job configuration for ${this.config.projectName}
+job "${this.config.projectName}" {
+  datacenters = ["dc1"]
+  
+  group "postgres" {
+    count = 1
+    
+    task "postgres" {
+      driver = "docker"
+      
+      config {
+        image = "postgres:${this.config.postgres.engineVersion}"
+        ports = ["postgres"]
+        
+        env = {
+          POSTGRES_DB = "${this.config.projectName}"
+          POSTGRES_USER = "admin"
+          POSTGRES_PASSWORD = "password123"
+        }
+        
+        volumes = [
+          {
+            type = "bind"
+            source = "postgres_data"
+            destination = "/var/lib/postgresql/data"
+          }
+        ]
+      }
+      
+      resources {
+        cpu = ${this.getCpuLimit()} * 100
+        memory = ${this.getMemoryLimit()}
+      }
+      
+      service {
+        name = "postgres"
+        port = "postgres"
+        check {
+          type = "tcp"
+          interval = "10s"
+          timeout = "3s"
+        }
+      }
+    }
+  }
+  
+  group "adfs" {
+    count = 1
+    
+    task "adfs" {
+      driver = "docker"
+      
+      config {
+        image = "mcr.microsoft.com/windows/servercore:ltsc2022"
+        ports = ["http", "https"]
+      }
+      
+      resources {
+        cpu = 2000
+        memory = 4096
+      }
+      
+      service {
+        name = "adfs"
+        port = "http"
+        check {
+          type = "tcp"
+          interval = "10s"
+          timeout = "3s"
+        }
+      }
+    }
+  }
+}
+`;
   }
 }
