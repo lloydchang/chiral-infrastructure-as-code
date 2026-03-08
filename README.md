@@ -148,7 +148,7 @@ export const config: ChiralSystem = {
 
 **Key Features:**
 - **minNodes/maxNodes**: Controls Kubernetes cluster sizing and autoscaling bounds
-- **Autoscaling**: All clouds support automatic scaling within configured limits
+- **Autoscaling**: All clouds have automatic scaling within configured limits
 - **Environment-aware**: Development configurations
 
 Run the CLI:
@@ -225,7 +225,7 @@ const chiralSystem = await TerraformImportAdapter.importFromTerraform({
 });
 ```
 
-#### Supported Resources
+#### Resources
 - **AWS**: EKS clusters, RDS databases, EC2 instances, VPC networks
 - **Azure**: AKS clusters, PostgreSQL servers, VM instances, Virtual networks
 - **GCP**: GKE clusters, Cloud SQL databases, Compute instances, VPC networks
@@ -260,7 +260,7 @@ The analysis includes:
 
 #### Migration Strategies
 
-Chiral supports three migration strategies:
+Chiral has three migration strategies:
 
 **Greenfield Migration** (Recommended for new environments):
 ```bash
@@ -346,9 +346,9 @@ chiral migrate --source terraform/ --provider aws --strategy parallel
 
 The Terraform migration interface transforms Chiral from an IaC generation tool into a **complete migration solution** for teams wanting to escape the complexity and risks of Terraform state management.
 
-### Enhanced Migration & Multi-Format Support
+### Enhanced Migration & Multi-Format
 
-Chiral now provides migration support for multiple IaC tools and enhanced capabilities:
+Chiral now provides migration for multiple IaC tools and enhanced capabilities:
 
 #### Multi-Format IaC Import
 ```bash
@@ -371,7 +371,7 @@ Chiral provides a **Terraform Import Adapter** that analyzes existing Terraform 
 3. **Map to Chiral Intent**: Converts cloud-specific resources to Chiral's abstract intent schema
 4. **Generate Configuration**: Creates a Chiral config file ready for multi-cloud generation
 
-#### Supported Resource Types
+#### Resource Types
 
 **AWS Resources:**
 - `aws_eks_cluster` → K8s cluster configuration (version, node groups)
@@ -442,7 +442,7 @@ The Terraform Import Adapter includes a custom HCL parser that handles basic Ter
 
 **HCL Parsing Strategy:**
 - Regex-based resource block detection
-- Support for string, numeric, array, and boolean values
+- String, numeric, array, and boolean values
 - Nested block parsing for complex resource configurations
 - Error handling for malformed HCL files
 
@@ -457,7 +457,7 @@ The Terraform Import Adapter includes a custom HCL parser that handles basic Ter
 
 **Version 0.0.0** - Latest Updates:
 - HardwareMap Integration: Unified hardware mapping system for consistent instance type resolution across all cost analysis modules
-- Enhanced AWS Pricing: Added support for m5.large instances in cost estimation
+- Enhanced AWS Pricing: Added m5.large instances in cost estimation
 - TypeScript Fixes: Resolved compilation errors and improved type safety
 - Resource Mapping: Improved AWS, Azure, and GCP resource detection and mapping
 - Error Handling: Better error messages and graceful failure handling
@@ -468,13 +468,13 @@ The Terraform Import Adapter includes a custom HCL parser that handles basic Ter
 - **Smart Resource Mapping**: Automatically maps cloud-specific instance types and configurations to Chiral workload sizes
 - **Validation**: Ensures imported configurations meet Chiral's intent schema requirements
 - **Migration Metadata**: Includes migration strategy and compliance validation settings
-- **Multi-Cloud Ready**: Imported configurations can be used to generate artifacts for any supported cloud
+- **Multi-Cloud Ready**: Imported configurations can be used to generate artifacts
 - **Testing**: Test suite validates actual HCL parsing and resource mapping with real Terraform files
 
 #### Limitations
 
 - **HCL Parsing**: Uses regex-based parsing; complex nested expressions or advanced HCL features may require manual adjustment
-- **Resource Coverage**: Supports common infrastructure patterns; custom resources may need manual mapping
+- **Resource Coverage**: Common infrastructure patterns; custom resources may need manual mapping
 - **Dependencies**: Does not currently import resource dependencies or complex relationships
 - **Variables**: Does not resolve Terraform variables; uses default values or inferred settings
 
@@ -498,7 +498,7 @@ az deployment group create --resource-group my-rg --template-file azure-deployme
 gcloud infra-manager deployments apply projects/my-project/locations/global/deployments/my-deployment --git-source-repo=https://github.com/my-org/my-repo --git-source-directory=dist
 ```
 
-#### Pulumi Migration Support
+#### Pulumi Migration
 ```bash
 # Analyze and migrate from Pulumi projects
 chiral migrate -s ./pulumi-project -p aws --iac-tool pulumi --analyze-only
@@ -516,7 +516,7 @@ chiral migrate -s ./pulumi-project -p aws --iac-tool pulumi
 
 Chiral provides compliance validation for federal and state government cloud requirements:
 
-**Supported Frameworks:**
+**Frameworks:**
 - **FedRAMP**: Low, Moderate, High impact levels
 - **GovRAMP**: Low, Moderate, High impact levels (formerly StateRAMP)
 
@@ -577,7 +577,7 @@ For detailed compliance guidance, see **[FEDRAMP_GOVRAMP_COMPLIANCE.md](docs/FED
 
 Chiral provides compliance validation for healthcare data protection requirements:
 
-**Supported Frameworks:**
+**Frameworks:**
 - **HIPAA**: Low, Moderate, High impact levels (Health Insurance Portability and Accountability Act)
 - **HITRUST CSF**: Low, Moderate, High impact levels (Health Information Trust Alliance Common Security Framework)
 - **HITECH**: Low, Moderate, High impact levels (Health Information Technology for Economic and Clinical Health Act)
@@ -722,7 +722,7 @@ For detailed healthcare compliance guidance, see **[HEALTHCARE_COMPLIANCE.md](do
 
 Chiral provides compliance validation for Department of Defense Impact Levels (IL2, IL4, IL5, IL6) for Controlled Unclassified Information (CUI) and mission-critical defense systems:
 
-**Supported Frameworks:**
+**Frameworks:**
 - **DoD IL2**: Basic protection for CUI
 - **DoD IL4**: Enhanced protection for CUI and mission-critical systems  
 - **DoD IL5**: Highest level protection for national security systems
@@ -930,7 +930,7 @@ resource "chiral_kubernetes_cluster" "main" {
 
 #### Bridge Options
 
-For gradual migration, Chiral supports bridge configurations that delegate state management to cloud providers while maintaining Terraform compatibility:
+For gradual migration, Chiral has bridge configurations that delegate state management to cloud providers while maintaining Terraform compatibility:
 
 ```bash
 # Generate Terraform with AWS CloudFormation state delegation
@@ -1039,7 +1039,7 @@ For a deeper dive into **why multi-cloud infrastructure management is fundamenta
 
 Chiral produces native cloud artifacts that can be deployed independently: AWS CDK and CloudFormation for AWS, Azure Bicep for Azure, and Google Cloud Infrastructure Manager (Terraform Blueprint) for GCP. These are standard cloud templates that work with native cloud tooling, with GCP's Terraform Blueprint leveraging Infrastructure Manager for state-managed deployment, avoiding traditional Terraform state issues.
 
-**Autoscaling Support:**
+**Autoscaling:**
 - **AWS EKS**: Auto-scaling node groups with `minSize`/`maxSize` from intent
 - **Azure AKS**: Auto-scaling agent pools with `minCount`/`maxCount` from intent  
 - **GCP GKE**: Auto-scaling node pools with `min_node_count`/`max_node_count` from intent
@@ -1147,7 +1147,7 @@ Chiral takes a different approach to multi-cloud infrastructure management compa
 **Azure Enhancements**:
 - Uses Azure Verified Modules (AVM) for standardized deployments
 - Integrates azure-cost-cli for real-time cost estimation during generation
-- Supports deployment stacks for complete mode in environments
+- Deployment stacks for complete mode in environments
 
 **Ideal**: Each cloud's best native IaC format (Bicep for Azure, Terraform for GCP)
 
