@@ -7,15 +7,22 @@ import { CostAnalyzer } from '../cost-analysis';
 // Skill Response Interfaces
 export interface ArtifactResponse {
   artifacts: {
-    aws?: string;
-    azure?: string;
-    gcp?: string;
     local?: string;
+    aws?: string;
+    'aws-local-emulator'?: string;
+    'aws-local-simulator'?: string;
+    azure?: string;
+    'azure-local-emulator'?: string;
+    'azure-local-simulator'?: string;
+    gcp?: string;
+    'gcp-local-emulator'?: string;
+    'gcp-local-simulator'?: string;
   };
   metadata: {
     generatedAt: Date;
     agentEnhanced: boolean;
     processingTime: number;
+    mode?: 'production' | 'emulator' | 'simulator';
   };
 }
 
@@ -119,6 +126,69 @@ export class LocalAgentAdapter {
       };
     } catch (error) {
       console.error('Artifact generation failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate local emulator artifacts (full service simulation)
+   */
+  async generateLocalEmulatorArtifacts(config: ChiralSystem): Promise<ArtifactResponse> {
+    const startTime = Date.now();
+
+    try {
+      const validation = await this.validateConfig(config);
+      if (!validation.valid) {
+        throw new Error(`Configuration validation failed: ${validation.errors.join(', ')}`);
+      }
+
+      const dockerCompose = this.generateEmulatorDockerCompose(config);
+      const emulatorSetup = this.generateEmulatorSetupScript(config);
+
+      return {
+        artifacts: {
+          local: dockerCompose + '\n\n' + emulatorSetup
+        },
+        metadata: {
+          generatedAt: new Date(),
+          agentEnhanced: false,
+          processingTime: Date.now() - startTime,
+          mode: 'emulator'
+        }
+      };
+    } catch (error) {
+      console.error('Local emulator artifact generation failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate local simulator artifacts (partial simulation)
+   */
+  async generateLocalSimulatorArtifacts(config: ChiralSystem): Promise<ArtifactResponse> {
+    const startTime = Date.now();
+
+    try {
+      const validation = await this.validateConfig(config);
+      if (!validation.valid) {
+        throw new Error(`Configuration validation failed: ${validation.errors.join(', ')}`);
+      }
+
+      const simulationScripts = this.generateSimulationScripts(config);
+
+      return {
+        artifacts: {
+          local: simulationScripts
+        },
+        metadata: {
+          generatedAt: new Date(),
+          agentEnhanced: false,
+          processingTime: Date.now() - startTime,
+          mode: 'simulator'
+        }
+      };
+    } catch (error) {
+      console.error('Local simulator artifact generation failed:', error);
       throw error;
     }
   }
