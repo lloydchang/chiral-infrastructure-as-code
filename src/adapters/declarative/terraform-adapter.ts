@@ -46,7 +46,7 @@ export class TerraformImportAdapter {
     /-----BEGIN\s+(RSA\s+)?PRIVATE\s+KEY-----/g
   ];
 
-  static async parseTerraformFiles(sourcePath: string, provider: 'aws' | 'azure' | 'gcp' | 'local'): Promise<ParsedTerraformResource[]> {
+  static async parseTerraformFiles(sourcePath: string, provider: 'local' | 'aws' | 'aws-local-emulator' | 'aws-local-simulator' | 'azure' | 'azure-local-emulator' | 'azure-local-simulator' | 'gcp' | 'gcp-local-emulator' | 'gcp-local-simulator'): Promise<ParsedTerraformResource[]> {
     // Parse Terraform .tf files and extract resource definitions
     const resources: ParsedTerraformResource[] = [];
     let securityWarnings: string[] = [];
@@ -145,7 +145,7 @@ export class TerraformImportAdapter {
     return resources;
   }
 
-  static async convertToChiralIntent(resources: ParsedTerraformResource[], provider: 'aws' | 'azure' | 'gcp' | 'local'): Promise<Partial<ChiralSystem>> {
+  static async convertToChiralIntent(resources: ParsedTerraformResource[], provider: 'local' | 'aws' | 'aws-local-emulator' | 'aws-local-simulator' | 'azure' | 'azure-local-emulator' | 'azure-local-simulator' | 'gcp' | 'gcp-local-emulator' | 'gcp-local-simulator'): Promise<Partial<ChiralSystem>> {
     // Convert parsed Terraform resources to Chiral intent
     const intent: Partial<ChiralSystem> = {
       projectName: 'imported-infrastructure',

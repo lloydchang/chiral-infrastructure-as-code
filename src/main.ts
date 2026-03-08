@@ -45,7 +45,7 @@ import { setupCoreCommands } from './cli/core-commands';
 // =================================================================
 // IMPORT HELPERS
 // =================================================================
-export const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 'gcp' | 'local', stackName?: string, agentic?: boolean): Promise<ChiralSystem> => {
+export const importIaC = async (sourcePath: string, provider: 'local' | 'aws' | 'aws-local-emulator' | 'aws-local-simulator' | 'azure' | 'azure-local-emulator' | 'azure-local-simulator' | 'gcp' | 'gcp-local-emulator' | 'gcp-local-simulator', stackName?: string, agentic?: boolean): Promise<ChiralSystem> => {
   const ext = path.extname(sourcePath);
   let resources: any[] = [];
 
@@ -424,7 +424,7 @@ const inferRegion = (resources: any[], provider: string): { aws?: string; azure?
   return {};
 };
 
-const buildChiralSystemFromResources = async (resources: any[], provider: string, stackName?: string, agentic?: boolean): Promise<ChiralSystem> => {
+const buildChiralSystemFromResources = async (resources: any[], provider: 'local' | 'aws' | 'aws-local-emulator' | 'aws-local-simulator' | 'azure' | 'azure-local-emulator' | 'azure-local-simulator' | 'gcp' | 'gcp-local-emulator' | 'gcp-local-simulator', stackName?: string, agentic?: boolean): Promise<ChiralSystem> => {
   // Enhanced resource mapping with better error handling and type support
   const warnings: string[] = [];
   const unmappableResources: string[] = [];
@@ -507,17 +507,19 @@ const buildChiralSystemFromResources = async (resources: any[], provider: string
         const adapter = new AwsAgentAdapter();
         const suggestions = await adapter.suggestMappings(unmappableResources);
         console.log(`AWS Agent suggestions: ${suggestions.join('; ')}`);
-      } else if (provider === 'azure') {
-        const { AzureAgentAdapter } = await import('./adapters/azure-agent');
-        const adapter = new AzureAgentAdapter();
-        const suggestions = await adapter.suggestMappings(unmappableResources);
-        console.log(`Azure Agent suggestions: ${suggestions.join('; ')}`);
-      } else if (provider === 'gcp') {
-        const { GcpAgentAdapter } = await import('./adapters/gcp-agent');
-        const adapter = new GcpAgentAdapter(process.env.GCP_PROJECT_ID || '');
-        const suggestions = await adapter.suggestMappings(unmappableResources);
-        console.log(`GCP Agent suggestions: ${suggestions.join('; ')}`);
       }
+      // Azure and GCP agent imports disabled - agents not yet implemented
+      // else if (provider === 'azure') {
+      //   const { AzureAgentAdapter } = await import('./adapters/azure-agent');
+      //   const adapter = new AzureAgentAdapter();
+      //   const suggestions = await adapter.suggestMappings(unmappableResources);
+      //   console.log(`Azure Agent suggestions: ${suggestions.join('; ')}`);
+      // } else if (provider === 'gcp') {
+      //   const { GcpAgentAdapter } = await import('./adapters/gcp-agent');
+      //   const adapter = new GcpAgentAdapter(process.env.GCP_PROJECT_ID || '');
+      //   const suggestions = await adapter.suggestMappings(unmappableResources);
+      //   console.log(`GCP Agent suggestions: ${suggestions.join('; ')}`);
+      // }
     } catch (error) {
       console.warn('Agentic import failed, continuing with deterministic import:', error);
     }
@@ -832,13 +834,15 @@ program
         if (provider === 'aws') {
           const { AwsAgentAdapter } = await import('./adapters/aws-agent');
           cloudAgent = new AwsAgentAdapter();
-        } else if (provider === 'azure') {
-          const { AzureAgentAdapter } = await import('./adapters/azure-agent');
-          cloudAgent = new AzureAgentAdapter();
-        } else if (provider === 'gcp') {
-          const { GcpAgentAdapter } = await import('./adapters/gcp-agent');
-          cloudAgent = new GcpAgentAdapter(process.env.GCP_PROJECT_ID || '');
         }
+        // Azure and GCP agents not yet implemented
+        // else if (provider === 'azure') {
+        //   const { AzureAgentAdapter } = await import('./adapters/azure-agent');
+        //   cloudAgent = new AzureAgentAdapter();
+        // } else if (provider === 'gcp') {
+        //   const { GcpAgentAdapter } = await import('./adapters/gcp-agent');
+        //   cloudAgent = new GcpAgentAdapter(process.env.GCP_PROJECT_ID || '');
+        // }
 
         // Create multi-agents
         const analyzer = new WorkloadAnalyzerAgent(cloudAgent);

@@ -28,7 +28,7 @@ export function setupCoreCommands(program: Command): void {
     .description('Generate infrastructure artifacts deterministically (No AI enhancement)')
     .requiredOption('-c, --config <path>', 'Path to Chiral configuration file')
     .option('-o, --output <path>', 'Output directory', 'dist')
-    .option('--providers <providers>', 'Cloud providers (comma-separated)', 'aws,azure,gcp,local')
+    .option('--providers <providers>', 'Cloud providers (comma-separated)', 'local,aws,aws-local-emulator,aws-local-simulator,azure,azure-local-emulator,azure-local-simulator,gcp,gcp-local-emulator,gcp-local-simulator')
     .action(async (options) => {
       try {
         console.log('🏗️  CHIRAL CORE - Deterministic Infrastructure Generation');
@@ -169,7 +169,7 @@ export function setupCoreCommands(program: Command): void {
     .command('cost')
     .description('Analyze infrastructure costs (No AI optimization)')
     .requiredOption('-c, --config <path>', 'Path to Chiral configuration file')
-    .option('--providers <providers>', 'Cloud providers (comma-separated)', 'aws,azure,gcp,local')
+    .option('--providers <providers>', 'Cloud providers (comma-separated)', 'local,aws,aws-local-emulator,aws-local-simulator,azure,azure-local-emulator,azure-local-simulator,gcp,gcp-local-emulator,gcp-local-simulator')
     .action(async (options) => {
       try {
         console.log('💰 CHIRAL CORE - Infrastructure Cost Analysis');
