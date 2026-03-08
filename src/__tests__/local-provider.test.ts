@@ -411,9 +411,12 @@ describe('Local Provider Security', () => {
     const artifacts = artifactGenerator.generateAllArtifacts();
 
     // Should use environment variables instead of hardcoded secrets
-    expect(artifacts['docker-compose.yml']).toContain('${POSTGRES_PASSWORD:-password123}');
-    expect(artifacts['docker-compose.yml']).toContain('${REDIS_PASSWORD:-redis123}');
-    expect(artifacts['.env.example']).toContain('your_secure_password_here');
+    expect(artifacts['docker-compose.yml']).toContain('${POSTGRES_PASSWORD}');
+    expect(artifacts['docker-compose.yml']).toContain('${REDIS_PASSWORD}');
+    expect(artifacts['docker-compose.yml']).not.toContain('password123');
+    expect(artifacts['docker-compose.yml']).not.toContain('redis123');
+    expect(artifacts['.env.example']).toContain('CHANGE_THIS_STRONG_PASSWORD');
+    expect(artifacts['.env.example']).toContain('CHANGE_THIS_STRONG_REDIS_PASSWORD');
   });
 
   it('should generate secure Kubernetes secrets', () => {

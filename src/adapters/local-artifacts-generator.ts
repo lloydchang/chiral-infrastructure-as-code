@@ -84,7 +84,7 @@ services:
     environment:
       POSTGRES_DB: ${this.config.projectName}
       POSTGRES_USER: admin
-      POSTGRES_PASSWORD: \${POSTGRES_PASSWORD:-password123}
+      POSTGRES_PASSWORD: \${POSTGRES_PASSWORD}
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     ports:
       - "${this.getPostgresPort()}:5432"
@@ -137,7 +137,7 @@ services:
     networks:
       - ${this.config.projectName}-network
     restart: unless-stopped
-    command: redis-server --appendonly yes --requirepass \${REDIS_PASSWORD:-redis123}
+    command: redis-server --appendonly yes --requirepass \${REDIS_PASSWORD}
 
   nginx:
     image: nginx:alpine
@@ -214,7 +214,7 @@ services:
     networks:
       - ${this.config.projectName}-network
     environment:
-      REDIS_HOSTS: local:redis:6379:0:redis123
+      REDIS_HOSTS: local:redis:6379:0:\${REDIS_PASSWORD}
     profiles:
       - tools
 `;
@@ -383,7 +383,7 @@ volumes:
       },
       type: 'Opaque',
       data: {
-        password: Buffer.from('password123').toString('base64')
+        password: Buffer.from(process.env.POSTGRES_PASSWORD || 'changeme').toString('base64')
       }
     };
 
@@ -842,14 +842,15 @@ k8s-shell: ## Open shell in Kubernetes pod
   private generateEnvExample(): string {
     return `# Environment variables for ${this.config.projectName}
 # Copy this file to .env and modify as needed
+# IMPORTANT: Never commit .env files with real credentials to version control
 
 # Database configuration
-POSTGRES_PASSWORD=your_secure_password_here
+POSTGRES_PASSWORD=CHANGE_THIS_STRONG_PASSWORD
 POSTGRES_DB=${this.config.projectName}
 POSTGRES_USER=admin
 
 # Redis configuration
-REDIS_PASSWORD=your_redis_password_here
+REDIS_PASSWORD=CHANGE_THIS_STRONG_REDIS_PASSWORD
 
 # Application configuration
 NODE_ENV=${this.config.environment}
@@ -860,9 +861,9 @@ NETWORK_CIDR=${this.config.networkCidr}
 EXTERNAL_API_URL=https://api.example.com
 WEBHOOK_URL=https://webhook.example.com
 
-# Security
-JWT_SECRET=your_jwt_secret_here
-ENCRYPTION_KEY=your_encryption_key_here
+# Security - Generate strong random values for these
+JWT_SECRET=CHANGE_THIS_TO_A_STRONG_RANDOM_JWT_SECRET
+ENCRYPTION_KEY=CHANGE_THIS_TO_A_STRONG_RANDOM_ENCRYPTION_KEY
 
 # Monitoring (if enabled)
 PROMETHEUS_URL=http://localhost:9090
@@ -1153,7 +1154,7 @@ job "${this.config.projectName}" {
         env = {
           POSTGRES_DB = "${this.config.projectName}"
           POSTGRES_USER = "admin"
-          POSTGRES_PASSWORD = "password123"
+          POSTGRES_PASSWORD = "\${POSTGRES_PASSWORD}"
         }
         
         volumes = [
