@@ -1,8 +1,22 @@
 # Chiral Configuration Examples
 
-This directory contains example Chiral configurations that demonstrate different migration scenarios and use cases.
+This directory contains example Chiral configurations that demonstrate different migration scenarios, local development setups, and cloud emulator/simulator environments.
 
-## Migration Scenarios
+## 📚 Example Categories
+
+### Local Development & Cloud Emulators
+**📖 [Complete Guide](./README-LOCAL-DEVELOPMENT.md)**
+
+- **[Local Docker Desktop](./local-docker-desktop/)** - Development with Docker Desktop Kubernetes
+- **[Local Kubernetes](./local-kubernetes/)** - Development with minikube, kind, or k3d
+- **[AWS Local Emulator](./aws-local-emulator/)** - Full AWS service emulation with LocalStack
+- **[AWS Local Simulator](./aws-local-simulator/)** - Lightweight AWS service simulation
+- **[Azure Local Emulator](./azure-local-emulator/)** - Full Azure service emulation with Azurite
+- **[Azure Local Simulator](./azure-local-simulator/)** - Lightweight Azure service simulation
+- **[GCP Local Emulator](./gcp-local-emulator/)** - Full GCP service emulation with Firebase
+- **[GCP Local Simulator](./gcp-local-simulator/)** - Lightweight GCP service simulation
+
+### Migration Scenarios
 
 ### 1. Azure-First Organization
 **File**: `azure-migration-example/chiral.config.ts`
