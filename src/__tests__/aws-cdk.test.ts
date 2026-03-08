@@ -308,19 +308,8 @@ describe('AWS CDK Adapter', () => {
       
       expect(stackArtifact).toBeDefined();
       expect(stackArtifact.template).toBeDefined();
-      // Just check that template exists and has resources
       expect(stackArtifact.template.Resources).toBeDefined();
       expect(typeof stackArtifact.template.Resources).toBe('object');
-    });
-
-    it('should include required CloudFormation sections', () => {
-      const stack = new AwsCdkAdapter(app, 'TestStack', config);
-      const cloudAssembly = app.synth();
-      const stackArtifact = cloudAssembly.getStackByName(stack.stackName);
-      
-      expect(stackArtifact).toBeDefined();
-      expect(stackArtifact.template).toBeDefined();
-      expect(stackArtifact.template.Resources).toBeDefined();
     });
   });
 
