@@ -44,13 +44,15 @@ export interface ChiralSystem {
     aws?: string;
     azure?: string;
     gcp?: string;
+    local?: string; // Local development environment
   };
+  local?: string;
   network?: {
     subnetCidr?: string; // Default subnet within networkCidr
   };
   terraformBridge?: {
     enabled?: boolean;
-    provider?: 'aws' | 'azure' | 'gcp';
+    provider?: 'aws' | 'azure' | 'gcp' | 'local';
     delegateState?: boolean;
     sourcePath?: string;
   };
@@ -63,7 +65,7 @@ export interface ChiralSystem {
   };
   pulumiBridge?: {
     enabled?: boolean;
-    provider?: 'aws' | 'azure' | 'gcp';
+    provider?: 'aws' | 'azure' | 'gcp' | 'local';
     delegateState?: boolean;
     sourcePath?: string;
   };
@@ -84,6 +86,7 @@ export interface ChiralSystem {
       aws?: string; // AWS region for data residency
       azure?: string; // Azure region for data residency
       gcp?: string; // GCP region for data residency
+      local?: string; // Local region for data residency
     };
     encryptionAtRest?: boolean; // Require encryption at rest
     encryptionInTransit?: boolean; // Require encryption in transit

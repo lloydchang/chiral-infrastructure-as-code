@@ -50,7 +50,26 @@ const gcpDbTierToSize: { [key: string]: WorkloadSize } = {
   'db-n1-standard-2': 'large',
 };
 
-export function mapInstanceTypeToWorkloadSize(instanceType: string, provider: 'aws' | 'azure' | 'gcp'): WorkloadSize {
+// Local development mappings
+const localInstanceTypeToSize: { [key: string]: WorkloadSize } = {
+  'docker-compose': 'small',
+  'minikube': 'small',
+  'kind': 'small',
+  'k3s': 'small',
+  'docker-desktop': 'medium',
+  'lima': 'small',
+  'colima': 'medium',
+};
+
+const localDbClassToSize: { [key: string]: WorkloadSize } = {
+  'postgres': 'small',
+  'postgres-container': 'small',
+  'mysql': 'small',
+  'sqlite': 'small',
+  'mariadb': 'small',
+};
+
+export function mapInstanceTypeToWorkloadSize(instanceType: string, provider: 'aws' | 'azure' | 'gcp' | 'local'): WorkloadSize {
   switch (provider) {
     case 'aws':
       return awsInstanceTypeToSize[instanceType] || 'small'; // Default to small if unknown
@@ -58,12 +77,14 @@ export function mapInstanceTypeToWorkloadSize(instanceType: string, provider: 'a
       return azureVmSizeToSize[instanceType] || 'small';
     case 'gcp':
       return gcpMachineTypeToSize[instanceType] || 'small';
+    case 'local':
+      return localInstanceTypeToSize[instanceType] || 'small';
     default:
       return 'small';
   }
 }
 
-export function mapDbClassToWorkloadSize(dbClass: string, provider: 'aws' | 'azure' | 'gcp'): WorkloadSize {
+export function mapDbClassToWorkloadSize(dbClass: string, provider: 'aws' | 'azure' | 'gcp' | 'local'): WorkloadSize {
   switch (provider) {
     case 'aws':
       return awsDbClassToSize[dbClass] || 'small';
@@ -71,6 +92,8 @@ export function mapDbClassToWorkloadSize(dbClass: string, provider: 'aws' | 'azu
       return azureDbSkuToSize[dbClass] || 'small';
     case 'gcp':
       return gcpDbTierToSize[dbClass] || 'small';
+    case 'local':
+      return localDbClassToSize[dbClass] || 'small';
     default:
       return 'small';
   }
@@ -86,7 +109,11 @@ export function inferProjectName(stackName?: string, defaultName: string = 'impo
   return stackName || defaultName;
 }
 
-export function inferRegion(provider: 'aws' | 'azure' | 'gcp', providerConfig?: any): { aws?: string, azure?: string, gcp?: string } | undefined {
+export function inferRegion(provider: 'aws' | 'azure' | 'gcp' | 'local', providerConfig?: any): { aws?: string, azure?: string, gcp?: string, local?: string } | undefined {
+  if (provider === 'local') {
+    return { local: 'localhost' };
+  }
+  
   const region = providerConfig?.region || providerConfig?.location;
   if (region) {
     return { [provider]: region };
@@ -103,7 +130,7 @@ export function inferNetworkCidr(resources: any[]): string {
 // Function to build ChiralSystem from parsed IaC resources
 export function buildChiralSystemFromResources(
   resources: any[],
-  provider: 'aws' | 'azure' | 'gcp',
+  provider: 'aws' | 'azure' | 'gcp' | 'local',
   stackName?: string
 ): ChiralSystem {
   // Initialize with defaults
@@ -119,15 +146,26 @@ export function buildChiralSystemFromResources(
 
   // Scan resources to infer intent
   for (const resource of resources) {
-    // Example: if AWS EKS, set k8s
-    // This is placeholder; actual implementation would parse resource types and properties
-    if (resource.type === 'aws_eks_cluster' || resource.type === 'Microsoft.ContainerService/managedClusters') {
+    // Example: if AWS EKS, Azure AKS, GCP GKE, or local K8s
+    if (resource.type === 'aws_eks_cluster' || 
+        resource.type === 'Microsoft.ContainerService/managedClusters' || 
+        resource.type === 'google_container_cluster' ||
+        (provider === 'local' && (resource.type === 'kubernetes_cluster' || resource.type === 'minikube' || resource.type === 'kind'))) {
       config.k8s.version = resource.properties?.kubernetesVersion || config.k8s.version;
       config.k8s.minNodes = resource.properties?.minCount || config.k8s.minNodes;
       config.k8s.maxNodes = resource.properties?.maxCount || config.k8s.maxNodes;
       // Map node size if available
     }
-    // Similar for DB and VM
+    
+    // Database inference for all providers
+    if (resource.type?.includes('rds') || 
+        resource.type?.includes('postgresql') || 
+        resource.type?.includes('database') ||
+        (provider === 'local' && (resource.type === 'postgres_container' || resource.type === 'database'))) {
+      config.postgres.engineVersion = resource.properties?.engineVersion || config.postgres.engineVersion;
+      config.postgres.storageGb = resource.properties?.allocatedStorage || config.postgres.storageGb;
+      // Map database size if available
+    }
   }
 
   return config;

@@ -10,7 +10,7 @@ import * as path from 'path';
 import { HardwareMap } from './translation/hardware-map';
 
 export interface CostEstimate {
-  provider: 'aws' | 'azure' | 'gcp';
+  provider: 'aws' | 'azure' | 'gcp' | 'local';
   totalMonthlyCost: number;
   currency: string;
   breakdown: CostBreakdown;
@@ -43,18 +43,19 @@ export interface CostBreakdown {
 
 export interface CostComparison {
   cheapest: {
-    provider: 'aws' | 'azure' | 'gcp';
+    provider: 'aws' | 'azure' | 'gcp' | 'local';
     cost: number;
     savings: number; // percentage savings vs most expensive
   };
   mostExpensive: {
-    provider: 'aws' | 'azure' | 'gcp';
+    provider: 'aws' | 'azure' | 'gcp' | 'local';
     cost: number;
   };
   estimates: {
     aws: CostEstimate;
     azure: CostEstimate;
     gcp: CostEstimate;
+    local: CostEstimate;
   };
 }
 
@@ -1206,23 +1207,25 @@ export class AzureCostAnalyzer {
 
 export class CostAnalyzer {
   static async compareCosts(config: ChiralSystem, options: CostAnalysisOptions = {}): Promise<CostComparison> {
-    const [awsEstimate, azureEstimate, gcpEstimate] = await Promise.all([
+    const [awsEstimate, azureEstimate, gcpEstimate, localEstimate] = await Promise.all([
       AWSCostAnalyzer.getAWSPricing(config, options),
       AzureCostAnalyzer.getAzurePricing(config, options),
-      GCPCostAnalyzer.getGCPPricing(config, options)
+      GCPCostAnalyzer.getGCPPricing(config, options),
+      this.getLocalPricing(config, options)
     ]);
 
-    const estimates = { aws: awsEstimate, azure: azureEstimate, gcp: gcpEstimate };
+    const estimates = { aws: awsEstimate, azure: azureEstimate, gcp: gcpEstimate, local: localEstimate };
 
     const costs = [
       { provider: 'aws' as const, cost: awsEstimate.totalMonthlyCost },
       { provider: 'azure' as const, cost: azureEstimate.totalMonthlyCost },
-      { provider: 'gcp' as const, cost: gcpEstimate.totalMonthlyCost }
+      { provider: 'gcp' as const, cost: gcpEstimate.totalMonthlyCost },
+      { provider: 'local' as const, cost: localEstimate.totalMonthlyCost }
     ].sort((a, b) => a.cost - b.cost);
 
     const cheapest = costs[0];
-    const mostExpensive = costs[2];
-    const savings = ((mostExpensive.cost - cheapest.cost) / mostExpensive.cost) * 100;
+    const mostExpensive = costs[3]; // Now we have 4 providers
+    const savings = mostExpensive.cost > 0 ? ((mostExpensive.cost - cheapest.cost) / mostExpensive.cost) * 100 : 100;
 
     return {
       cheapest: {
@@ -1244,6 +1247,32 @@ export class CostAnalyzer {
 
   static async getGCPEstimate(config: ChiralSystem, options: CostAnalysisOptions = {}): Promise<CostEstimate> {
     return GCPCostAnalyzer.getGCPPricing(config, options);
+  }
+
+  static async getLocalPricing(config: ChiralSystem, options: CostAnalysisOptions = {}): Promise<CostEstimate> {
+    // Local development is free - no cloud costs
+    const breakdown: CostBreakdown = {
+      compute: { kubernetes: 0, vm: 0, total: 0 },
+      storage: { database: 0, vmDisk: 0, total: 0 },
+      network: { dataTransfer: 0, loadBalancer: 0, total: 0 },
+      other: { management: 0, monitoring: 0, total: 0 }
+    };
+
+    return {
+      provider: 'local',
+      totalMonthlyCost: 0,
+      currency: options.currency || 'USD',
+      breakdown,
+      recommendations: [
+        'Local development is ideal for development and testing',
+        'Use local environment to validate configurations before deploying to cloud',
+        'Local environment provides faster iteration cycles'
+      ],
+      warnings: [
+        'Local environment may not match production performance characteristics',
+        'Consider cloud provider costs when planning production deployment'
+      ]
+    };
   }
 
   static generateCostReport(comparison: CostComparison, options: CostAnalysisOptions = {}): string {

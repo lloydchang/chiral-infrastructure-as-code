@@ -45,7 +45,7 @@ import { setupCoreCommands } from './cli/core-commands';
 // =================================================================
 // IMPORT HELPERS
 // =================================================================
-export const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 'gcp', stackName?: string, agentic?: boolean): Promise<ChiralSystem> => {
+export const importIaC = async (sourcePath: string, provider: 'aws' | 'azure' | 'gcp' | 'local', stackName?: string, agentic?: boolean): Promise<ChiralSystem> => {
   const ext = path.extname(sourcePath);
   let resources: any[] = [];
 
@@ -400,7 +400,7 @@ const inferWindowsVersion = (resources: any[]): '2019' | '2022' => {
   return versions[0] || '2022';
 };
 
-const inferRegion = (resources: any[], provider: string): { aws?: string; azure?: string; gcp?: string } => {
+const inferRegion = (resources: any[], provider: string): { aws?: string; azure?: string; gcp?: string; local?: string } => {
   // Extract region information from resource configurations
   const regions = resources.map(r => {
     const props = r.values || r.properties || {};
@@ -417,6 +417,8 @@ const inferRegion = (resources: any[], provider: string): { aws?: string; azure?
     return { azure: region.replace(/\s+/g, ' ') };
   } else if (provider === 'gcp') {
     return { gcp: region.split('-')[0] + '-' + region.split('-')[1] };
+  } else if (provider === 'local') {
+    return { local: 'localhost' };
   }
   
   return {};
@@ -446,6 +448,12 @@ const buildChiralSystemFromResources = async (resources: any[], provider: string
       db: ['google_sql_database_instance'],
       vm: ['google_compute_instance'],
       network: ['google_compute_network', 'google_compute_subnetwork']
+    },
+    local: {
+      k8s: ['kubernetes_deployment', 'kubernetes_service', 'minikube_cluster'],
+      db: ['docker_container'],
+      vm: ['docker_container'],
+      network: ['docker_network']
     }
   };
 
@@ -1048,11 +1056,11 @@ program
   .command('import')
   .description('Import existing IaC into Chiral config')
   .requiredOption('-s, --source <path>', 'Path to IaC source file (.tf, .tfstate, .yaml, .json, .bicep)')
-  .requiredOption('-p, --provider <provider>', 'Cloud provider: aws, azure, gcp')
+  .requiredOption('-p, --provider <provider>', 'Cloud provider: aws, azure, gcp, local')
   .option('-o, --output <path>', 'Output path for chiral config', 'chiral.config.ts')
   .action(async (options) => {
     const sourcePath = path.resolve(options.source);
-    const provider = options.provider as 'aws' | 'azure' | 'gcp';
+    const provider = options.provider as 'aws' | 'azure' | 'gcp' | 'local';
     const outputPath = path.resolve(options.output);
 
     console.log(`\n🧪 Importing IaC from [${sourcePath}] for [${provider}]`);

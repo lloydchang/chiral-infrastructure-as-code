@@ -84,20 +84,22 @@ export class MigrationWizard {
     });
   }
 
-  private async selectProvider(): Promise<'aws' | 'azure' | 'gcp'> {
+  private async selectProvider(): Promise<'aws' | 'azure' | 'gcp' | 'local'> {
     console.log('\nSelect target cloud provider:');
     console.log('1. AWS');
     console.log('2. Azure');
     console.log('3. GCP');
+    console.log('4. Local (Development)');
 
-    const choice = await this.askQuestion('Enter choice (1-3): ');
+    const choice = await this.askQuestion('Enter choice (1-4): ');
 
     switch (choice) {
       case '1': return 'aws';
       case '2': return 'azure';
       case '3': return 'gcp';
+      case '4': return 'local';
       default:
-        console.log('Invalid choice. Please select 1, 2, or 3.');
+        console.log('Invalid choice. Please select 1, 2, 3, or 4.');
         return this.selectProvider();
     }
   }

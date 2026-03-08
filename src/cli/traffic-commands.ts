@@ -18,7 +18,7 @@ export function setupTrafficCommands(program: Command): void {
     .command('enforce')
     .description('Start traffic enforcement with 100% consistency requirement')
     .option('-c, --config <path>', 'Traffic enforcement configuration file')
-    .option('-p, --provider <provider>', 'Cloud provider (aws|azure|gcp)', 'aws')
+    .option('-p, --provider <provider>', 'Cloud provider (aws|azure|gcp|local)', 'aws')
     .option('-n, --project <name>', 'Project name')
     .option('-e, --environment <env>', 'Environment (dev|staging|prod)', 'staging')
     .option('-m, --mode <mode>', 'Enforcement mode (gradual|immediate|scheduled)', 'gradual')
@@ -214,8 +214,8 @@ function validateTrafficConfig(config: TrafficEnforcementConfig): void {
   const errors: string[] = [];
 
   // Validate provider
-  if (!['aws', 'azure', 'gcp'].includes(config.provider)) {
-    errors.push(`Invalid provider: ${config.provider}. Must be aws, azure, or gcp`);
+  if (!['aws', 'azure', 'gcp', 'local'].includes(config.provider)) {
+    errors.push(`Invalid provider: ${config.provider}. Must be aws, azure, gcp, or local`);
   }
 
   // Validate traffic steps

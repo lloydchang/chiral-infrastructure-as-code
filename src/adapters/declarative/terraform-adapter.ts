@@ -12,14 +12,14 @@ import { getRegionalHardwareMap } from '../../translation/hardware-map';
 import { mapInstanceTypeToWorkloadSize, mapDbClassToWorkloadSize, inferEnvironment, inferProjectName, inferNetworkCidr } from '../../translation/import-map';
 
 export interface TerraformImportConfig {
-  provider: 'aws' | 'azure' | 'gcp';
+  provider: 'aws' | 'azure' | 'gcp' | 'local';
   sourcePath: string;
   stateFile?: string;
   analyzeOnly?: boolean;
 }
 
 export interface TerraformConfig {
-  provider: 'aws' | 'azure' | 'gcp';
+  provider: 'aws' | 'azure' | 'gcp' | 'local';
   delegateState?: boolean;
   outputDirectory?: string;
   projectName: string;
@@ -46,7 +46,7 @@ export class TerraformImportAdapter {
     /-----BEGIN\s+(RSA\s+)?PRIVATE\s+KEY-----/g
   ];
 
-  static async parseTerraformFiles(sourcePath: string, provider: 'aws' | 'azure' | 'gcp'): Promise<ParsedTerraformResource[]> {
+  static async parseTerraformFiles(sourcePath: string, provider: 'aws' | 'azure' | 'gcp' | 'local'): Promise<ParsedTerraformResource[]> {
     // Parse Terraform .tf files and extract resource definitions
     const resources: ParsedTerraformResource[] = [];
     let securityWarnings: string[] = [];
@@ -145,7 +145,7 @@ export class TerraformImportAdapter {
     return resources;
   }
 
-  static async convertToChiralIntent(resources: ParsedTerraformResource[], provider: 'aws' | 'azure' | 'gcp'): Promise<Partial<ChiralSystem>> {
+  static async convertToChiralIntent(resources: ParsedTerraformResource[], provider: 'aws' | 'azure' | 'gcp' | 'local'): Promise<Partial<ChiralSystem>> {
     // Convert parsed Terraform resources to Chiral intent
     const intent: Partial<ChiralSystem> = {
       projectName: 'imported-infrastructure',
@@ -153,7 +153,8 @@ export class TerraformImportAdapter {
       networkCidr: '10.0.0.0/16',
       region: provider === 'aws' ? { aws: 'us-east-1' } : 
               provider === 'azure' ? { azure: 'eastus' } : 
-              { gcp: 'us-central1' },
+              provider === 'gcp' ? { gcp: 'us-central1' } :
+              { local: 'localhost' },
       k8s: {
         version: '1.35',
         minNodes: 2,
@@ -183,6 +184,9 @@ export class TerraformImportAdapter {
         case 'gcp':
           this.mapGcpResource(resource, intent, provider);
           break;
+        case 'local':
+          this.mapLocalResource(resource, intent, provider);
+          break;
       }
     }
     
@@ -202,7 +206,7 @@ export class TerraformImportAdapter {
     return warnings;
   }
 
-  private static mapAwsResource(resource: ParsedTerraformResource, intent: Partial<ChiralSystem>, provider: 'aws' | 'azure' | 'gcp'): void {
+  private static mapAwsResource(resource: ParsedTerraformResource, intent: Partial<ChiralSystem>, provider: 'aws' | 'azure' | 'gcp' | 'local'): void {
     switch (resource.resourceType) {
       case 'aws_eks_cluster':
         if (resource.config.version) {
@@ -252,7 +256,7 @@ export class TerraformImportAdapter {
     }
   }
 
-  private static mapAzureResource(resource: ParsedTerraformResource, intent: Partial<ChiralSystem>, provider: 'aws' | 'azure' | 'gcp'): void {
+  private static mapAzureResource(resource: ParsedTerraformResource, intent: Partial<ChiralSystem>, provider: 'aws' | 'azure' | 'gcp' | 'local'): void {
     switch (resource.resourceType) {
       case 'azurerm_kubernetes_cluster':
         if (resource.config.kubernetes_version) {
@@ -297,7 +301,7 @@ export class TerraformImportAdapter {
     }
   }
 
-  private static mapGcpResource(resource: ParsedTerraformResource, intent: Partial<ChiralSystem>, provider: 'aws' | 'azure' | 'gcp'): void {
+  private static mapGcpResource(resource: ParsedTerraformResource, intent: Partial<ChiralSystem>, provider: 'aws' | 'azure' | 'gcp' | 'local'): void {
     switch (resource.resourceType) {
       case 'google_container_cluster':
         if (resource.config.min_master_version) {
@@ -337,6 +341,64 @@ export class TerraformImportAdapter {
         if (resource.config.auto_create_subnetworks === false && resource.config.name) {
           // Default to common GCP CIDR if not specified
           intent.networkCidr = intent.networkCidr || '10.128.0.0/9';
+        }
+        break;
+    }
+  }
+
+  private static mapLocalResource(resource: ParsedTerraformResource, intent: Partial<ChiralSystem>, provider: 'aws' | 'azure' | 'gcp' | 'local'): void {
+    // For local provider, we'll map common local development resources
+    switch (resource.resourceType) {
+      case 'docker_container':
+        // Map Docker containers to Chiral components
+        if (resource.config.name?.includes('postgres') || resource.config.image?.includes('postgres')) {
+          if (resource.config.image) {
+            // Extract version from postgres image
+            const versionMatch = resource.config.image.match(/postgres:(\d+)/);
+            if (versionMatch) {
+              intent.postgres!.engineVersion = versionMatch[1];
+            }
+          }
+          // Local PostgreSQL typically uses smaller storage
+          intent.postgres!.storageGb = 10;
+          intent.postgres!.size = 'small';
+        } else if (resource.config.name?.includes('adfs') || resource.config.name?.includes('windows')) {
+          intent.adfs!.size = 'small';
+        }
+        break;
+
+      case 'kubernetes_deployment':
+        if (resource.config.spec?.template?.spec?.containers) {
+          const containers = resource.config.spec.template.spec.containers;
+          if (Array.isArray(containers)) {
+            // Map Kubernetes deployments to Chiral components
+            for (const container of containers) {
+              if (container.image?.includes('postgres')) {
+                intent.postgres!.size = 'small';
+              }
+            }
+          }
+        }
+        break;
+
+      case 'minikube_cluster':
+        // Map minikube configuration
+        if (resource.config.kubernetes_version) {
+          intent.k8s!.version = resource.config.kubernetes_version;
+        }
+        intent.k8s!.minNodes = 1;
+        intent.k8s!.maxNodes = 1;
+        intent.k8s!.size = 'small';
+        break;
+
+      default:
+        // For unknown local resources, try to infer from naming
+        if (resource.resourceName.includes('postgres') || resource.resourceName.includes('db')) {
+          intent.postgres!.size = 'small';
+        } else if (resource.resourceName.includes('k8s') || resource.resourceName.includes('kubernetes')) {
+          intent.k8s!.size = 'small';
+        } else if (resource.resourceName.includes('adfs') || resource.resourceName.includes('windows')) {
+          intent.adfs!.size = 'small';
         }
         break;
     }

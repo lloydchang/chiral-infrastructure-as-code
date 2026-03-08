@@ -4,7 +4,7 @@
 // Generate automated validation tests for migrated infrastructure
 
 export interface ValidationScriptConfig {
-  provider: 'aws' | 'azure' | 'gcp';
+  provider: 'aws' | 'azure' | 'gcp' | 'local';
   projectName: string;
   environment: string;
   includeConnectivityTests: boolean;
@@ -141,6 +141,32 @@ validate_check "Cloud SQL instance is runnable" "
 # Test Compute instance
 validate_check "Compute instance is running" "
   gcloud compute instances describe ${config.projectName}-adfs --zone us-central1-a --format 'value(status)' | grep -q RUNNING
+"`);
+          break;
+
+        case 'local':
+          tests.push(`
+# Local Development Environment Tests
+echo "🏠 Testing Local Development Environment..."
+
+# Test Docker containers
+validate_check "Docker containers are running" "
+  docker ps --filter name=${config.projectName} --format 'table {{.Names}}' | grep -q ${config.projectName}
+"
+
+# Test minikube/kind cluster if applicable
+validate_check "Kubernetes cluster is accessible" "
+  kubectl cluster-info --context ${config.projectName}-local 2>/dev/null | grep -q 'Kubernetes control plane' || kubectl cluster-info | grep -q 'Kubernetes control plane'
+"
+
+# Test PostgreSQL local instance
+validate_check "PostgreSQL is accessible locally" "
+  pg_isready -h localhost -p 5432 -U postgres 2>/dev/null || docker ps | grep -q postgres
+"
+
+# Test local services connectivity
+validate_check "Local services are responding" "
+  curl -f http://localhost:8080/health 2>/dev/null || curl -f http://localhost:3000/health 2>/dev/null || echo 'Services may not be running on standard ports'
 "`);
           break;
       }

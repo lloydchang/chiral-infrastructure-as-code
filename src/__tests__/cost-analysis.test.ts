@@ -278,13 +278,14 @@ describe('Cost Analysis', () => {
         const comparison = await CostAnalyzer.compareCosts(testConfig);
         
         expect(comparison.cheapest.provider).toBeDefined();
-        expect(comparison.cheapest.cost).toBeGreaterThan(0);
+        expect(comparison.cheapest.cost).toBeGreaterThanOrEqual(0); // Local can be 0
         expect(comparison.cheapest.savings).toBeGreaterThanOrEqual(0);
         expect(comparison.mostExpensive.provider).toBeDefined();
         expect(comparison.mostExpensive.cost).toBeGreaterThan(0);
         expect(comparison.estimates.aws).toBeDefined();
         expect(comparison.estimates.azure).toBeDefined();
         expect(comparison.estimates.gcp).toBeDefined();
+        expect(comparison.estimates.local).toBeDefined();
       });
 
       it('should have cheapest cost less than or equal to most expensive', async () => {
