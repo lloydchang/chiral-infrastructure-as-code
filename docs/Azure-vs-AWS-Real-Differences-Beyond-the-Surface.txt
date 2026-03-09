@@ -540,3 +540,4 @@ Terraform + self-managed backend = concurrency problems AND plaintext secrets in
 CDK / Bicep = state lives in the cloud provider, sidesteps the problem entirely at the cost of zero portability
 
 So my previous claim that "Pulumi largely inherits Terraform's state problems" is only true if you're using self-managed backends — which is a significant qualifier I should have made explicit.
+
