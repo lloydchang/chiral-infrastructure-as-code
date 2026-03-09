@@ -2,7 +2,7 @@
 
 **One Intent, Many Clouds: Native IaC Generation for Core Infrastructure**
 
-> **Solving [multi-cloud infrastructure's enterprise challenges](docs/CHALLENGES.md)**: Different native cloud IaCs, state management complexity, and vendor lock-in make functionally uniform deployments across AWS, Azure, and GCP challenging. **Chiral generates native cloud artifacts from a single intent schema**, ensuring functional uniformity through optimal trade-offs while maintaining **permanent core isolation** with zero outer layer dependencies.
+> **Solving [multi-cloud infrastructure's enterprise challenges](docs/CHALLENGES.md)**: Different native cloud IaCs, state management complexity, and vendor lock-in make functionally uniform deployments across AWS, Azure, and GCP challenging. **Chiral generates native cloud artifacts from a single intent schema**, ensuring functional uniformity through optimal trade-offs.
 
 ---
 
