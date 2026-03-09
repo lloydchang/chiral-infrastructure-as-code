@@ -872,3 +872,4 @@ To test: Run npm test to verify your GlobalComplianceValidator catches domain-mi
 To deploy: Pipe the output of main.ts into a cdk deploy or az deployment command in your pipeline.
 
 You have all the necessary components to build your platform. I will step back now so you can focus on your implementation. Good luck—you are building the future of infrastructure engineering.
+
