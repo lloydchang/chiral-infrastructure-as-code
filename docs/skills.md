@@ -131,3 +131,203 @@ Chiral provides agent-accessible skills for generating compliant, multi-cloud in
 - Validation ensures outputs match chiral compliance standards.
 
 This skills definition enables cloud agents to leverage Chiral's deterministic infrastructure generation while maintaining security and reliability.
+
+### 🤖 Agent-Enhanced Skills
+
+#### `multi_agent_generate`
+Uses GenDB-inspired multi-agent architecture for optimized IaC generation.
+
+**Parameters:**
+- `config`: ChiralSystem configuration object
+- `optimization_goals`: Array of goals (cost, performance, security)
+- `max_iterations`: Maximum optimization iterations
+
+**Response:**
+```json
+{
+  "artifacts": {
+    "aws": "# Optimized CDK code...",
+    "azure": "# Optimized Bicep code...",
+    "gcp": "# Optimized Terraform code..."
+  },
+  "metadata": {
+    "generatedAt": "2024-01-01T00:00:00Z",
+    "processingTime": 3500,
+    "agentEnhanced": true,
+    "agentsUsed": ["WorkloadAnalyzer", "StorageDesigner", "IaCPlanner", "IaCGenerator", "IaCOptimizer"],
+    "optimizations": ["Cost reduced by 15%", "Performance improved by 25%"]
+  }
+}
+```
+
+#### `intelligent_import`
+Uses AI-enhanced import from existing IaC (Terraform, Pulumi, CloudFormation).
+
+**Parameters:**
+- `source_file`: Path to source IaC file
+- `source_type`: IaC type (terraform, pulumi, cloudformation)
+- `target_providers`: Array of target cloud providers
+
+**Response:**
+```json
+{
+  "chiralConfig": {
+    "projectName": "imported-project",
+    "k8s": {...},
+    "postgres": {...},
+    "adfs": {...}
+  },
+  "metadata": {
+    "confidence": 0.95,
+    "mappings": ["EC2 -> EKS nodes", "RDS -> PostgreSQL"],
+    "warnings": ["Some resource properties may need manual review"]
+  }
+}
+```
+
+### 🔒 Security & Compliance Skills
+
+#### `security_assessment`
+Performs comprehensive security assessment against multiple frameworks.
+
+**Parameters:**
+- `config`: ChiralSystem configuration object
+- `frameworks`: Security frameworks (ISO27001, SOC2, NIST, CIS)
+- `severity_threshold`: Minimum severity level to report
+
+**Response:**
+```json
+{
+  "compliant": false,
+  "violations": [
+    {
+      "framework": "ISO27001",
+      "control": "A.9.4.1",
+      "severity": "high",
+      "description": "Encryption not enabled for data at rest"
+    }
+  ],
+  "remediations": ["Enable AES-256 encryption for PostgreSQL"]
+}
+```
+
+#### `privacy_impact_analysis`
+Conducts privacy impact assessment for data processing components.
+
+**Parameters:**
+- `config`: ChiralSystem configuration object
+- `data_classification`: Data sensitivity level (public, internal, confidential, restricted)
+- `jurisdictions`: Applicable privacy jurisdictions (GDPR, CCPA, etc.)
+
+**Response:**
+```json
+{
+  "piaRequired": true,
+  "risks": [
+    {
+      "category": "data_processing",
+      "impact": "high",
+      "description": "Cross-border data transfer without adequate safeguards"
+    }
+  ],
+  "mitigations": ["Implement data residency controls", "Add encryption in transit"]
+}
+```
+
+## Cloud Agent Integration
+
+### AWS Q/Bedrock Integration
+
+Chiral skills are exposed as Amazon Q Business skills:
+
+```json
+{
+  "skill": {
+    "name": "chiral_infrastructure_generation",
+    "description": "Generate multi-cloud infrastructure as code",
+    "parameters": {
+      "config": {"type": "object", "description": "Chiral configuration"},
+      "providers": {"type": "array", "items": {"enum": ["aws", "azure", "gcp"]}}
+    },
+    "handler": "arn:aws:lambda:us-east-1:123456789012:function:chiral-skill-handler"
+  }
+}
+```
+
+### Azure AI Integration
+
+Skills are registered with Azure OpenAI assistants:
+
+```json
+{
+  "assistant": {
+    "name": "Chiral Infrastructure Assistant",
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "generate_infrastructure",
+          "description": "Generate IaC from Chiral intent",
+          "parameters": {...}
+        }
+      }
+    ]
+  }
+}
+```
+
+### GCP Vertex AI Integration
+
+Chiral capabilities are exposed as Vertex AI extensions:
+
+```json
+{
+  "extension": {
+    "name": "chiral-iac-generator",
+    "description": "Multi-cloud infrastructure generation",
+    "operations": [
+      {
+        "name": "generate",
+        "description": "Generate IaC artifacts",
+        "parameters": {...}
+      }
+    ]
+  }
+}
+```
+
+## Agent Communication Protocol
+
+Chiral agents communicate using a standardized message format:
+
+```typescript
+interface AgentMessage {
+  from: string;        // Sending agent name
+  to: string;          // Target agent name
+  type: 'analysis' | 'design' | 'plan' | 'generation' | 'optimization' | 'feedback';
+  payload: any;        // Message-specific data
+  timestamp: number;   // Unix timestamp
+}
+```
+
+## Best Practices
+
+1. **Fallback Strategy**: Always maintain deterministic fallbacks when agent services are unavailable
+2. **Cost Optimization**: Cache agent responses and use batch processing to minimize API costs
+3. **Security**: Validate all agent inputs against Chiral schemas to prevent injection attacks
+4. **Monitoring**: Log agent interactions for debugging and optimization
+5. **Versioning**: Pin cloud SDK versions to ensure predictable behavior
+
+## Error Handling
+
+All skills return standardized error responses:
+
+```json
+{
+  "error": {
+    "code": "AGENT_UNAVAILABLE",
+    "message": "Cloud agent service temporarily unavailable",
+    "fallback": "Deterministic generation will be used"
+  }
+}
+```
