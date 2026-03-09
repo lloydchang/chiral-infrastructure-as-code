@@ -61,3 +61,25 @@ az deployment group create --resource-group chiral-local-test --template-file ./
 Chiral's value is a single source of truth generating native artifacts. LocalStack for Azure acts as the "Unit Test Runner" for your Bicep generator.
 
 If your TypeScript intent produces a Bicep file that azlocal rejects, you've caught a translation logic bug in seconds rather than minutes. This maintains a "Fail Fast" loop for both AWS CDK and Azure Bicep branches of the Chiral pattern.
+
+## LocalStack for Azure Changelog
+
+### Version 0.1.0
+
+LocalStack for Azure 0.1.0 supports the following Azure services:
+
+- **Azure API Management**
+- **Azure App Service**
+- **Azure RBAC** (Role-Based Access Control)
+- **Azure Container Registry**
+- **Azure Kubernetes Service**
+- **Azure Database for PostgreSQL**
+- **Azure Key Vault**
+- **Azure Resource Manager**
+- **Azure Blob Storage**
+- **Azure Storage**
+- **Azure SQL**
+
+This changelog tracks updates to LocalStack for Azure support, including new services, enhancements, and compatibility fixes. The service coverage continues to expand with each release, improving the local development experience for Azure infrastructure as code.
+
+For the latest updates and detailed release notes, visit: https://docs.localstack.cloud/azure/changelog/

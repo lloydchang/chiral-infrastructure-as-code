@@ -257,6 +257,28 @@ chiral import azure-emulator --tool localstack-azure --resource-group test-rg
 chiral validate azure-emulator --tool localstack-azure --services storage,functions
 ```
 
+## LocalStack for Azure Changelog
+
+This changelog tracks updates to LocalStack for Azure support, including new services, enhancements, and compatibility fixes.
+
+### Version 0.1.0
+
+LocalStack for Azure 0.1.0 supports the following services:
+
+- **Azure API Management**
+- **Azure App Service**
+- **Azure RBAC** (Role-Based Access Control)
+- **Azure Container Registry**
+- **Azure Kubernetes Service**
+- **Azure Database for PostgreSQL**
+- **Azure Key Vault**
+- **Azure Resource Manager**
+- **Azure Blob Storage**
+- **Azure Storage**
+- **Azure SQL**
+
+For the latest updates and detailed release notes, visit: https://docs.localstack.cloud/azure/changelog/
+
 ## Comparison Matrix
 
 | Tool | Category | Startup Time | Resource Usage | Service Focus | Best For |
