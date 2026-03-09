@@ -1,3 +1,7 @@
+<img width="312" height="180" alt="Image" src="https://github.com/user-attachments/assets/07294367-34dd-4d94-a903-ca7a15d93989" />
+
+---
+
 # Chiral Infrastructure as Code
 
 **One Intent, Many Clouds: Native IaC Generation for Core Infrastructure**
@@ -1281,3 +1285,7 @@ https://github.com/lloydchang/chiral-infrastructure-as-code
 ## License
 
 [GNU Affero General Public License v3.0 or later](https://github.com/lloydchang/chiral-infrastructure-as-code/blob/main/LICENSE)
+
+---
+
+<img width="1024" height="1024" alt="Image" src="https://github.com/user-attachments/assets/89d03e78-424f-4406-a101-f3e6b9e306fc" />
